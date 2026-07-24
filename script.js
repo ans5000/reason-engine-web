@@ -1,3 +1,18 @@
+const imageStyles = document.createElement('link');
+imageStyles.rel = 'stylesheet';
+imageStyles.href = 'image-overrides.css';
+document.head.appendChild(imageStyles);
+
+const heroEyebrow = document.querySelector('.hero .eyebrow');
+const heroSubtitle = document.querySelector('.hero-subtitle');
+const heroLead = document.querySelector('.hero-lead');
+
+if (heroEyebrow) heroEyebrow.textContent = 'KI UND MENSCH. ZUSAMMEN. ETHISCH.';
+if (heroSubtitle) heroSubtitle.textContent = 'Bessere Entscheidungen entstehen in Zusammenarbeit zwischen KI und Mensch.';
+if (heroLead) {
+  heroLead.textContent = 'Reason Engine verbindet Klarheit mit Kontext, strukturiert Komplexität und schafft Werkzeuge für verantwortungsvolle Zusammenarbeit.';
+}
+
 const header = document.querySelector('[data-header]');
 const navToggle = document.querySelector('[data-nav-toggle]');
 const nav = document.querySelector('[data-nav]');
