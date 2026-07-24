@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Reason Engine macht Quellen, Annahmen und Entscheidungen sichtbar, prüfbar und korrigierbar.">
   <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#070b0a">
-  <title>Reason Engine · Denken, das einer Prüfung standhält</title>
+  <meta name="theme-color" content="#17140f">
+  <title>Reason Engine · Eine Werkstatt für besseres Denken</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="site.webmanifest">
   <link rel="stylesheet" href="styles.css">
@@ -14,29 +14,24 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Zum Inhalt springen</a>
-  <div class="ambient ambient-one" aria-hidden="true"></div>
-  <div class="ambient ambient-two" aria-hidden="true"></div>
-  <div class="grain" aria-hidden="true"></div>
 
   <header class="site-header" data-header>
     <div class="shell nav-shell">
       <a class="brand" href="#top" aria-label="Reason Engine Startseite">
-        <span class="brand-mark"><img src="assets/mark.svg" width="34" height="34" alt=""></span>
+        <img src="assets/mark.svg" width="36" height="36" alt="">
         <span>Reason Engine</span>
       </a>
 
-      <div class="nav-meta">
-        <span class="preview-pill"><i></i> Private Preview 0.2</span>
-        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
-          <span class="sr-only">Navigation öffnen</span>
-          <span></span><span></span>
-        </button>
-      </div>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
+        <span class="sr-only">Navigation öffnen</span>
+        <span></span><span></span>
+      </button>
 
       <nav id="site-nav" class="site-nav" aria-label="Hauptnavigation" data-nav>
-        <a href="#system">System</a>
-        <a href="#prinzip">Prinzip</a>
-        <a href="#pilot">Pilot</a>
+        <a href="#warum">Warum Reason?</a>
+        <a href="#arbeitsweise">Wie wir arbeiten</a>
+        <a href="#atlas">Atlas</a>
+        <a href="#pilot">Decision Sprint</a>
         <a class="nav-cta" href="#kontakt">Kontakt</a>
       </nav>
     </div>
@@ -44,291 +39,208 @@
 
   <main id="main">
     <section class="hero" id="top">
-      <div class="shell hero-shell">
+      <div class="hero-art" aria-hidden="true"></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="shell hero-inner">
         <div class="hero-copy reveal">
-          <p class="kicker"><span>Research infrastructure</span><span>for complex decisions</span></p>
-          <h1>
-            Denken, das<br>
-            einer Prüfung<br>
-            <em>standhält.</em>
-          </h1>
+          <p class="eyebrow light">INFRASTRUKTUR FÜR KOMPLEXE ENTSCHEIDUNGEN</p>
+          <h1>Reason Engine</h1>
+          <p class="hero-subtitle">Eine Engine für besseres Denken. Gebaut für Menschen, nicht nur für Systeme.</p>
           <p class="hero-lead">
-            Reason Engine macht aus verstreuten Quellen, Annahmen und KI-Antworten
-            einen nachvollziehbaren Entscheidungsweg.
+            Wir verbinden Quellen, Annahmen, Ideen und Entscheidungen zu einem nachvollziehbaren Weg,
+            der geprüft, korrigiert und gemeinsam weiterentwickelt werden kann.
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#pilot">Decision Sprint</a>
-            <a class="text-link" href="#system">System erkunden <span>↘</span></a>
+            <a class="button button-light" href="#warum">Engine entdecken</a>
+            <a class="button button-ghost" href="#pilot">Decision Sprint</a>
           </div>
-          <div class="hero-proof">
-            <span>Kein Wahrheitsautomat.</span>
-            <span>Keine Black Box.</span>
-            <span>Korrigierbar by design.</span>
-          </div>
-        </div>
-
-        <div class="reason-console reveal" data-tilt>
-          <div class="console-glow" aria-hidden="true"></div>
-          <div class="console-window">
-            <div class="console-topbar">
-              <div class="window-dots" aria-hidden="true"><i></i><i></i><i></i></div>
-              <span>REASON MAP / DECISION-042</span>
-              <span class="console-status"><i></i> AUDITABLE</span>
-            </div>
-
-            <div class="console-body">
-              <div class="graph-stage" aria-label="Beispielhafte Reason Map">
-                <svg viewBox="0 0 620 470" role="img" aria-labelledby="graph-title graph-desc">
-                  <title id="graph-title">Reason Map einer Entscheidung</title>
-                  <desc id="graph-desc">Quellen, Fakten und Annahmen führen über eine Prüfung zu einer korrigierbaren Entscheidung.</desc>
-                  <g class="graph-lines" fill="none">
-                    <path d="M113 96C172 98 203 154 264 185"/>
-                    <path d="M108 350C174 345 208 273 269 240"/>
-                    <path d="M282 73C300 113 307 141 309 184"/>
-                    <path d="M376 218C424 215 448 184 493 165"/>
-                    <path d="M374 232C430 247 454 296 502 310"/>
-                  </g>
-                  <g class="graph-node node-source" transform="translate(56 55)">
-                    <rect width="126" height="72" rx="20"/>
-                    <text x="18" y="29">SOURCE</text>
-                    <text class="node-value" x="18" y="51">12 references</text>
-                  </g>
-                  <g class="graph-node node-fact" transform="translate(44 314)">
-                    <rect width="144" height="72" rx="20"/>
-                    <text x="18" y="29">FACTS</text>
-                    <text class="node-value" x="18" y="51">8 verified</text>
-                  </g>
-                  <g class="graph-node node-assumption" transform="translate(224 34)">
-                    <rect width="150" height="72" rx="20"/>
-                    <text x="18" y="29">ASSUMPTIONS</text>
-                    <text class="node-value" x="18" y="51">3 exposed</text>
-                  </g>
-                  <g class="graph-node node-core" transform="translate(247 177)">
-                    <rect width="134" height="86" rx="24"/>
-                    <text x="22" y="34">CHECK</text>
-                    <text class="node-value" x="22" y="58">counter-case</text>
-                    <circle cx="108" cy="43" r="8"/>
-                  </g>
-                  <g class="graph-node node-decision" transform="translate(450 118)">
-                    <rect width="136" height="82" rx="22"/>
-                    <text x="18" y="31">DECISION</text>
-                    <text class="node-value" x="18" y="55">provisional</text>
-                  </g>
-                  <g class="graph-node node-risk" transform="translate(458 278)">
-                    <rect width="128" height="72" rx="20"/>
-                    <text x="18" y="29">RISKS</text>
-                    <text class="node-value" x="18" y="51">2 unresolved</text>
-                  </g>
-                </svg>
-                <div class="cursor-pulse" aria-hidden="true"></div>
-              </div>
-
-              <div class="evidence-drawer">
-                <div class="drawer-head">
-                  <span>Evidence trace</span>
-                  <span>07 / 12</span>
-                </div>
-                <div class="evidence-row">
-                  <span class="evidence-icon">↗</span>
-                  <div><strong>Primary source</strong><small>verified · 24 Jul</small></div>
-                  <span class="confidence">0.92</span>
-                </div>
-                <div class="evidence-row muted-row">
-                  <span class="evidence-icon">?</span>
-                  <div><strong>Open assumption</strong><small>requires review</small></div>
-                  <span class="confidence">0.41</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="console-footer">
-              <span>Facts ≠ assumptions ≠ decisions</span>
-              <span>Last correction: 2m ago</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="signal-rail" aria-hidden="true">
-        <div class="signal-track">
-          <span>FACTS</span><i></i><span>SOURCES</span><i></i><span>ASSUMPTIONS</span><i></i><span>DECISIONS</span><i></i><span>CORRECTIONS</span><i></i>
-          <span>FACTS</span><i></i><span>SOURCES</span><i></i><span>ASSUMPTIONS</span><i></i><span>DECISIONS</span><i></i><span>CORRECTIONS</span><i></i>
+          <p class="hero-truth">Frühe Entwicklungsphase. Keine fertige Plattform und keine erfundenen Erfolgsgeschichten.</p>
         </div>
       </div>
     </section>
 
-    <section class="section system-section" id="system">
-      <div class="shell">
-        <div class="section-intro reveal">
-          <p class="eyebrow">01 / THE SYSTEM</p>
-          <h2>Antworten sind billig.<br><span>Begründungen sind Infrastruktur.</span></h2>
+    <section class="value-rail" aria-label="Grundwerte">
+      <div class="shell value-grid">
+        <article class="value-item reveal">
+          <span class="value-icon">◯</span>
+          <div><h2>Persönlich</h2><p>Kontext und Entscheidungen bleiben verständlich und dem Menschen zugeordnet.</p></div>
+        </article>
+        <article class="value-item reveal">
+          <span class="value-icon">▤</span>
+          <div><h2>Nachvollziehbar</h2><p>Quellen, Annahmen, Gegenargumente und Korrekturen bleiben sichtbar.</p></div>
+        </article>
+        <article class="value-item reveal">
+          <span class="value-icon">◇</span>
+          <div><h2>Modular</h2><p>Bausteine wachsen vom kleinen Arbeitsprozess bis zur größeren Engine City.</p></div>
+        </article>
+        <article class="value-item reveal">
+          <span class="value-icon">⌘</span>
+          <div><h2>Gemeinschaftlich</h2><p>Menschen denken, prüfen und entscheiden gemeinsam statt nebeneinander.</p></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="page-section intro-section" id="warum">
+      <div class="shell editorial-grid">
+        <article class="editorial-card text-card reveal">
+          <p class="eyebrow">01 / WARUM REASON?</p>
+          <h2>Antworten sind schnell. Gute Begründungen brauchen Architektur.</h2>
           <p>
-            In komplexer Arbeit verschmelzen Fakten, Vermutungen, Quellen und Beschlüsse zu einer überzeugenden Wolke.
+            In komplexer Arbeit verschwimmen Fakten, Vermutungen, Quellen und Beschlüsse schnell zu einer überzeugenden Wolke.
             Reason Engine gibt jedem Teil wieder eine sichtbare Adresse.
           </p>
-        </div>
+          <ul class="quiet-list">
+            <li>Fakten und Annahmen unterscheiden</li>
+            <li>Quellen und Unsicherheit sichtbar halten</li>
+            <li>Entscheidungen später korrigieren können</li>
+          </ul>
+        </article>
 
-        <div class="bento-grid">
-          <article class="bento bento-large reveal">
-            <div class="bento-label"><span>01</span> Reason Map</div>
-            <h3>Zusammenhänge sehen, ohne sie zu glätten.</h3>
-            <p>Dokumente, Quellen, Personen, Annahmen und Entscheidungen bleiben verbunden, aber unterscheidbar.</p>
-            <div class="mini-map" aria-hidden="true">
-              <i style="--x:14%;--y:26%;--s:13px"></i>
-              <i style="--x:44%;--y:15%;--s:9px"></i>
-              <i style="--x:75%;--y:31%;--s:16px"></i>
-              <i style="--x:36%;--y:69%;--s:12px"></i>
-              <i style="--x:83%;--y:75%;--s:10px"></i>
-              <svg viewBox="0 0 500 260"><path d="M70 65C156 7 172 197 279 53S369 237 432 190"/><path d="M76 70C140 162 208 118 270 174s106-2 157 13"/></svg>
-            </div>
-          </article>
-
-          <article class="bento bento-audit reveal">
-            <div class="bento-label"><span>02</span> Audit trail</div>
-            <h3>Jede Korrektur bleibt sichtbar.</h3>
-            <div class="audit-stack" aria-hidden="true">
-              <div><span>v0.3</span><b>Decision revised</b><small>new source</small></div>
-              <div><span>v0.2</span><b>Assumption exposed</b><small>review</small></div>
-              <div><span>v0.1</span><b>Initial reasoning</b><small>draft</small></div>
-            </div>
-          </article>
-
-          <article class="bento bento-human reveal">
-            <div class="bento-label"><span>03</span> Human control</div>
-            <h3>Die Maschine strukturiert. Menschen verantworten.</h3>
-            <div class="control-switch" aria-hidden="true"><span>Execute</span><i></i><strong>Approval required</strong></div>
-          </article>
-
-          <article class="bento bento-wide reveal">
-            <div>
-              <div class="bento-label"><span>04</span> Evidence before inference</div>
-              <h3>Erst Beleg. Dann Schlussfolgerung.</h3>
-            </div>
-            <div class="evidence-flow" aria-hidden="true">
-              <span>Source</span><i>→</i><span>Claim</span><i>→</i><span>Check</span><i>→</i><span>Decision</span>
-            </div>
-          </article>
-        </div>
+        <article class="editorial-card atlas-preview reveal" id="atlas">
+          <div class="card-image map-image">
+            <img src="assets/city-map.svg" width="720" height="720" alt="Abstrakte Karte der Engine City">
+          </div>
+          <div class="card-body">
+            <p class="eyebrow">ATLAS / ENGINE CITY</p>
+            <h2>Eine Stadt für Wissen, Arbeit und Erinnerung.</h2>
+            <p>Atlas macht Projekte, Beziehungen, offene Fragen und Entscheidungen als begehbare Struktur sichtbar.</p>
+            <span class="status-chip">Konzept in Entwicklung</span>
+          </div>
+        </article>
       </div>
     </section>
 
-    <section class="section principle-section" id="prinzip">
-      <div class="shell principle-layout">
-        <div class="principle-sticky reveal">
-          <p class="eyebrow">02 / OPERATING PRINCIPLE</p>
-          <h2>Stabiler Kern.<br><em>Wilde Ränder.</em></h2>
-          <p>Struktur schützt die Freiheit des Denkens, statt sie zu begrenzen.</p>
-        </div>
-
-        <div class="principle-cards">
-          <article class="principle-card reveal">
-            <span>THINK</span>
-            <h3>Maximale Freiheit</h3>
-            <p>Ideen dürfen springen, widersprechen, scheitern und unfertig bleiben.</p>
-          </article>
-          <article class="principle-card reveal">
-            <span>DECIDE</span>
-            <h3>Klare Prüfung</h3>
-            <p>Wer etwas behauptet, zeigt Quellen, Unsicherheit und Gegenargumente.</p>
-          </article>
-          <article class="principle-card reveal">
-            <span>ACT</span>
-            <h3>Nachvollziehbare Kontrolle</h3>
-            <p>Je größer die mögliche Wirkung, desto stärker die Freigabe und Auditspur.</p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <section class="section pilot-section" id="pilot">
+    <section class="page-section work-section" id="arbeitsweise">
       <div class="shell">
-        <div class="pilot-frame reveal">
-          <div class="pilot-orbit orbit-one" aria-hidden="true"></div>
-          <div class="pilot-orbit orbit-two" aria-hidden="true"></div>
-          <div class="pilot-header">
-            <div>
-              <p class="eyebrow">03 / FIRST COMMERCIAL PILOT</p>
-              <h2>Decision Sprint</h2>
-            </div>
-            <span class="pilot-badge">Limited pilot</span>
-          </div>
+        <div class="section-head reveal">
+          <p class="eyebrow">02 / WIE WIR ARBEITEN</p>
+          <h2>Beim Denken frei. Beim Entscheiden prüfbar.</h2>
+          <p>Die Engine wird dort strenger, wo aus einer Idee eine Behauptung, eine Entscheidung oder eine Handlung wird.</p>
+        </div>
 
-          <div class="pilot-grid">
-            <div class="pilot-promise">
-              <p>
-                Eine reale Recherche- oder Entscheidungsfrage wird in einen überprüfbaren Prozess übersetzt.
-                Kein Plattformtheater. Ein konkretes Problem, ein klarer Ausgang.
-              </p>
-              <a class="button button-light" href="#kontakt">Pilotgespräch vormerken</a>
-            </div>
-            <ol class="pilot-list">
-              <li><span>01</span><div><strong>Problem freilegen</strong><small>Entscheidungsweg und Reibungsverluste</small></div></li>
-              <li><span>02</span><div><strong>Evidenz ordnen</strong><small>Fakten, Quellen, Annahmen und Risiken</small></div></li>
-              <li><span>03</span><div><strong>Entscheidung bauen</strong><small>klar, korrigierbar, wiederverwendbar</small></div></li>
-              <li><span>04</span><div><strong>System übergeben</strong><small>Vorlage, Nachbesprechung und nächste Tests</small></div></li>
-            </ol>
-          </div>
+        <div class="process-grid">
+          <article class="process-card reveal">
+            <span>01</span><h3>Verstehen</h3><p>Problem, Kontext, Beteiligte und bisherige Entscheidungen aufnehmen.</p>
+          </article>
+          <article class="process-card reveal">
+            <span>02</span><h3>Trennen</h3><p>Fakten, Interpretationen, Annahmen und offene Fragen sichtbar auseinanderhalten.</p>
+          </article>
+          <article class="process-card reveal">
+            <span>03</span><h3>Prüfen</h3><p>Quellen, Gegenargumente, Risiken und Unsicherheit ernsthaft testen.</p>
+          </article>
+          <article class="process-card reveal">
+            <span>04</span><h3>Entscheiden</h3><p>Eine verantwortbare, vorläufige und später korrigierbare Entscheidung treffen.</p>
+          </article>
         </div>
       </div>
     </section>
 
-    <section class="section status-section" id="status">
+    <section class="page-section rooms-section">
+      <div class="shell room-grid">
+        <article class="room-card room-lab reveal">
+          <div class="room-art lab-art" aria-hidden="true">
+            <div class="lab-window"></div>
+            <div class="lab-table"></div>
+            <div class="lab-note n1"></div><div class="lab-note n2"></div><div class="lab-note n3"></div>
+          </div>
+          <div class="room-copy">
+            <p class="eyebrow light">REASON LAB</p>
+            <h2>Ein Forschungsraum für unfertige Ideen.</h2>
+            <p>Hypothesen dürfen hier offen bleiben, scheitern und neu zusammengesetzt werden, bevor sie in den stabilen Kern gelangen.</p>
+            <span class="status-chip dark-chip">Research in progress</span>
+          </div>
+        </article>
+
+        <article class="room-card room-journal reveal">
+          <div class="journal-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="room-copy dark-copy">
+            <p class="eyebrow">DISCOVERY JOURNAL</p>
+            <h2>Was wir lernen, bleibt auffindbar.</h2>
+            <p>Beobachtungen, Irrtümer und Entscheidungen werden nicht hinter einer glänzenden Oberfläche versteckt.</p>
+            <span class="status-chip">Kanonischer Forschungsweg</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="principle-section">
+      <div class="shell principle-grid">
+        <div class="principle-quote reveal">
+          <p class="eyebrow light">03 / OPERATING PRINCIPLE</p>
+          <blockquote>Struktur schützt die Freiheit des Denkens, statt sie zu begrenzen.</blockquote>
+        </div>
+        <div class="principle-list reveal">
+          <article><span>THINK</span><div><h3>Maximale Freiheit</h3><p>Ideen dürfen springen, widersprechen und unfertig bleiben.</p></div></article>
+          <article><span>DECIDE</span><div><h3>Klare Prüfung</h3><p>Behauptungen zeigen Quellen, Unsicherheit und Gegenargumente.</p></div></article>
+          <article><span>ACT</span><div><h3>Nachvollziehbare Kontrolle</h3><p>Je größer die Wirkung, desto stärker Freigabe und Auditspur.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="page-section pilot-section" id="pilot">
+      <div class="shell pilot-card reveal">
+        <div class="pilot-copy">
+          <p class="eyebrow light">ERSTER KOMMERZIELLER PILOT</p>
+          <h2>Reason Engine Decision Sprint</h2>
+          <p>
+            Ein begrenzter Arbeitsprozess für eine konkrete, wiederkehrende Recherche- oder Entscheidungsfrage.
+            Kein Plattformverkauf, sondern ein überprüfbarer Versuch an einem echten Problem.
+          </p>
+          <div class="pilot-facts">
+            <span>90 Minuten Workshop</span>
+            <span>Klare Entscheidungsübersicht</span>
+            <span>Wiederverwendbare Vorlage</span>
+          </div>
+        </div>
+        <ol class="pilot-steps">
+          <li><span>1</span><div><h3>Problem aufnehmen</h3><p>Entscheidungsweg und Reibungsverluste verstehen.</p></div></li>
+          <li><span>2</span><div><h3>Ebenen trennen</h3><p>Fakten, Annahmen, Quellen und Risiken ordnen.</p></div></li>
+          <li><span>3</span><div><h3>Entscheidung bauen</h3><p>Eine klare und prüfbare Übersicht erstellen.</p></div></li>
+          <li><span>4</span><div><h3>Lernen sichern</h3><p>Vorlage und Nachbesprechung für den nächsten Fall.</p></div></li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="page-section status-section">
       <div class="shell status-layout">
         <div class="status-copy reveal">
-          <p class="eyebrow">04 / BUILDING IN PUBLIC, CAREFULLY</p>
-          <h2>Keine erfundene Erfolgsgeschichte.</h2>
-          <p>Reason Engine ist ein ernsthafter Aufbau in früher Phase. Der aktuelle Stand wird nicht schöner geredet, als er ist.</p>
+          <p class="eyebrow">04 / AKTUELLER STATUS</p>
+          <h2>Das Grundstück ist gesichert. Die Werkstatt entsteht.</h2>
+          <p>Wir zeigen nur, was bereits belegt ist, und markieren offen, was noch Hypothese oder Entwurf bleibt.</p>
         </div>
-        <div class="status-board reveal">
-          <div><span>Vision & architecture</span><strong class="status-live">active</strong></div>
-          <div><span>Technical proofs</span><strong>early prototypes</strong></div>
-          <div><span>Commercial offer</span><strong>pilot hypothesis</strong></div>
-          <div><span>Paying customers</span><strong>not proven</strong></div>
-        </div>
+        <dl class="status-list reveal">
+          <div><dt>Vision & Architektur</dt><dd>aktive Entwicklung</dd></div>
+          <div><dt>Technische Nachweise</dt><dd>begrenzte Prototypen</dd></div>
+          <div><dt>Decision Sprint</dt><dd>Pilothypothese</dd></div>
+          <div><dt>Zahlende Kunden</dt><dd>noch nicht bewiesen</dd></div>
+        </dl>
       </div>
     </section>
 
-    <section class="section contact-section" id="kontakt">
-      <div class="shell contact-panel reveal">
-        <div class="contact-copy">
-          <p class="eyebrow">ENTER THROUGH A REAL PROBLEM</p>
-          <h2>Der beste Eingang ist eine Entscheidung, die heute zu viel Reibung erzeugt.</h2>
+    <section class="contact-section" id="kontakt">
+      <div class="shell contact-card reveal">
+        <div>
+          <p class="eyebrow">KONTAKT</p>
+          <h2>Ein echtes Problem ist der beste Eingang.</h2>
+          <p>Die öffentliche Kontaktadresse wird vor dem Livegang eingerichtet und getestet.</p>
         </div>
-        <div class="contact-side">
-          <p>Kontaktadresse wird vor dem öffentlichen Start eingerichtet und getestet.</p>
-          <div class="contact-address">
-            <span>planned</span>
-            <strong>kontakt@reasonengine.de</strong>
-          </div>
+        <div class="contact-address">
+          <span>Vor Veröffentlichung aktivieren</span>
+          <strong>kontakt@reasonengine.de</strong>
+          <small>Aktuell noch nicht als funktionierend bestätigt.</small>
         </div>
-      </div>
-    </section>
-
-    <section class="forest-edge" aria-label="Verborgene Inschrift">
-      <div class="shell">
-        <details class="hidden-inscription">
-          <summary>
-            <img src="assets/butterfly.svg" width="36" height="30" alt="Eine kleine Schmetterlingsspur entdecken">
-          </summary>
-          <blockquote>Nutze deine Fähigkeiten. Der Wald wäre still, wenn nur die begabtesten Vögel sängen.</blockquote>
-          <p>Verborgene Inschrift · Urheberschaft nicht verifiziert</p>
-        </details>
       </div>
     </section>
   </main>
 
   <footer class="site-footer">
     <div class="shell footer-grid">
-      <a class="brand footer-brand" href="#top">
-        <span class="brand-mark"><img src="assets/mark.svg" width="30" height="30" alt=""></span>
-        <span>Reason Engine</span>
-      </a>
-      <p>Die Stadt darf flüstern. Sie soll nicht predigen.</p>
-      <div class="footer-links">
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
+      <div>
+        <a class="brand footer-brand" href="#top"><img src="assets/mark.svg" width="32" height="32" alt=""><span>Reason Engine</span></a>
+        <p>Die Stadt darf flüstern. Sie soll nicht predigen.</p>
       </div>
-      <p class="footer-status">Private Preview 0.2 · nicht veröffentlicht</p>
+      <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
+      <p class="footer-status">Öffentliche Vorschau · Suchmaschinen blockiert · Version 0.3</p>
     </div>
   </footer>
 </body>
