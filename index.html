@@ -3,17 +3,14 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Reason Engine macht Quellen, Annahmen und Entscheidungen sichtbar, prüfbar und korrigierbar.">
+  <meta name="description" content="Reason Engine entwickelt KI-gestützte Entscheidungs- und Prozesssysteme, die Annahmen, Abhängigkeiten und Verantwortung sichtbar machen.">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#17140f">
-  <title>Reason Engine · Eine Werkstatt für besseres Denken</title>
+  <title>Reason Engine · Komplexe Entscheidungen sichtbar machen</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="styles.css">
-  <link rel="stylesheet" href="image-overrides.css">
-  <link rel="stylesheet" href="visual-story.css">
-  <script src="script.js" defer></script>
-  <script src="visual-assets.js" defer></script>
+  <link rel="stylesheet" href="homepage-v0.5.css">
+  <script src="homepage-v0.5.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Zum Inhalt springen</a>
@@ -21,7 +18,7 @@
   <header class="site-header" data-header>
     <div class="shell nav-shell">
       <a class="brand" href="#top" aria-label="Reason Engine Startseite">
-        <img src="assets/mark.svg" width="36" height="36" alt="">
+        <img src="assets/mark.svg" width="34" height="34" alt="">
         <span>Reason Engine</span>
       </a>
 
@@ -31,220 +28,207 @@
       </button>
 
       <nav id="site-nav" class="site-nav" aria-label="Hauptnavigation" data-nav>
-        <a href="#warum">Warum Reason?</a>
-        <a href="#arbeitsweise">Wie wir arbeiten</a>
-        <a href="#atlas">Atlas</a>
-        <a href="#pilot">Decision Sprint</a>
-        <a class="nav-cta" href="#kontakt">Kontakt</a>
+        <a href="#arbeitsweise">Arbeitsweise</a>
+        <a href="#projekte">Projekte</a>
+        <a href="#prinzipien">Prinzipien</a>
+        <a href="#pilot">Pilot</a>
+        <a class="nav-cta" href="mailto:ohno5001@gmail.com?subject=Pilotgespräch%20Reason%20Engine">Gespräch vereinbaren</a>
       </nav>
     </div>
   </header>
 
   <main id="main">
-    <section class="hero" id="top">
-      <div class="hero-art" aria-hidden="true"></div>
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <img class="hero-image" src="assets/workshop-people.webp" data-b64-src="assets/hero-library-original.webp.b64" width="1448" height="1086" alt="Zwei Menschen arbeiten in einer hölzernen Bibliothek gemeinsam an einem großen Modell; daneben steht ein MacBook.">
       <div class="hero-shade" aria-hidden="true"></div>
       <div class="shell hero-inner">
         <div class="hero-copy reveal">
-          <p class="eyebrow light">KI UND MENSCH. ZUSAMMEN. ETHISCH.</p>
-          <h1>Reason Engine</h1>
-          <p class="hero-subtitle">Bessere Entscheidungen entstehen in Zusammenarbeit zwischen KI und Mensch.</p>
+          <p class="eyebrow light">KI UND MENSCH</p>
+          <h1 id="hero-title">Wir machen komplexe Entscheidungen sichtbar.</h1>
           <p class="hero-lead">
-            Wir verbinden Quellen, Annahmen, Ideen und Entscheidungen zu einem nachvollziehbaren Weg,
-            der geprüft, korrigiert und gemeinsam weiterentwickelt werden kann.
+            Reason Engine entwickelt KI-gestützte Entscheidungs- und Prozesssysteme für Organisationen,
+            in denen Wissen über Menschen, Dokumente und Werkzeuge verteilt ist.
+          </p>
+          <p class="hero-detail">
+            Annahmen, Abhängigkeiten, Verantwortlichkeiten und nächste Schritte bleiben nachvollziehbar,
+            statt in einer Black Box zu verschwinden.
           </p>
           <div class="hero-actions">
-            <a class="button button-light" href="#warum">Engine entdecken</a>
-            <a class="button button-ghost" href="#pilot">Decision Sprint</a>
+            <a class="button button-light" href="#pilot">Pilotprozess prüfen</a>
+            <a class="button button-ghost" href="#arbeitsweise">Unsere Arbeitsweise</a>
           </div>
-          <p class="hero-truth">Frühe Entwicklungsphase. Keine fertige Plattform und keine erfundenen Erfolgsgeschichten.</p>
+          <p class="hero-truth">Frühe Entwicklungsphase. Reale Prozesse zuerst, Produktversprechen später.</p>
         </div>
       </div>
     </section>
 
-    <section class="value-rail" aria-label="Grundwerte">
-      <div class="shell value-grid">
-        <article class="value-item reveal">
-          <span class="value-icon">◯</span>
-          <div><h2>Persönlich</h2><p>Kontext und Entscheidungen bleiben verständlich und dem Menschen zugeordnet.</p></div>
-        </article>
-        <article class="value-item reveal">
-          <span class="value-icon">▤</span>
-          <div><h2>Nachvollziehbar</h2><p>Quellen, Annahmen, Gegenargumente und Korrekturen bleiben sichtbar.</p></div>
-        </article>
-        <article class="value-item reveal">
-          <span class="value-icon">◇</span>
-          <div><h2>Modular</h2><p>Bausteine wachsen vom kleinen Arbeitsprozess bis zur größeren Engine City.</p></div>
-        </article>
-        <article class="value-item reveal">
-          <span class="value-icon">⌘</span>
-          <div><h2>Gemeinschaftlich</h2><p>Menschen denken, prüfen und entscheiden gemeinsam statt nebeneinander.</p></div>
-        </article>
-      </div>
-    </section>
-
-    <section class="page-section intro-section" id="warum">
-      <div class="shell editorial-grid">
-        <article class="editorial-card text-card reveal">
-          <p class="eyebrow">01 / WARUM REASON?</p>
-          <h2>Antworten sind schnell. Gute Begründungen brauchen Architektur.</h2>
+    <section class="mechanism-section" id="arbeitsweise" aria-labelledby="mechanism-title">
+      <div class="shell mechanism-grid">
+        <div class="mechanism-copy reveal">
+          <p class="eyebrow">WIE REASON ENGINE ARBEITET</p>
+          <h2 id="mechanism-title">Aus einem Gespräch wird ein prüfbarer Prozess.</h2>
           <p>
-            In komplexer Arbeit verschwimmen Fakten, Vermutungen, Quellen und Beschlüsse schnell zu einer überzeugenden Wolke.
-            Reason Engine gibt jedem Teil wieder eine sichtbare Adresse.
+            Reason Engine trennt direkte Aussagen, modellseitige Ableitungen, offene Fragen und bestätigte Regeln.
+            So entsteht keine bloße Zusammenfassung, sondern ein korrigierbarer Entscheidungsraum.
           </p>
-          <ul class="quiet-list">
-            <li>Fakten und Annahmen unterscheiden</li>
-            <li>Quellen und Unsicherheit sichtbar halten</li>
-            <li>Entscheidungen später korrigieren können</li>
-          </ul>
-        </article>
+          <ol class="method-steps">
+            <li><span>01</span><div><strong>Erfassen</strong><p>Reale Abläufe und Fachwissen in natürlicher Sprache aufnehmen.</p></div></li>
+            <li><span>02</span><div><strong>Strukturieren</strong><p>Rollen, Schritte, Annahmen und Abhängigkeiten sichtbar machen.</p></div></li>
+            <li><span>03</span><div><strong>Prüfen</strong><p>Unsicherheit, Konflikte und Inferenz ausdrücklich kennzeichnen.</p></div></li>
+            <li><span>04</span><div><strong>Handeln</strong><p>Verantwortung, Freigaben und nächste Schritte festlegen.</p></div></li>
+          </ol>
+        </div>
 
-        <article class="editorial-card atlas-preview reveal" id="atlas">
-          <div class="card-image map-image">
-            <img src="assets/city-map.svg" width="720" height="720" alt="Abstrakte Karte der Engine City">
+        <article class="reason-artifact reveal" aria-label="Beispiel eines strukturierten Gesprächsausschnitts">
+          <div class="artifact-head">
+            <span>P2 / PROCESS DISCOVERY</span>
+            <span>VALIDATION ARTEFACT</span>
           </div>
-          <div class="card-body">
-            <p class="eyebrow">ATLAS / ENGINE CITY</p>
-            <h2>Eine Stadt für Wissen, Arbeit und Erinnerung.</h2>
-            <p>Atlas macht Projekte, Beziehungen, offene Fragen und Entscheidungen als begehbare Struktur sichtbar.</p>
-            <span class="status-chip">Konzept in Entwicklung</span>
+          <div class="artifact-row heard">
+            <span class="artifact-label">GEHÖRT</span>
+            <p>„Die Werkstatt wird meistens vor dem Angebot einbezogen.“</p>
           </div>
+          <div class="artifact-row inferred">
+            <span class="artifact-label">ABGELEITET · OFFEN</span>
+            <p>Eine technische Prüfung ist vor jedem verbindlichen Preis notwendig.</p>
+          </div>
+          <div class="artifact-row open">
+            <span class="artifact-label">ZU KLÄREN</span>
+            <p>Gibt es eine Wertgrenze, unterhalb derer der Verkauf selbst entscheiden darf?</p>
+          </div>
+          <div class="artifact-row confirmed">
+            <span class="artifact-label">BESTÄTIGT</span>
+            <p>Bis zu einer definierten Grenze ist eine vorläufige Bewertung unter festgelegten Bedingungen möglich.</p>
+          </div>
+          <p class="artifact-note">Beispielstruktur, keine behauptete Betriebsregel.</p>
         </article>
       </div>
     </section>
 
-    <section class="story-panorama story-city" aria-labelledby="city-title">
-      <figure class="story-panorama-media reveal">
-        <img data-city-visual width="720" height="405"
-             alt="Begrünte Stadtpromenade an einem Kanal mit Fußgängern, Fahrrädern und organischer Architektur">
-      </figure>
-      <div class="shell story-panorama-copy reveal">
-        <p class="eyebrow light">ATLAS / VISIONSEBENE</p>
-        <h2 id="city-title">Die Karte erklärt die Struktur. Die Stadt zeigt, wie sie sich anfühlen soll.</h2>
-        <p>Weitläufig, begehbar und lebendig. Wissen liegt nicht in einem schwarzen Kasten, sondern erhält Orte, Wege und Nachbarschaften.</p>
-        <span class="visual-caption">Konzeptbild · Engine City</span>
-      </div>
-    </section>
-
-    <section class="page-section work-section" id="arbeitsweise">
+    <section class="projects-section" id="projekte" aria-labelledby="projects-title">
       <div class="shell">
         <div class="section-head reveal">
-          <p class="eyebrow">02 / WIE WIR ARBEITEN</p>
-          <h2>Beim Denken frei. Beim Entscheiden prüfbar.</h2>
-          <p>Die Engine wird dort strenger, wo aus einer Idee eine Behauptung, eine Entscheidung oder eine Handlung wird.</p>
+          <p class="eyebrow">WAS GERADE ENTSTEHT</p>
+          <h2 id="projects-title">Vier Räume, ein gemeinsamer Kern.</h2>
+          <p>Keine erfundenen Produkte. Wir zeigen, was konzeptionell feststeht, was im Feld geprüft wird und was noch Entwurf ist.</p>
         </div>
 
-        <div class="process-grid">
-          <article class="process-card reveal">
-            <span>01</span><h3>Verstehen</h3><p>Problem, Kontext, Beteiligte und bisherige Entscheidungen aufnehmen.</p>
+        <div class="project-grid">
+          <article class="project-card project-core reveal">
+            <div class="project-meta"><span>01</span><span>FOUNDATION</span></div>
+            <h3>Reason Engine</h3>
+            <p>Der generische Normen-, Evidenz- und Entscheidungskern. Er trennt Behauptung, Beleg, Inferenz, Entscheidung und Korrektur.</p>
+            <span class="status-chip">Kernarchitektur aktiv</span>
           </article>
-          <article class="process-card reveal">
-            <span>02</span><h3>Trennen</h3><p>Fakten, Interpretationen, Annahmen und offene Fragen sichtbar auseinanderhalten.</p>
+
+          <article class="project-card project-p2 reveal">
+            <div class="project-meta"><span>02</span><span>EXTERNAL PILOT</span></div>
+            <h3>P2 Engine</h3>
+            <p>Der erste externe kommerzielle Validierungsraum: Prozess- und Entscheidungssysteme für den Landmaschinenhandel.</p>
+            <span class="status-chip">Discovery pending</span>
           </article>
-          <article class="process-card reveal">
-            <span>03</span><h3>Prüfen</h3><p>Quellen, Gegenargumente, Risiken und Unsicherheit ernsthaft testen.</p>
+
+          <article class="project-card project-atlas reveal">
+            <div class="project-meta"><span>03</span><span>SPATIAL INTERFACE</span></div>
+            <h3>Atlas / Engine City</h3>
+            <p>Eine räumliche Oberfläche für komplexe Systeme, Beziehungen und Entscheidungen. Vom großen Ganzen bis zum einzelnen Artefakt.</p>
+            <span class="status-chip">Konzept in Entwicklung</span>
           </article>
-          <article class="process-card reveal">
-            <span>04</span><h3>Entscheiden</h3><p>Eine verantwortbare, vorläufige und später korrigierbare Entscheidung treffen.</p>
+
+          <article class="project-card project-lab reveal">
+            <div class="project-meta"><span>04</span><span>RESEARCH</span></div>
+            <h3>Discovery & Reason Labs</h3>
+            <p>Beobachtungen, Hypothesen, Fehler und neue Verfahren bleiben auffindbar, prüfbar und von bestätigtem Wissen getrennt.</p>
+            <span class="status-chip">Research in progress</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="manifest-section" aria-labelledby="manifest-title">
+      <div class="shell manifest-grid">
+        <figure class="manifest-image reveal">
+          <img src="assets/city-map.svg" data-b64-src="assets/system-depth-original.webp.b64" width="1122" height="1402" alt="Abstrakte Darstellung einer schwebenden Kugel, geometrischer Beziehungen und einer verborgenen Tiefe unter einer dunklen Oberfläche.">
+        </figure>
+        <div class="manifest-copy reveal">
+          <p class="eyebrow light">MANIFESTMOMENT</p>
+          <h2 id="manifest-title">Was sichtbar ist, ist selten das ganze System.</h2>
+          <p>
+            Entscheidungen entstehen aus Annahmen, Beziehungen, Abhängigkeiten und Folgen.
+            Reason Engine macht diese Strukturen prüfbar, ohne vorzugeben, Unsicherheit vollständig beseitigen zu können.
+          </p>
+          <blockquote>„Wahrheit statt Wunschdenken“ bedeutet nicht, dass alles gewiss sein muss. Es bedeutet, dass Ungewissheit sichtbar bleibt.</blockquote>
+        </div>
+      </div>
+    </section>
+
+    <section class="principles-section" id="prinzipien" aria-labelledby="principles-title">
+      <div class="shell">
+        <div class="section-head reveal">
+          <p class="eyebrow">PRINZIPIEN IN ARBEITSKLEIDUNG</p>
+          <h2 id="principles-title">Haltung muss sich im System prüfen lassen.</h2>
+        </div>
+
+        <div class="principle-grid">
+          <article class="principle-card reveal">
+            <span>WAHRHEIT</span>
+            <h3>Unsicherheit dokumentieren</h3>
+            <p>Wir simulieren keine falsche Eindeutigkeit. Offene Punkte, Konflikte und Grenzen bleiben sichtbar.</p>
+          </article>
+          <article class="principle-card reveal">
+            <span>VERANTWORTUNG</span>
+            <h3>Begründungen zurückverfolgen</h3>
+            <p>Aussagen, Entscheidungen und Ergebnisse bleiben auf Quellen, Annahmen und verantwortliche Rollen zurückführbar.</p>
+          </article>
+          <article class="principle-card reveal">
+            <span>LERNEN</span>
+            <h3>Korrekturen erhalten</h3>
+            <p>Neue Erkenntnisse überschreiben die Vergangenheit nicht. Sie verbessern das System mit nachvollziehbarer Spur.</p>
+          </article>
+          <article class="principle-card reveal">
+            <span>OFFENHEIT</span>
+            <h3>Fachwissen im Team halten</h3>
+            <p>Wissen bleibt für beteiligte Menschen sichtbar und kontrollierbar, statt im Modell zu verschwinden.</p>
           </article>
         </div>
       </div>
     </section>
 
-    <section class="page-section rooms-section">
-      <div class="shell room-grid">
-        <article class="room-card room-lab reveal">
-          <div class="room-art lab-art" aria-hidden="true">
-            <div class="lab-window"></div>
-            <div class="lab-table"></div>
-            <div class="lab-note n1"></div><div class="lab-note n2"></div><div class="lab-note n3"></div>
-          </div>
-          <div class="room-copy">
-            <p class="eyebrow light">REASON LAB</p>
-            <h2>Ein Forschungsraum für unfertige Ideen.</h2>
-            <p>Hypothesen dürfen hier offen bleiben, scheitern und neu zusammengesetzt werden, bevor sie in den stabilen Kern gelangen.</p>
-            <span class="status-chip dark-chip">Research in progress</span>
-          </div>
-        </article>
-
-        <article class="room-card room-journal reveal">
-          <div class="journal-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
-          <div class="room-copy dark-copy">
-            <p class="eyebrow">DISCOVERY JOURNAL</p>
-            <h2>Was wir lernen, bleibt auffindbar.</h2>
-            <p>Beobachtungen, Irrtümer und Entscheidungen werden nicht hinter einer glänzenden Oberfläche versteckt.</p>
-            <span class="status-chip">Kanonischer Forschungsweg</span>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <section class="principle-section">
-      <div class="shell principle-grid">
-        <div class="principle-quote reveal">
-          <p class="eyebrow light">03 / OPERATING PRINCIPLE</p>
-          <blockquote>Struktur schützt die Freiheit des Denkens, statt sie zu begrenzen.</blockquote>
-        </div>
-        <div class="principle-list reveal">
-          <article><span>THINK</span><div><h3>Maximale Freiheit</h3><p>Ideen dürfen springen, widersprechen und unfertig bleiben.</p></div></article>
-          <article><span>DECIDE</span><div><h3>Klare Prüfung</h3><p>Behauptungen zeigen Quellen, Unsicherheit und Gegenargumente.</p></div></article>
-          <article><span>ACT</span><div><h3>Nachvollziehbare Kontrolle</h3><p>Je größer die Wirkung, desto stärker Freigabe und Auditspur.</p></div></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="page-section pilot-section" id="pilot">
+    <section class="pilot-section" id="pilot" aria-labelledby="pilot-title">
       <div class="shell pilot-card reveal">
         <div class="pilot-copy">
-          <p class="eyebrow light">ERSTER KOMMERZIELLER PILOT</p>
-          <h2>Reason Engine Decision Sprint</h2>
+          <p class="eyebrow light">AKTUELLER EINSTIEG</p>
+          <h2 id="pilot-title">Einen realen Prozess gemeinsam prüfen.</h2>
           <p>
-            Ein begrenzter Arbeitsprozess für eine konkrete, wiederkehrende Recherche- oder Entscheidungsfrage.
-            Kein Plattformverkauf, sondern ein überprüfbarer Versuch an einem echten Problem.
+            Wir beginnen nicht mit einem Großprojekt. Wir untersuchen einen klar begrenzten Prozess und prüfen an anonymisierten Fällen,
+            ob Reason Engine einen praktischen Unterschied macht.
           </p>
-          <div class="pilot-facts">
-            <span>90 Minuten Workshop</span>
-            <span>Klare Entscheidungsübersicht</span>
-            <span>Wiederverwendbare Vorlage</span>
+          <div class="hero-actions">
+            <a class="button button-light" href="mailto:ohno5001@gmail.com?subject=Pilotgespräch%20Reason%20Engine">Pilotgespräch vereinbaren</a>
+            <a class="button button-ghost" href="#pilot-rahmen">Was ein Pilot umfasst</a>
           </div>
         </div>
-        <ol class="pilot-steps">
-          <li><span>1</span><div><h3>Problem aufnehmen</h3><p>Entscheidungsweg und Reibungsverluste verstehen.</p></div></li>
-          <li><span>2</span><div><h3>Ebenen trennen</h3><p>Fakten, Annahmen, Quellen und Risiken ordnen.</p></div></li>
-          <li><span>3</span><div><h3>Entscheidung bauen</h3><p>Eine klare und prüfbare Übersicht erstellen.</p></div></li>
-          <li><span>4</span><div><h3>Lernen sichern</h3><p>Vorlage und Nachbesprechung für den nächsten Fall.</p></div></li>
-        </ol>
+        <div class="pilot-boundary" id="pilot-rahmen">
+          <div><span>1</span><p><strong>Ein Prozess</strong><br>Kein versteckter ERP-Neubau.</p></div>
+          <div><span>2</span><p><strong>Maximal zwei Testfälle</strong><br>Anonymisiert oder synthetisch.</p></div>
+          <div><span>3</span><p><strong>Klarer Endpunkt</strong><br>Stoppen, nicht bauen oder bezahltes Angebot.</p></div>
+          <div><span>4</span><p><strong>Keine Produktivabhängigkeit</strong><br>Validierung bleibt Validierung.</p></div>
+        </div>
       </div>
     </section>
 
-    <section class="page-section status-section">
+    <section class="status-section" aria-labelledby="status-title">
       <div class="shell status-layout">
-        <div class="status-copy reveal">
-          <p class="eyebrow">04 / AKTUELLER STATUS</p>
-          <h2>Das Grundstück ist gesichert. Die Werkstatt entsteht.</h2>
-          <p>Wir zeigen nur, was bereits belegt ist, und markieren offen, was noch Hypothese oder Entwurf bleibt.</p>
+        <div class="reveal">
+          <p class="eyebrow">AKTUELLER STAND</p>
+          <h2 id="status-title">Die Werkstatt steht. Der Nutzen muss sich im Feld beweisen.</h2>
         </div>
         <dl class="status-list reveal">
-          <div><dt>Vision & Architektur</dt><dd>aktive Entwicklung</dd></div>
-          <div><dt>Technische Nachweise</dt><dd>begrenzte Prototypen</dd></div>
-          <div><dt>Decision Sprint</dt><dd>Pilothypothese</dd></div>
-          <div><dt>Zahlende Kunden</dt><dd>noch nicht bewiesen</dd></div>
+          <div><dt>Reason Engine Kern</dt><dd>konzeptionell etabliert</dd></div>
+          <div><dt>P2 Foundation</dt><dd>angelegt, unvalidiert</dd></div>
+          <div><dt>Erster Feldtest</dt><dd>ausstehend</dd></div>
+          <div><dt>Zahlungsbereitschaft</dt><dd>noch nicht bewiesen</dd></div>
         </dl>
-      </div>
-    </section>
-
-    <section class="contact-section" id="kontakt">
-      <div class="shell contact-card reveal">
-        <div>
-          <p class="eyebrow">KONTAKT</p>
-          <h2>Ein echtes Problem ist der beste Eingang.</h2>
-          <p>Schreib uns kurz, woran eine Recherche oder Entscheidung gerade festhängt.</p>
-        </div>
-        <a class="contact-address" href="mailto:ohno5001@gmail.com">
-          <span>Kontakt aufnehmen</span>
-          <strong>ohno5001@gmail.com</strong>
-          <small>Direkte E-Mail an Stefan Preuss</small>
-        </a>
       </div>
     </section>
   </main>
@@ -253,10 +237,14 @@
     <div class="shell footer-grid">
       <div>
         <a class="brand footer-brand" href="#top"><img src="assets/mark.svg" width="32" height="32" alt=""><span>Reason Engine</span></a>
-        <p>Die Stadt darf flüstern. Sie soll nicht predigen.</p>
+        <p>KI-gestützte Systeme für Entscheidungen, bei denen menschliche Verantwortung nicht verloren gehen darf.</p>
       </div>
-      <div class="footer-links"><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
-      <p class="footer-status">Öffentliche Vorschau · Suchmaschinen blockiert · Version 0.4</p>
+      <div class="footer-links">
+        <a href="https://github.com/ans5000/reason-engine" rel="noopener noreferrer">GitHub</a>
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </div>
+      <p class="footer-status">Öffentliche Vorschau · Frühe Entwicklungsphase · Keine behaupteten Kundenergebnisse</p>
     </div>
   </footer>
 </body>
