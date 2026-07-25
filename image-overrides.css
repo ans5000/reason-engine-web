@@ -1,14 +1,17 @@
 @import url("typography-overrides.css");
 
 .hero-art {
-  background: url("assets/workshop-people.webp") center 52% / cover no-repeat;
-  filter: saturate(.88) contrast(1.02) brightness(.92);
+  background-color: #2b2a24;
+  background-position: center 52%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: saturate(.84) contrast(1.04) brightness(.88);
 }
 
 .hero-shade {
   background:
-    linear-gradient(90deg, rgba(17, 14, 10, .94) 0%, rgba(17, 14, 10, .75) 34%, rgba(17, 14, 10, .18) 68%, rgba(17, 14, 10, .34) 100%),
-    linear-gradient(0deg, rgba(12, 10, 8, .72) 0%, transparent 40%, rgba(12, 10, 8, .18) 100%);
+    linear-gradient(90deg, rgba(17, 14, 10, .94) 0%, rgba(17, 14, 10, .76) 34%, rgba(17, 14, 10, .18) 68%, rgba(17, 14, 10, .32) 100%),
+    linear-gradient(0deg, rgba(12, 10, 8, .72) 0%, transparent 40%, rgba(12, 10, 8, .15) 100%);
 }
 
 .lab-art {
@@ -24,6 +27,6 @@
 
 @media (max-width: 780px) {
   .hero-art {
-    background-position: 57% 50%;
+    background-position: 50% 50%;
   }
 }
