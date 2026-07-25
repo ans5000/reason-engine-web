@@ -1,31 +1,3 @@
-async function decodeBase64Image(path) {
-  const response = await fetch(path);
-  if (!response.ok) throw new Error(`Bildquelle nicht geladen: ${path}`);
-
-  const encoded = (await response.text()).trim();
-  const binary = atob(encoded);
-  const bytes = new Uint8Array(binary.length);
-
-  for (let index = 0; index < binary.length; index += 1) {
-    bytes[index] = binary.charCodeAt(index);
-  }
-
-  return URL.createObjectURL(new Blob([bytes], { type: 'image/webp' }));
-}
-
-async function applyEmbeddedImages() {
-  const images = document.querySelectorAll('[data-b64-src]');
-  await Promise.all(Array.from(images).map(async (image) => {
-    try {
-      image.src = await decodeBase64Image(image.dataset.b64Src);
-    } catch (error) {
-      console.warn(error);
-    }
-  }));
-}
-
-applyEmbeddedImages();
-
 const header = document.querySelector('[data-header]');
 const navToggle = document.querySelector('[data-nav-toggle]');
 const nav = document.querySelector('[data-nav]');
