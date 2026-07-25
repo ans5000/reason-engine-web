@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 720" role="img" aria-labelledby="title desc">
+  <title id="title">Abstrakte offene Stadt</title>
+  <desc id="desc">Organische Wege verbinden einen stabilen Kern mit offenen Rändern und freien Bauflächen.</desc>
+  <defs>
+    <radialGradient id="fog" cx="50%" cy="45%" r="55%">
+      <stop offset="0" stop-color="#9bcac4" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#9bcac4" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="13"/></filter>
+  </defs>
+  <rect width="720" height="720" fill="url(#fog)"/>
+  <g opacity=".28" fill="#4e7564" filter="url(#soft)">
+    <circle cx="95" cy="170" r="65"/><circle cx="615" cy="152" r="72"/><circle cx="118" cy="580" r="78"/><circle cx="620" cy="564" r="92"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M82 504C168 462 178 362 263 347s106 62 181 16 104-138 194-113" stroke="#9bcac4" stroke-opacity=".48" stroke-width="3"/>
+    <path d="M112 190c90 12 125 95 205 107s120-66 192-28 86 128 134 154" stroke="#d9b78e" stroke-opacity=".44" stroke-width="3"/>
+    <path d="M218 628c-18-90 37-142 98-170s145-21 192-87 30-145 85-190" stroke="#c5d6b9" stroke-opacity=".38" stroke-width="2.6"/>
+    <path d="M111 375c88-8 121 41 191 13 61-25 66-82 130-88 62-6 88 46 165 39" stroke="#e7e1d3" stroke-opacity=".22" stroke-width="2" stroke-dasharray="8 12"/>
+  </g>
+  <g>
+    <path d="M287 291c44-39 119-35 157 9 36 42 31 105-5 144-41 44-111 49-157 10-47-40-51-122 5-163Z" fill="#14271f" stroke="#c5d6b9" stroke-opacity=".66" stroke-width="3"/>
+    <path d="M313 328c29-26 77-24 103 6 24 29 20 71-4 96-28 29-74 32-105 7-31-26-33-80 6-109Z" fill="#0f1e19" stroke="#d9b78e" stroke-opacity=".55" stroke-width="2.4"/>
+    <circle cx="363" cy="385" r="12" fill="#c5d6b9" opacity=".88"/>
+  </g>
+  <g fill="#11231c" stroke="#9bcac4" stroke-opacity=".58" stroke-width="2">
+    <path d="M124 206l39-24 36 28-8 49-47 7-31-27 11-33Z"/>
+    <path d="M518 116l49-18 34 37-14 52-52 4-29-33 12-42Z"/>
+    <path d="M544 494l54-12 32 44-21 51-55-1-25-38 15-44Z"/>
+    <path d="M129 508l45-20 38 30-6 50-47 13-35-30 5-43Z"/>
+  </g>
+  <g fill="#d9b78e" opacity=".7">
+    <circle cx="150" cy="225" r="5"/><circle cx="551" cy="144" r="5"/><circle cx="580" cy="529" r="5"/><circle cx="166" cy="538" r="5"/>
+  </g>
+  <g fill="#c5d6b9" opacity=".5">
+    <circle cx="246" cy="207" r="4"/><circle cx="479" cy="226" r="4"/><circle cx="477" cy="489" r="4"/><circle cx="265" cy="535" r="4"/>
+  </g>
+  <g fill="none" stroke="#d9b78e" stroke-width="2.5" stroke-opacity=".64">
+    <path d="M435 333c36-14 71-4 95 23"/><path d="M221 370c34-21 62-22 88-6"/>
+  </g>
+</svg>

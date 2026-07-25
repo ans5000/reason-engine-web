@@ -1,0 +1,32 @@
+@import url("typography-overrides.css");
+
+.hero-art {
+  background-color: #2b2a24;
+  background-position: center 52%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  filter: saturate(.84) contrast(1.04) brightness(.88);
+}
+
+.hero-shade {
+  background:
+    linear-gradient(90deg, rgba(17, 14, 10, .94) 0%, rgba(17, 14, 10, .76) 34%, rgba(17, 14, 10, .18) 68%, rgba(17, 14, 10, .32) 100%),
+    linear-gradient(0deg, rgba(12, 10, 8, .72) 0%, transparent 40%, rgba(12, 10, 8, .15) 100%);
+}
+
+.lab-art {
+  background:
+    linear-gradient(145deg, rgba(15, 24, 18, .08), rgba(7, 12, 9, .64)),
+    url("assets/workshop-room.webp") center 50% / cover no-repeat;
+  filter: saturate(.86) contrast(1.02);
+}
+
+.lab-art > * {
+  display: none;
+}
+
+@media (max-width: 780px) {
+  .hero-art {
+    background-position: 50% 50%;
+  }
+}

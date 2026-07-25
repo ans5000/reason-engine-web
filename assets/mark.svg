@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">Reason Engine Zeichen</title>
+  <defs>
+    <linearGradient id="g" x1="10" y1="8" x2="54" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#c5d6b9"/>
+      <stop offset="1" stop-color="#79aaa2"/>
+    </linearGradient>
+  </defs>
+  <path fill="none" stroke="url(#g)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" d="M14 49V23l18-11 18 11v26L32 58 14 49Z"/>
+  <path fill="none" stroke="#d9b78e" stroke-width="2.6" stroke-linecap="round" d="M22 43V28l10-6 10 6v15"/>
+  <circle cx="32" cy="36" r="4.2" fill="#c5d6b9"/>
+</svg>

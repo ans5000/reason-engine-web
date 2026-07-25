@@ -1,0 +1,109 @@
+:root {
+  --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
+  --weight-body: 400;
+  --weight-ui: 600;
+  --weight-label: 700;
+  --weight-display: 400;
+}
+
+/* Role 1: calm, readable body and interface text. */
+body {
+  font-family: var(--font-body);
+  font-weight: var(--weight-body);
+  letter-spacing: 0;
+}
+
+.site-nav a,
+.button,
+.status-chip,
+.contact-address span,
+.status-list dd,
+.footer-links a,
+.skip-link {
+  font-family: var(--font-body);
+  font-weight: var(--weight-ui);
+}
+
+/* Role 2: one consistent serif voice for ideas, chapters and quotations. */
+.brand,
+.hero h1,
+.hero-subtitle,
+.value-item h2,
+.editorial-card h2,
+.section-head h2,
+.process-card h3,
+.room-copy h2,
+.principle-quote blockquote,
+.principle-list h3,
+.pilot-copy h2,
+.pilot-steps h3,
+.status-copy h2,
+.contact-card h2,
+.contact-address strong,
+.legal-card h1,
+.legal-card h2 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-display);
+}
+
+.brand {
+  font-weight: 600;
+  letter-spacing: .015em;
+}
+
+.hero h1 {
+  letter-spacing: -.04em;
+}
+
+.editorial-card h2,
+.section-head h2,
+.room-copy h2,
+.principle-quote blockquote,
+.pilot-copy h2,
+.status-copy h2,
+.contact-card h2 {
+  letter-spacing: -.03em;
+}
+
+/* Role 3: restrained uppercase labels for navigation through the story. */
+.eyebrow,
+.process-card > span,
+.principle-list span,
+.contact-address span {
+  font-family: var(--font-body);
+  font-weight: var(--weight-label);
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  font-size: .72rem;
+}
+
+.status-chip {
+  letter-spacing: .035em;
+}
+
+.hero-lead,
+.editorial-card p,
+.section-head p,
+.status-copy p,
+.process-card p,
+.room-copy p,
+.principle-list p,
+.pilot-copy > p,
+.pilot-steps p,
+.contact-card p,
+.legal-card p {
+  font-weight: var(--weight-body);
+}
+
+@media (max-width: 780px) {
+  .eyebrow,
+  .process-card > span,
+  .principle-list span,
+  .contact-address span {
+    letter-spacing: .09em;
+  }
+}
