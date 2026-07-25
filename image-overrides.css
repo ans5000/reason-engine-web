@@ -1,3 +1,5 @@
+@import url("typography-overrides.css");
+
 .hero-art {
   background: url("assets/workshop-people.webp") center 52% / cover no-repeat;
   filter: saturate(.88) contrast(1.02) brightness(.92);
