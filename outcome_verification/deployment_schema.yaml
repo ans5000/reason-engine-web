@@ -1,0 +1,63 @@
+version: "0.1"
+axiom: "Action completed is not outcome verified."
+
+deployment:
+  deployment_id: "website-<timestamp>"
+  target_system: "reasonengine.de"
+  expected_outcome:
+    url: "https://reasonengine.de/"
+    build_identifier:
+      value: "outcome-verification-v0.1"
+      source:
+        type: "html_meta"
+        selector: "meta[name='reason-engine-build']"
+        attribute: "content"
+    content_marker: "Wir machen komplexe Entscheidungen sichtbar."
+  action_path:
+    repository: "ans5000/reason-engine-web"
+    source_branch: "main"
+    deployment_provider: "UNKNOWN"
+    deployment_trigger: "UNKNOWN"
+  verification_method:
+    request_url: "https://reasonengine.de/"
+    expected_final_url: "https://reasonengine.de/"
+    accepted_final_statuses: [200]
+    allowed_redirect_statuses: [301, 302, 307, 308]
+    critical_asset:
+      url: "https://reasonengine.de/assets/IMG_0472.jpeg"
+      role: "hero-image"
+      reason: "Primäres sichtbares Asset der erwarteten Website-Version"
+      accepted_statuses: [200]
+  rollback_path:
+    method: "UNKNOWN"
+    target_revision: "UNKNOWN"
+  known_unknowns:
+    - type: "hosting_provider"
+      description: "Aktiver Hostinganbieter ist noch nicht bestätigt."
+      blocking: true
+    - type: "deployment_source"
+      description: "Aktive Deploymentquelle ist noch nicht bestätigt."
+      blocking: true
+    - type: "dns"
+      description: "DNS-Ziel der Domain ist noch nicht bestätigt."
+      blocking: true
+
+allowed_unknown_types:
+  - dns
+  - hosting_provider
+  - deployment_source
+  - deployment_trigger
+  - cdn_cache
+  - canonical_url
+  - asset_path
+  - rollback_revision
+  - provider_visibility
+  - other
+
+allowed_asset_roles:
+  - hero-image
+  - main-css
+  - main-js
+  - app-shell
+  - favicon
+  - other
