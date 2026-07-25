@@ -2,6 +2,30 @@ const header = document.querySelector('[data-header]');
 const navToggle = document.querySelector('[data-nav-toggle]');
 const nav = document.querySelector('[data-nav]');
 
+const preferredImages = [
+  {
+    selector: '.hero-image',
+    src: 'assets/reason-engine-hero-original.jpg',
+    fallback: 'assets/workshop-people.webp',
+  },
+  {
+    selector: '.manifest-image img',
+    src: 'assets/reason-engine-system-depth-original.jpg',
+    fallback: 'assets/city-map.svg',
+  },
+];
+
+preferredImages.forEach(({ selector, src, fallback }) => {
+  const image = document.querySelector(selector);
+  if (!image) return;
+
+  image.addEventListener('error', () => {
+    if (!image.src.endsWith(fallback)) image.src = fallback;
+  }, { once: true });
+
+  image.src = src;
+});
+
 const updateHeader = () => {
   if (header) header.classList.toggle('is-scrolled', window.scrollY > 24);
 };
