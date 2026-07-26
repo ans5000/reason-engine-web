@@ -73,14 +73,12 @@ jobs:
           grep -Fq 'study-pilot-v0.1-2026-07-26' artifacts/study.html
           grep -Fq 'noindex,nofollow' artifacts/atlas-live.html
           grep -Fq 'Sicherung importieren' artifacts/atlas-live.html
+          grep -Fq 'atlas-viewport-hotfix-2026-07-26' artifacts/atlas-live.html
+          grep -Fq 'viewport-center-v0.8.1.js' artifacts/atlas-live.html
           grep -Fq 'Allow: /' artifacts/robots.txt
           grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
           grep -Fq 'https://reasonengine.de/' artifacts/sitemap.xml
           grep -Fq 'https://reasonengine.de/study.html' artifacts/sitemap.xml
-          if [[ "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
-            grep -Fq 'atlas-viewport-hotfix-2026-07-26' artifacts/atlas-live.html
-            grep -Fq 'viewport-center-v0.8.1.js' artifacts/atlas-live.html
-          fi
           if grep -Fq 'https://reasonengine.de/app/' artifacts/sitemap.xml; then
             echo 'Atlas must remain outside the public sitemap during alpha.' >&2
             exit 1
@@ -115,13 +113,22 @@ jobs:
           mkdir -p artifacts
           node .github/scripts/verify-atlas-v081.mjs 2>&1 | tee artifacts/public-handoff-browser.log
 
-      - name: Verify centered Atlas viewport
+      - name: Verify branch Atlas viewport
         shell: bash
         env:
           ATLAS_VIEWPORT_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/index.html' || 'https://reasonengine.de/app/index.html' }}
         run: |
           set -euo pipefail
-          node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-browser.log
+          node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-branch.log
+
+      - name: Verify deployed Atlas viewport
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          ATLAS_VIEWPORT_BASE: https://reasonengine.de/app/index.html
+        run: |
+          set -euo pipefail
+          node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-live.log
 
       - name: Publish handoff evidence
         if: always()
