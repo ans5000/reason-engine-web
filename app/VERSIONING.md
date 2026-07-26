@@ -4,30 +4,30 @@ Atlas uses separate version numbers for separate promises.
 
 ## App release
 
-The public interface is currently **Atlas v0.5.0**.
+The public interface is **Atlas v0.6.0**.
 
-This number describes the shipped product surface: interface, disclosures, behavior and release-level changes.
+This release converges the territorial field map with the local rule-based reasoning layer:
 
-Atlas v0.5 changes the spatial grammar from a radial node diagram to a growing hex landscape:
+- the problem is the central hex field,
+- six clarification fields form the first ring,
+- answers are assigned to the active clarification field,
+- additional fields occupy deterministic free hex slots,
+- relationships are represented as explicit roads,
+- field type and truth state remain separate,
+- possible contradictions are flagged through lexical overlap plus opposing negation,
+- a Markdown decision dossier can be exported.
 
-- the root problem occupies the central hex,
-- existing clarification spaces remain visible as surrounding fields,
-- every submitted conversation entry creates a new, automatically filled hex,
-- new hexes are assigned to the active clarification district,
-- the map expands in a deterministic honeycomb spiral,
-- newly created hexes receive a short arrival animation.
-
-Atlas v0.5 retains the local rule-based reasoning layer from v0.4. Topic assignment, entry classification and contradiction hints remain heuristics. They are not semantic AI, factual verification or a guarantee that a contradiction is real.
+These functions are heuristics. They are not semantic AI, factual verification or a guarantee that a contradiction is real.
 
 ## Data schema
 
-The local Atlas library and individual Atlas records currently use **schema v0.2**.
+The local Atlas library and individual Atlas records use **schema v0.3**.
 
-A new app release does not require a data-schema change when stored JSON remains compatible. Atlas v0.5 stores optional `district` and `createdAt` metadata on new records while preserving compatibility with existing v0.2 libraries and backups. Older records without these fields remain renderable as hexes.
+Schema v0.3 replaces free x/y nodes with typed fields using axial hex coordinates (`q`, `r`) and explicit routes. Existing v0.1 and v0.2 browser data is migrated locally when first opened.
 
 ## Backup format
 
-Backup code may have its own implementation release name while still reading and writing schema v0.2 data. Compatibility must be checked against the data schema, not inferred from the app release number.
+The backup format is v0.3. It writes native fields and routes and includes a compatibility `nodes` projection for the existing restore acceptance test. Import accepts current field backups and earlier node-based exports.
 
 ## Public-alpha status
 
@@ -35,6 +35,6 @@ The app is publicly reachable but intentionally carries `noindex,nofollow` durin
 
 ## Integrity boundary
 
-The history is append-only in normal interface behavior: new events are appended rather than silently rewriting earlier events. This is not a cryptographic guarantee. Data stored in the browser or exported as JSON can be modified outside the interface.
+The history is append-only in normal interface behavior. This is not a cryptographic guarantee. Browser data and exported files can be changed outside the interface.
 
-The decision dossier is a derived local export. It reflects the current browser state at export time and is not signed, hashed or independently verified.
+The decision dossier is a derived local export. It reflects the current browser state and is not signed, hashed or independently verified.

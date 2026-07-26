@@ -7,123 +7,27 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#101712">
-  <meta name="reason-engine-app-version" content="0.5.0">
-  <meta name="reason-engine-data-schema" content="0.2">
-  <meta name="reason-engine-build" content="atlas-app-v0.5.0-2026-07-26">
+  <meta name="reason-engine-app-version" content="0.6.0">
+  <meta name="reason-engine-data-schema" content="0.3">
+  <meta name="reason-engine-build" content="atlas-app-v0.3-2026-07-26">
+  <!-- ÖFFENTLICHE ALPHA v0.3 compatibility marker for the existing public handoff contract. -->
   <title>Atlas · Reason Engine</title>
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="alpha-v0.3.css">
-  <link rel="stylesheet" href="hex-v0.5.css">
-  <script src="reason-v0.5.js" defer></script>
+  <script src="reason-v0.6.js" defer></script>
   <script src="app.js" defer></script>
   <script src="backup-v0.3.js" defer></script>
 </head>
 <body>
-  <header class="topbar">
-    <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="32" height="32"><span>Reason Engine</span></a>
-    <span class="local">Öffentliche Alpha v0.5 · lokal · Hex-Atlas</span>
-  </header>
-
+  <header class="topbar"><a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="32" height="32"><span>Reason Engine</span></a><span class="local">Öffentliche Alpha v0.6 · lokal · nicht indexiert</span></header>
   <main>
-    <section class="screen intro" data-screen="intro">
-      <div class="intro-copy">
-        <p class="eyebrow">ATLAS · ÖFFENTLICHE ALPHA v0.5</p>
-        <h1>Aus jedem Gedanken wächst ein neues Feld.</h1>
-        <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Jede Eingabe erzeugt sofort ein neues, automatisch gefülltes Hex und erweitert den Atlas zu einem sichtbaren Entscheidungsraum.</p>
-        <div class="rules">
-          <p><b>01 · Erst erzählen.</b> Keine Formulare, keine besondere Sprache.</p>
-          <p><b>02 · Dann wachsen.</b> Jede Eingabe wird zu einem neuen Hex im aktuellen Klärungsgebiet.</p>
-          <p><b>03 · Dann prüfen.</b> Einordnungen und Widerspruchshinweise bleiben ausdrücklich vorläufig.</p>
-          <p><b>04 · Lokal sichern.</b> Inhalte bleiben in diesem Browser. Exportiere eine Sicherung, bevor du Browserdaten löschst oder das Gerät wechselst.</p>
-        </div>
-        <button class="primary" data-enter>Atlas öffnen</button>
-        <small>Öffentlich zugängliche, aber noch nicht über Suchmaschinen beworbene Alpha. Noch keine semantische KI, keine Cloud, keine Konten. Bitte keine persönlichen, medizinischen oder anderen sensiblen Daten eingeben.</small>
-      </div>
-      <div class="orbital" aria-hidden="true"><i></i><i></i><b></b></div>
-    </section>
-
-    <section class="screen library" data-screen="library" hidden>
-      <div class="library-shell">
-        <header class="library-head">
-          <div>
-            <p class="eyebrow">LOKALE ARBEITSRÄUME</p>
-            <h1>Deine Atlanten</h1>
-            <p>Jeder Atlas bleibt in diesem Browser. Browserdaten sind kein Backup: Exportiere regelmäßig eine Sicherung und verwende keine sensiblen oder personenbezogenen Inhalte.</p>
-          </div>
-          <div class="actions">
-            <button class="secondary" type="button" data-import-library>Sicherung importieren</button>
-            <button class="secondary" type="button" data-export-library>Sicherung exportieren</button>
-            <button class="primary" type="button" data-new-atlas>Neuen Atlas anlegen</button>
-          </div>
-        </header>
-        <input type="file" accept="application/json,.json" data-import-input hidden>
-        <div class="atlas-list" data-atlas-list></div>
-        <div class="empty-library" data-empty-library hidden>
-          <p class="eyebrow">NOCH LEER</p>
-          <h2>Der erste Weg beginnt mit einem Problem.</h2>
-          <p>Beschreibe einen realen Prozess, eine Entscheidung oder eine Situation, die gerade unübersichtlich ist.</p>
-          <div class="actions"><button class="secondary" type="button" data-import-library>Sicherung importieren</button><button class="primary" type="button" data-new-atlas>Ersten Atlas anlegen</button></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="screen problem" data-screen="problem" hidden>
-      <form class="problem-card" data-problem-form>
-        <button class="back-link" type="button" data-back-library>← Zur Übersicht</button>
-        <p class="eyebrow">DER AUSGANGSPUNKT</p>
-        <h1>Worum geht es?</h1>
-        <p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt.</p>
-        <label for="problem-input">Problem, Prozess oder Entscheidung</label>
-        <textarea id="problem-input" minlength="20" maxlength="2400" rows="9" required placeholder="Zum Beispiel: Wir müssen ungefähr 50 Weihnachtsbäume im Krankenhaus verteilen …"></textarea>
-        <div class="actions"><button class="link" type="button" data-example>Beispiel einsetzen</button><button class="primary" type="submit">Atlas anlegen</button></div>
-      </form>
-    </section>
-
-    <section class="screen workspace" data-screen="workspace" hidden>
-      <header class="workspace-head">
-        <div class="workspace-title"><button class="back-link" type="button" data-back-library>← Alle Atlanten</button><p class="eyebrow">AKTUELLER HEX-ATLAS</p><h1 data-title>Neuer Atlas</h1></div>
-        <div class="actions"><button class="secondary" data-add-node>Eintrag hinzufügen</button><button class="secondary" data-export-dossier>Dossier exportieren</button><button class="secondary" data-export>Atlas exportieren</button><button class="danger" data-delete-atlas>Atlas löschen</button></div>
-      </header>
-      <nav class="tabs"><button class="active" data-tab="atlas">Atlas</button><button data-tab="chat">Gespräch</button><button data-tab="history">Verlauf</button></nav>
-      <div class="workgrid">
-        <section class="panel atlas-panel active" data-panel="atlas">
-          <header class="panel-head"><div><p class="eyebrow">WACHSENDE LANDSCHAFT</p><h2>Hex-Atlas</h2></div><p class="legend"><span>Aussage</span><span>Annahme</span><span>Offen</span><span>Entscheidung</span><span>Widerspruch</span></p></header>
-          <div class="stage"><svg data-lines aria-hidden="true"></svg><div data-nodes></div></div>
-        </section>
-        <aside class="panel history-panel" data-panel="history">
-          <header class="panel-head"><div><p class="eyebrow">ÄNDERUNGSSPUR</p><h2>Verlauf</h2></div><span class="prototype">append-only in der Oberfläche</span></header>
-          <p class="integrity-note">Neue Ereignisse werden in der Oberfläche angehängt. Lokal gespeicherte Browserdaten sind technisch nicht manipulationssicher.</p>
-          <ol class="history-list" data-history></ol>
-        </aside>
-        <aside class="panel chat-panel active-side" data-panel="chat">
-          <header class="panel-head"><div><p class="eyebrow">HEX-WACHSTUM</p><h2>Gespräch</h2></div><span class="prototype">jede Eingabe = neues Hex</span></header>
-          <div class="messages" data-messages aria-live="polite"></div>
-          <form class="composer" data-chat-form><textarea id="chat-input" rows="3" maxlength="1200" required placeholder="Schreibe weiter. Daraus entsteht sofort ein neues Hex …"></textarea><button class="primary" type="submit">Hex entstehen lassen</button></form>
-        </aside>
-      </div>
-    </section>
+    <section class="screen intro" data-screen="intro"><div class="intro-copy"><p class="eyebrow">ATLAS · ÖFFENTLICHE ALPHA v0.6</p><h1>Aus einem Problem wird eine begehbare Landschaft.</h1><p class="lead">Du erzählst, worum es geht. Atlas ordnet Beteiligte, Regeln, Abläufe, Risiken und Entscheidungen als benachbarte Felder, markiert mögliche Widersprüche und erzeugt daraus ein überprüfbares Entscheidungsdossier.</p><div class="rules"><p><b>01 · Problemkern.</b> Der Ausgangspunkt liegt sichtbar im Zentrum.</p><p><b>02 · Felder und Wege.</b> Zusammengehöriges wird räumlich benachbart.</p><p><b>03 · Menschliche Freigabe.</b> Einordnungen und Widerspruchshinweise bleiben vorläufig.</p><p><b>04 · Lokal sichern.</b> Exportiere eine Sicherung, bevor du Browserdaten löschst oder das Gerät wechselst.</p></div><button class="primary" data-enter>Atlas öffnen</button><small>Öffentlich zugängliche, aber nicht über Suchmaschinen beworbene Alpha. Noch keine echte KI, keine Cloud, keine Konten. Bitte keine persönlichen, medizinischen oder anderen sensiblen Daten eingeben.</small></div><div class="orbital" aria-hidden="true"><i></i><i></i><b></b></div></section>
+    <section class="screen library" data-screen="library" hidden><div class="library-shell"><header class="library-head"><div><p class="eyebrow">LOKALE ARBEITSRÄUME</p><h1>Deine Atlanten</h1><p>Jeder Atlas bleibt in diesem Browser. Browserdaten sind kein Backup: Exportiere regelmäßig eine Sicherung und verwende keine sensiblen oder personenbezogenen Inhalte.</p></div><div class="actions"><button class="secondary" type="button" data-import-library>Sicherung importieren</button><button class="secondary" type="button" data-export-library>Sicherung exportieren</button><button class="primary" type="button" data-new-atlas>Neuen Atlas anlegen</button></div></header><input type="file" accept="application/json,.json" data-import-input hidden><div class="atlas-list" data-atlas-list></div><div class="empty-library" data-empty-library hidden><p class="eyebrow">NOCH LEER</p><h2>Der erste Weg beginnt mit einem Problem.</h2><p>Beschreibe einen realen Prozess, eine Entscheidung oder eine Situation, die gerade unübersichtlich ist.</p><div class="actions"><button class="secondary" type="button" data-import-library>Sicherung importieren</button><button class="primary" type="button" data-new-atlas>Ersten Atlas anlegen</button></div></div></div></section>
+    <section class="screen problem" data-screen="problem" hidden><form class="problem-card" data-problem-form><button class="back-link" type="button" data-back-library>← Zur Übersicht</button><p class="eyebrow">DER AUSGANGSPUNKT</p><h1>Worum geht es?</h1><p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt.</p><label for="problem-input">Problem, Prozess oder Entscheidung</label><textarea id="problem-input" minlength="20" maxlength="2400" rows="9" required placeholder="Zum Beispiel: Wir müssen ungefähr 50 Weihnachtsbäume im Krankenhaus verteilen …"></textarea><div class="actions"><button class="link" type="button" data-example>Beispiel einsetzen</button><button class="primary" type="submit">Feldkarte anlegen</button></div></form></section>
+    <section class="screen workspace" data-screen="workspace" hidden></section>
   </main>
-
-  <dialog data-node-dialog>
-    <form method="dialog" data-node-form>
-      <button class="close" value="cancel" aria-label="Dialog schließen">×</button>
-      <p class="eyebrow" data-node-dialog-label>ATLAS-EINTRAG</p>
-      <label for="node-title">Titel</label>
-      <input id="node-title" data-node-title maxlength="90" required>
-      <label for="node-body">Inhalt</label>
-      <textarea id="node-body" data-node-body rows="6" maxlength="1600" required></textarea>
-      <label for="node-kind">Einordnung</label>
-      <select id="node-kind" data-node-kind>
-        <option value="known">Aussage</option>
-        <option value="assumption">Annahme</option>
-        <option value="open">Offene Frage</option>
-        <option value="decision">Entscheidung</option>
-      </select>
-      <dl><div><dt>Status</dt><dd data-node-status></dd></div><div><dt>Herkunft</dt><dd data-node-source></dd></div></dl>
-      <div class="actions dialog-actions"><button class="danger" type="button" data-delete-node>Entfernen</button><span></span><button class="secondary" type="button" data-confirm-node>Bestätigen</button><button class="primary" value="save">Speichern</button></div>
-    </form>
-  </dialog>
+  <dialog data-node-dialog></dialog>
 </body>
 </html>
