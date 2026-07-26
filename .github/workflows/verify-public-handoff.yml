@@ -20,7 +20,7 @@ jobs:
   verify-public-domain:
     name: Verify reasonengine.de
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 20
 
     steps:
       - name: Check out proposed source
@@ -50,10 +50,7 @@ jobs:
             local url="$1"
             local output="$2"
             local separator="?"
-            if [[ "$url" == *\?* ]]; then
-              separator="&"
-            fi
-
+            if [[ "$url" == *\?* ]]; then separator="&"; fi
             curl \
               --fail \
               --silent \
@@ -70,11 +67,13 @@ jobs:
 
           fetch "https://reasonengine.de/" artifacts/home.html
           fetch "https://reasonengine.de/study.html" artifacts/study.html
+          fetch "https://reasonengine.de/app/" artifacts/atlas-live.html
           fetch "https://reasonengine.de/robots.txt" artifacts/robots.txt
           fetch "https://reasonengine.de/sitemap.xml" artifacts/sitemap.xml
 
+          grep -Fq 'public-entrance-v0.7-2026-07-26' artifacts/home.html
           grep -Fq 'Entscheidungen mit KI, die später noch erklärbar sind.' artifacts/home.html
-          grep -Fq 'Reason Engine Study' artifacts/home.html
+          grep -Fq 'href="app/"' artifacts/home.html
           grep -Fq 'Weihnachtsbaumlogistik' artifacts/home.html
           grep -Fq 'Heute möglich. Noch nicht behauptet.' artifacts/home.html
 
@@ -83,18 +82,19 @@ jobs:
           grep -Fq 'FOUNDING STUDENT PASS' artifacts/study.html
           grep -Fq 'Einmalig 10 €' artifacts/study.html
 
+          grep -Fq 'atlas-app-v0.3-2026-07-26' artifacts/atlas-live.html
+          grep -Fq 'ÖFFENTLICHE ALPHA v0.3' artifacts/atlas-live.html
+          grep -Fq 'noindex,nofollow' artifacts/atlas-live.html
+          grep -Fq 'Sicherung importieren' artifacts/atlas-live.html
+          grep -Fq 'keine echte KI' artifacts/atlas-live.html
+
           grep -Fq 'Allow: /' artifacts/robots.txt
           grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
           grep -Fq 'https://reasonengine.de/' artifacts/sitemap.xml
           grep -Fq 'https://reasonengine.de/study.html' artifacts/sitemap.xml
-
-          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
-            fetch "https://reasonengine.de/app/" artifacts/atlas.html
-            grep -Fq 'public-entrance-v0.7-2026-07-26' artifacts/home.html
-            grep -Fq 'href="app/"' artifacts/home.html
-            grep -Fq 'atlas-app-v0.3-2026-07-26' artifacts/atlas.html
-            grep -Fq 'ÖFFENTLICHE ALPHA v0.3' artifacts/atlas.html
-            grep -Fq 'Sicherung importieren' artifacts/atlas.html
+          if grep -Fq 'https://reasonengine.de/app/' artifacts/sitemap.xml; then
+            echo 'Atlas must remain outside the public sitemap during alpha.' >&2
+            exit 1
           fi
 
       - name: Start branch preview for Atlas
@@ -103,9 +103,7 @@ jobs:
         run: |
           nohup python3 -m http.server 4173 > /tmp/reason-engine-preview.log 2>&1 &
           for attempt in $(seq 1 20); do
-            if curl --fail --silent http://127.0.0.1:4173/app/ > /dev/null; then
-              exit 0
-            fi
+            if curl --fail --silent http://127.0.0.1:4173/app/ > /dev/null; then exit 0; fi
             sleep 1
           done
           cat /tmp/reason-engine-preview.log
@@ -117,23 +115,32 @@ jobs:
           npm install --no-save --no-package-lock playwright@1.54.1
           npx playwright install --with-deps chromium
 
-      - name: Capture pages and exercise Atlas
+      - name: Capture pages and exercise branch plus production Atlas
         shell: bash
         env:
-          ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
+          BRANCH_ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
+          LIVE_ATLAS_BASE: https://reasonengine.de/app/
         run: |
           set -euo pipefail
           node <<'NODE'
           const { chromium } = require('playwright');
 
+          const liveAtlas = process.env.LIVE_ATLAS_BASE;
+          const branchAtlas = process.env.BRANCH_ATLAS_BASE;
           const captures = [
             { url: 'https://reasonengine.de/', path: 'artifacts/home-desktop.png', width: 1440, height: 1000, reveal: true },
             { url: 'https://reasonengine.de/', path: 'artifacts/home-mobile.png', width: 390, height: 844, reveal: true },
             { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-desktop.png', width: 1440, height: 1000, reveal: true },
             { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-mobile.png', width: 390, height: 844, reveal: true },
-            { url: process.env.ATLAS_BASE, path: 'artifacts/atlas-desktop.png', width: 1440, height: 1000, reveal: false },
-            { url: process.env.ATLAS_BASE, path: 'artifacts/atlas-mobile.png', width: 390, height: 844, reveal: false },
+            { url: liveAtlas, path: 'artifacts/atlas-live-desktop.png', width: 1440, height: 1000, reveal: false },
+            { url: liveAtlas, path: 'artifacts/atlas-live-mobile.png', width: 390, height: 844, reveal: false },
           ];
+          if (branchAtlas !== liveAtlas) {
+            captures.push(
+              { url: branchAtlas, path: 'artifacts/atlas-branch-desktop.png', width: 1440, height: 1000, reveal: false },
+              { url: branchAtlas, path: 'artifacts/atlas-branch-mobile.png', width: 390, height: 844, reveal: false },
+            );
+          }
 
           async function prepareLongCapture(page, reveal) {
             await page.addStyleTag({ content: 'html, body { scroll-behavior: auto !important; }' });
@@ -153,26 +160,35 @@ jobs:
             await page.waitForFunction(() => window.scrollY === 0);
           }
 
-          async function exerciseAtlas(browser) {
-            const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true });
+          async function exerciseAtlas(browser, base, label) {
+            const context = await browser.newContext({
+              viewport: { width: 1280, height: 900 },
+              acceptDownloads: true,
+              serviceWorkers: 'block',
+            });
             const page = await context.newPage();
-            await page.goto(`${process.env.ATLAS_BASE}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
+            await page.goto(`${base}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
+            const marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
+            if (marker !== 'atlas-app-v0.3-2026-07-26') throw new Error(`${label} returned build ${marker}`);
+            const robots = await page.locator('meta[name="robots"]').getAttribute('content');
+            if (robots !== 'noindex,nofollow') throw new Error(`${label} is not protected by noindex,nofollow`);
             await page.locator('[data-enter]').click();
-            await page.locator('[data-new-atlas]').first().click();
+            await page.locator('[data-screen="library"]:not([hidden])').waitFor();
+            await page.locator('[data-screen="library"]:not([hidden]) [data-new-atlas]').first().click();
             await page.locator('[data-example]').click();
             await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
             await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
             const nodeCount = await page.locator('[data-nodes] .node').count();
-            if (nodeCount < 5) throw new Error(`Atlas created only ${nodeCount} nodes`);
+            if (nodeCount < 5) throw new Error(`${label} created only ${nodeCount} nodes`);
             const historyCount = await page.locator('[data-history] li').count();
-            if (historyCount < 1) throw new Error('Atlas history is empty after creation');
+            if (historyCount < 1) throw new Error(`${label} history is empty after creation`);
             await page.locator('[data-screen="workspace"] [data-back-library]').click();
             await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
             const [download] = await Promise.all([
               page.waitForEvent('download'),
               page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
             ]);
-            if (!download.suggestedFilename().endsWith('.json')) throw new Error('Library backup is not JSON');
+            if (!download.suggestedFilename().endsWith('.json')) throw new Error(`${label} backup is not JSON`);
             await context.close();
           }
 
@@ -191,7 +207,8 @@ jobs:
                 await page.screenshot({ path: capture.path, fullPage: true, animations: 'disabled' });
                 await page.close();
               }
-              await exerciseAtlas(browser);
+              if (branchAtlas !== liveAtlas) await exerciseAtlas(browser, branchAtlas, 'branch Atlas');
+              await exerciseAtlas(browser, liveAtlas, 'production Atlas');
             } finally {
               await browser.close();
             }
