@@ -141,9 +141,11 @@
     importGuardTimer = setTimeout(() => { importContext = null; }, 15000);
   }, true);
 
-  document.addEventListener('submit', (event) => {
-    const form = event.target.closest?.('[data-field-form]');
-    if (!form || event.submitter?.value !== 'save' || !selectedFieldId) return;
+  document.addEventListener('click', (event) => {
+    const saveButton = event.target.closest?.('[data-field-form] button[value="save"]');
+    if (!saveButton || !selectedFieldId) return;
+    const form = saveButton.closest('[data-field-form]');
+    if (!form) return;
 
     const beforeLibrary = readLibrary();
     const beforeAtlas = currentAtlas(beforeLibrary);
