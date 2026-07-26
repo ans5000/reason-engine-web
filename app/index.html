@@ -6,7 +6,7 @@
   <meta name="description" content="Atlas, ein lokaler Reason-Engine-Prototyp für nachvollziehbare Probleme, Gespräche und Entscheidungen.">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#101712">
-  <meta name="reason-engine-build" content="atlas-app-v0.2-2026-07-26">
+  <meta name="reason-engine-build" content="atlas-app-v0.3-2026-07-26">
   <title>Atlas · Reason Engine</title>
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
@@ -22,24 +22,30 @@
   <main>
     <section class="screen intro" data-screen="intro">
       <div class="intro-copy">
-        <p class="eyebrow">ATLAS · PROTOTYP v0.2</p>
-        <h1>Aus einem Problem wird ein begehbarer Atlas.</h1>
-        <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes Gespräch macht daraus Schritt für Schritt eine sichtbare Karte aus Aussagen, Annahmen, offenen Fragen und Entscheidungen.</p>
+        <p class="eyebrow">ATLAS · PROTOTYP v0.3</p>
+        <h1>Aus einem Problem wird eine begehbare Landschaft.</h1>
+        <p class="lead">Du erzählst, worum es geht. Atlas ordnet Beteiligte, Regeln, Abläufe, Risiken und Entscheidungen als benachbarte Felder. Das Gespräch füllt die Karte, ohne Ungewisses als Wahrheit auszugeben.</p>
         <div class="rules">
-          <p><b>01 · Erst erzählen.</b> Keine Formulare, keine besondere Sprache.</p>
-          <p><b>02 · Dann sichtbar machen.</b> Der Atlas wächst mit dem Gespräch.</p>
-          <p><b>03 · Dann prüfen.</b> Nichts wird stillschweigend als wahr übernommen.</p>
+          <p><b>01 · Problemkern.</b> Der Ausgangspunkt liegt sichtbar im Zentrum.</p>
+          <p><b>02 · Felder und Wege.</b> Zusammengehöriges wird räumlich benachbart.</p>
+          <p><b>03 · Menschliche Freigabe.</b> Vorläufig bleibt vorläufig, bis du bestätigst.</p>
         </div>
         <button class="primary" data-enter>Atlas öffnen</button>
         <small>Noch keine echte KI, keine Cloud, keine Produktivdaten.</small>
       </div>
-      <div class="orbital" aria-hidden="true"><i></i><i></i><b></b></div>
+      <div class="hex-intro" aria-hidden="true">
+        <i></i><i></i><i></i><i></i><i></i><i></i><b></b>
+      </div>
     </section>
 
     <section class="screen library" data-screen="library" hidden>
       <div class="library-shell">
         <header class="library-head">
-          <div><p class="eyebrow">LOKALE ARBEITSRÄUME</p><h1>Deine Atlanten</h1><p>Jeder Atlas bleibt ausschließlich in diesem Browser gespeichert.</p></div>
+          <div>
+            <p class="eyebrow">LOKALE ARBEITSRÄUME</p>
+            <h1>Deine Atlanten</h1>
+            <p>Jede Landschaft bleibt ausschließlich in diesem Browser gespeichert.</p>
+          </div>
           <button class="primary" data-new-atlas>Neuen Atlas anlegen</button>
         </header>
         <div class="atlas-list" data-atlas-list></div>
@@ -60,51 +66,155 @@
         <p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt.</p>
         <label for="problem-input">Problem, Prozess oder Entscheidung</label>
         <textarea id="problem-input" minlength="20" maxlength="2400" rows="9" required placeholder="Zum Beispiel: Wir müssen ungefähr 50 Weihnachtsbäume im Krankenhaus verteilen …"></textarea>
-        <div class="actions"><button class="link" type="button" data-example>Beispiel einsetzen</button><button class="primary" type="submit">Atlas anlegen</button></div>
+        <div class="actions"><button class="link" type="button" data-example>Beispiel einsetzen</button><button class="primary" type="submit">Feldkarte anlegen</button></div>
       </form>
     </section>
 
-    <section class="screen workspace" data-screen="workspace" hidden>
+    <section class="screen workspace" data-screen="workspace" data-side="chat" hidden>
       <header class="workspace-head">
-        <div class="workspace-title"><button class="back-link" type="button" data-back-library>← Alle Atlanten</button><p class="eyebrow">AKTUELLER ATLAS</p><h1 data-title>Neuer Atlas</h1></div>
-        <div class="actions"><button class="secondary" data-add-node>Eintrag hinzufügen</button><button class="secondary" data-export>Exportieren</button><button class="danger" data-delete-atlas>Atlas löschen</button></div>
+        <div class="workspace-title">
+          <button class="back-link" type="button" data-back-library>← Alle Atlanten</button>
+          <p class="eyebrow">AKTUELLER ATLAS</p>
+          <h1 data-title>Neuer Atlas</h1>
+        </div>
+        <div class="actions workspace-actions">
+          <button class="secondary" data-add-field>Feld hinzufügen</button>
+          <button class="secondary" data-export>Exportieren</button>
+          <button class="danger" data-delete-atlas>Atlas löschen</button>
+        </div>
       </header>
-      <nav class="tabs"><button class="active" data-tab="atlas">Atlas</button><button data-tab="chat">Gespräch</button><button data-tab="history">Verlauf</button></nav>
+
+      <nav class="tabs" aria-label="Atlas-Ansichten">
+        <button class="active" data-tab="atlas">Karte</button>
+        <button data-tab="chat">Gespräch</button>
+        <button data-tab="history">Verlauf</button>
+      </nav>
+
       <div class="workgrid">
         <section class="panel atlas-panel active" data-panel="atlas">
-          <header class="panel-head"><div><p class="eyebrow">SICHTBARE STRUKTUR</p><h2>Atlas</h2></div><p class="legend"><span>Aussage</span><span>Annahme</span><span>Offen</span><span>Entscheidung</span></p></header>
-          <div class="stage"><svg data-lines aria-hidden="true"></svg><div data-nodes></div></div>
+          <header class="panel-head map-head">
+            <div>
+              <p class="eyebrow">FELDKARTE</p>
+              <h2>Atlas</h2>
+            </div>
+            <div class="map-meta">
+              <p class="map-stats"><span data-field-count>0 Felder</span><span data-route-count>0 Wege</span></p>
+              <div class="map-tools" aria-label="Kartensteuerung">
+                <button type="button" data-zoom-out aria-label="Karte verkleinern">−</button>
+                <button type="button" data-center-map>Zentrieren</button>
+                <button type="button" data-zoom-in aria-label="Karte vergrößern">+</button>
+              </div>
+            </div>
+          </header>
+          <div class="map-legend" aria-label="Legende">
+            <span data-legend="statement">Aussage</span>
+            <span data-legend="actor">Beteiligte</span>
+            <span data-legend="process">Ablauf</span>
+            <span data-legend="question">Offen</span>
+            <span data-legend="risk">Risiko</span>
+            <span data-legend="decision">Entscheidung</span>
+          </div>
+          <div class="stage" data-stage>
+            <div class="map-canvas" data-map-canvas>
+              <div class="map-board" data-map-board>
+                <svg class="routes" data-routes aria-hidden="true"></svg>
+                <div class="fields" data-fields></div>
+              </div>
+            </div>
+          </div>
         </section>
+
         <aside class="panel history-panel" data-panel="history">
-          <header class="panel-head"><div><p class="eyebrow">ÄNDERUNGSSPUR</p><h2>Verlauf</h2></div><span class="prototype">append-only</span></header>
+          <header class="panel-head">
+            <div><p class="eyebrow">ÄNDERUNGSSPUR</p><h2>Verlauf</h2></div>
+            <span class="prototype">append-only</span>
+          </header>
           <ol class="history-list" data-history></ol>
         </aside>
+
         <aside class="panel chat-panel active-side" data-panel="chat">
-          <header class="panel-head"><div><p class="eyebrow">KLÄRENDES GESPRÄCH</p><h2>Gespräch</h2></div><span class="prototype">regelbasiert</span></header>
+          <header class="panel-head">
+            <div><p class="eyebrow">KLÄRENDES GESPRÄCH</p><h2>Gespräch</h2></div>
+            <span class="prototype">regelbasiert</span>
+          </header>
           <div class="messages" data-messages aria-live="polite"></div>
-          <form class="composer" data-chat-form><textarea id="chat-input" rows="3" maxlength="1200" required placeholder="Antworte frei oder korrigiere den Atlas …"></textarea><button class="primary" type="submit">Senden</button></form>
+          <form class="composer" data-chat-form>
+            <textarea id="chat-input" rows="3" maxlength="1200" required placeholder="Antworte frei oder korrigiere die Karte …"></textarea>
+            <button class="primary" type="submit">Senden</button>
+          </form>
         </aside>
       </div>
     </section>
   </main>
 
-  <dialog data-node-dialog>
-    <form method="dialog" data-node-form>
+  <dialog data-field-dialog>
+    <form method="dialog" data-field-form>
       <button class="close" value="cancel" aria-label="Dialog schließen">×</button>
-      <p class="eyebrow" data-node-dialog-label>ATLAS-EINTRAG</p>
-      <label for="node-title">Titel</label>
-      <input id="node-title" data-node-title maxlength="90" required>
-      <label for="node-body">Inhalt</label>
-      <textarea id="node-body" data-node-body rows="6" maxlength="1600" required></textarea>
-      <label for="node-kind">Einordnung</label>
-      <select id="node-kind" data-node-kind>
-        <option value="known">Aussage</option>
-        <option value="assumption">Annahme</option>
-        <option value="open">Offene Frage</option>
-        <option value="decision">Entscheidung</option>
-      </select>
-      <dl><div><dt>Status</dt><dd data-node-status></dd></div><div><dt>Herkunft</dt><dd data-node-source></dd></div></dl>
-      <div class="actions dialog-actions"><button class="danger" type="button" data-delete-node>Entfernen</button><span></span><button class="secondary" type="button" data-confirm-node>Bestätigen</button><button class="primary" value="save">Speichern</button></div>
+      <p class="eyebrow" data-field-dialog-label>ATLAS-FELD</p>
+
+      <label for="field-title">Titel</label>
+      <input id="field-title" data-field-title maxlength="90" required>
+
+      <label for="field-body">Inhalt</label>
+      <textarea id="field-body" data-field-body rows="6" maxlength="1600" required></textarea>
+
+      <div class="form-grid">
+        <div>
+          <label for="field-type">Feldtyp</label>
+          <select id="field-type" data-field-type>
+            <option value="statement">Aussage</option>
+            <option value="assumption">Annahme</option>
+            <option value="question">Offene Frage</option>
+            <option value="decision">Entscheidung</option>
+            <option value="resource">Ressource</option>
+            <option value="risk">Risiko</option>
+            <option value="process">Prozessschritt</option>
+            <option value="actor">Beteiligter Bereich</option>
+            <option value="rule">Regel / Grenze</option>
+          </select>
+        </div>
+        <div>
+          <label for="field-state">Zustand</label>
+          <select id="field-state" data-field-state>
+            <option value="empty">Leer / ungeklärt</option>
+            <option value="provisional">Vorläufig</option>
+            <option value="confirmed">Bestätigt</option>
+            <option value="critical">Kritisch</option>
+            <option value="decided">Entschieden</option>
+          </select>
+        </div>
+      </div>
+
+      <dl>
+        <div><dt>Position</dt><dd data-field-position></dd></div>
+        <div><dt>Herkunft</dt><dd data-field-source></dd></div>
+      </dl>
+
+      <section class="route-editor" data-route-editor>
+        <div class="route-editor-head">
+          <div><p class="eyebrow">WEGE UND ABHÄNGIGKEITEN</p><h3>Verbindungen</h3></div>
+        </div>
+        <div class="route-create">
+          <select data-route-target aria-label="Zielfeld"></select>
+          <select data-route-type aria-label="Beziehungstyp">
+            <option value="supports">unterstützt</option>
+            <option value="depends">hängt ab von</option>
+            <option value="leads">führt zu</option>
+            <option value="blocks">blockiert</option>
+            <option value="decides">entscheidet über</option>
+            <option value="confirms">bestätigt durch</option>
+          </select>
+          <button class="secondary" type="button" data-add-route>Weg anlegen</button>
+        </div>
+        <ul class="route-list" data-route-list></ul>
+      </section>
+
+      <div class="actions dialog-actions">
+        <button class="danger" type="button" data-delete-field>Entfernen</button>
+        <span></span>
+        <button class="secondary" type="button" data-confirm-field>Bestätigen</button>
+        <button class="primary" value="save">Speichern</button>
+      </div>
     </form>
   </dialog>
 </body>
