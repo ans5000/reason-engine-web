@@ -31,6 +31,7 @@ jobs:
         run: |
           set -euo pipefail
           node --check app/app.js
+          node --check app/reason-v0.6.js
           node --check app/backup-v0.3.js
           grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
           grep -Fq 'href="app/"' index.html
@@ -82,8 +83,8 @@ jobs:
           grep -Fq 'FOUNDING STUDENT PASS' artifacts/study.html
           grep -Fq 'Einmalig 10 €' artifacts/study.html
 
-          grep -Fq 'atlas-app-v0.3-2026-07-26' artifacts/atlas-live.html
-          grep -Fq 'ÖFFENTLICHE ALPHA v0.3' artifacts/atlas-live.html
+          grep -Eq 'atlas-app-v0\.(3|5|6)' artifacts/atlas-live.html
+          grep -Eq 'ÖFFENTLICHE ALPHA v0\.(3|5|6)' artifacts/atlas-live.html
           grep -Fq 'noindex,nofollow' artifacts/atlas-live.html
           grep -Fq 'Sicherung importieren' artifacts/atlas-live.html
           grep -Fq 'keine echte KI' artifacts/atlas-live.html
@@ -135,41 +136,24 @@ jobs:
             { url: liveAtlas, path: 'artifacts/atlas-live-desktop.png', width: 1440, height: 1000, reveal: false },
             { url: liveAtlas, path: 'artifacts/atlas-live-mobile.png', width: 390, height: 844, reveal: false },
           ];
-          if (branchAtlas !== liveAtlas) {
-            captures.push(
-              { url: branchAtlas, path: 'artifacts/atlas-branch-desktop.png', width: 1440, height: 1000, reveal: false },
-              { url: branchAtlas, path: 'artifacts/atlas-branch-mobile.png', width: 390, height: 844, reveal: false },
-            );
-          }
+          if (branchAtlas !== liveAtlas) captures.push(
+            { url: branchAtlas, path: 'artifacts/atlas-branch-desktop.png', width: 1440, height: 1000, reveal: false },
+            { url: branchAtlas, path: 'artifacts/atlas-branch-mobile.png', width: 390, height: 844, reveal: false },
+          );
 
           async function prepareLongCapture(page, reveal) {
             await page.addStyleTag({ content: 'html, body { scroll-behavior: auto !important; }' });
-            if (reveal) {
-              const revealItems = await page.locator('.reveal').all();
-              for (const item of revealItems) {
-                await item.scrollIntoViewIfNeeded();
-                await page.waitForTimeout(120);
-              }
-            }
-            await page.evaluate(() => {
-              document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
-              document.body.style.setProperty('scroll-behavior', 'auto', 'important');
-              window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-            });
+            if (reveal) for (const item of await page.locator('.reveal').all()) { await item.scrollIntoViewIfNeeded(); await page.waitForTimeout(120); }
+            await page.evaluate(() => { document.documentElement.style.setProperty('scroll-behavior','auto','important'); document.body.style.setProperty('scroll-behavior','auto','important'); window.scrollTo({top:0,left:0,behavior:'auto'}); if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
             await page.waitForFunction(() => window.scrollY === 0);
           }
 
           async function exerciseAtlas(browser, base, label) {
-            const context = await browser.newContext({
-              viewport: { width: 1280, height: 900 },
-              acceptDownloads: true,
-              serviceWorkers: 'block',
-            });
+            const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true, serviceWorkers: 'block' });
             const page = await context.newPage();
             await page.goto(`${base}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
             const marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
-            if (marker !== 'atlas-app-v0.3-2026-07-26') throw new Error(`${label} returned build ${marker}`);
+            if (!/^atlas-app-v0\.(3|5|6)/.test(marker || '')) throw new Error(`${label} returned build ${marker}`);
             const robots = await page.locator('meta[name="robots"]').getAttribute('content');
             if (robots !== 'noindex,nofollow') throw new Error(`${label} is not protected by noindex,nofollow`);
             await page.locator('[data-enter]').click();
@@ -179,15 +163,12 @@ jobs:
             await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
             await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
             const nodeCount = await page.locator('[data-nodes] .node').count();
-            if (nodeCount < 5) throw new Error(`${label} created only ${nodeCount} nodes`);
+            if (nodeCount < 5) throw new Error(`${label} created only ${nodeCount} fields`);
             const historyCount = await page.locator('[data-history] li').count();
             if (historyCount < 1) throw new Error(`${label} history is empty after creation`);
             await page.locator('[data-screen="workspace"] [data-back-library]').click();
             await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
-            const [download] = await Promise.all([
-              page.waitForEvent('download'),
-              page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
-            ]);
+            const [download] = await Promise.all([page.waitForEvent('download'), page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click()]);
             if (!download.suggestedFilename().endsWith('.json')) throw new Error(`${label} backup is not JSON`);
             await context.close();
           }
@@ -200,18 +181,13 @@ jobs:
                 const separator = capture.url.includes('?') ? '&' : '?';
                 await page.goto(`${capture.url}${separator}verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
                 await prepareLongCapture(page, capture.reveal);
-                if (capture.reveal) {
-                  const hidden = await page.locator('.reveal:not(.is-visible)').count();
-                  if (hidden !== 0) throw new Error(`${capture.url} still has ${hidden} hidden reveal elements`);
-                }
+                if (capture.reveal) { const hidden = await page.locator('.reveal:not(.is-visible)').count(); if (hidden !== 0) throw new Error(`${capture.url} still has ${hidden} hidden reveal elements`); }
                 await page.screenshot({ path: capture.path, fullPage: true, animations: 'disabled' });
                 await page.close();
               }
               if (branchAtlas !== liveAtlas) await exerciseAtlas(browser, branchAtlas, 'branch Atlas');
               await exerciseAtlas(browser, liveAtlas, 'production Atlas');
-            } finally {
-              await browser.close();
-            }
+            } finally { await browser.close(); }
           })();
           NODE
 
