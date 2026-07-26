@@ -181,8 +181,12 @@
   }, true);
 
   function relabelCheckedState() {
-    document.querySelectorAll('option[value="confirmed"]').forEach((option) => { option.textContent = 'geprüft'; });
-    document.querySelectorAll('.hex-field[data-state="confirmed"]').forEach((field) => { field.dataset.stateLabel = 'geprüft'; });
+    document.querySelectorAll('option[value="confirmed"]').forEach((option) => {
+      if (option.textContent !== 'geprüft') option.textContent = 'geprüft';
+    });
+    document.querySelectorAll('.hex-field[data-state="confirmed"]').forEach((field) => {
+      if (field.dataset.stateLabel !== 'geprüft') field.dataset.stateLabel = 'geprüft';
+    });
     const label = document.querySelector('[data-field-dialog-label]');
     if (label?.textContent.includes('bestätigt')) label.textContent = label.textContent.replaceAll('bestätigt', 'geprüft');
   }
