@@ -1,0 +1,87 @@
+name: Verify public handoff
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: public-handoff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-public-domain:
+    name: Verify reasonengine.de
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Verify live files and truth markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+
+          fetch() {
+            local url="$1"
+            local output="$2"
+            curl \
+              --fail \
+              --silent \
+              --show-error \
+              --location \
+              --retry 18 \
+              --retry-all-errors \
+              --retry-delay 10 \
+              --connect-timeout 10 \
+              --max-time 45 \
+              "${url}${url//*\?*/&}${url//\?*/?}verify=${GITHUB_SHA}" \
+              --output "$output"
+          }
+
+          fetch "https://reasonengine.de/" artifacts/home.html
+          fetch "https://reasonengine.de/study.html" artifacts/study.html
+          fetch "https://reasonengine.de/robots.txt" artifacts/robots.txt
+          fetch "https://reasonengine.de/sitemap.xml" artifacts/sitemap.xml
+
+          grep -Fq 'public-entrance-v0.6-2026-07-26' artifacts/home.html
+          grep -Fq 'Entscheidungen mit KI, die später noch erklärbar sind.' artifacts/home.html
+          grep -Fq 'Reason Engine Study' artifacts/home.html
+          grep -Fq 'Weihnachtsbaumlogistik' artifacts/home.html
+          grep -Fq 'Heute möglich. Noch nicht behauptet.' artifacts/home.html
+
+          grep -Fq 'study-pilot-v0.1-2026-07-26' artifacts/study.html
+          grep -Fq 'Sieh, ob deine Hausarbeit wirklich trägt.' artifacts/study.html
+          grep -Fq 'Founding Student Pass' artifacts/study.html
+          grep -Fq 'Einmalig 10 €' artifacts/study.html
+
+          grep -Fq 'Allow: /' artifacts/robots.txt
+          grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
+          grep -Fq 'https://reasonengine.de/' artifacts/sitemap.xml
+          grep -Fq 'https://reasonengine.de/study.html' artifacts/sitemap.xml
+
+      - name: Install browser for pixel handoff
+        shell: bash
+        run: npx --yes playwright@1.54.1 install --with-deps chromium
+
+      - name: Capture desktop and mobile screenshots
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes playwright@1.54.1 screenshot --browser=chromium --full-page --viewport-size="1440,1000" "https://reasonengine.de/?verify=${GITHUB_SHA}" artifacts/home-desktop.png
+          npx --yes playwright@1.54.1 screenshot --browser=chromium --full-page --viewport-size="390,844" "https://reasonengine.de/?verify=${GITHUB_SHA}" artifacts/home-mobile.png
+          npx --yes playwright@1.54.1 screenshot --browser=chromium --full-page --viewport-size="1440,1000" "https://reasonengine.de/study.html?verify=${GITHUB_SHA}" artifacts/study-desktop.png
+          npx --yes playwright@1.54.1 screenshot --browser=chromium --full-page --viewport-size="390,844" "https://reasonengine.de/study.html?verify=${GITHUB_SHA}" artifacts/study-mobile.png
+
+      - name: Publish handoff evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-handoff-evidence
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
