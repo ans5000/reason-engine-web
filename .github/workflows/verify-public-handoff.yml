@@ -29,6 +29,11 @@ jobs:
           fetch() {
             local url="$1"
             local output="$2"
+            local separator="?"
+            if [[ "$url" == *\?* ]]; then
+              separator="&"
+            fi
+
             curl \
               --fail \
               --silent \
@@ -39,7 +44,7 @@ jobs:
               --retry-delay 10 \
               --connect-timeout 10 \
               --max-time 45 \
-              "${url}${url//*\?*/&}${url//\?*/?}verify=${GITHUB_SHA}" \
+              "${url}${separator}verify=${GITHUB_SHA}" \
               --output "$output"
           }
 
