@@ -7,7 +7,9 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#101712">
-  <meta name="reason-engine-build" content="atlas-app-v0.3-2026-07-26">
+  <meta name="reason-engine-app-version" content="0.3.1">
+  <meta name="reason-engine-data-schema" content="0.2">
+  <meta name="reason-engine-build" content="atlas-app-v0.3.1-2026-07-26">
   <title>Atlas · Reason Engine</title>
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
@@ -19,13 +21,13 @@
 <body>
   <header class="topbar">
     <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="32" height="32"><span>Reason Engine</span></a>
-    <span class="local">Öffentliche Alpha · lokal</span>
+    <span class="local">Öffentliche Alpha v0.3.1 · lokal · nicht indexiert</span>
   </header>
 
   <main>
     <section class="screen intro" data-screen="intro">
       <div class="intro-copy">
-        <p class="eyebrow">ATLAS · ÖFFENTLICHE ALPHA v0.3</p>
+        <p class="eyebrow">ATLAS · ÖFFENTLICHE ALPHA v0.3.1</p>
         <h1>Aus einem Problem wird ein begehbarer Atlas.</h1>
         <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes Gespräch macht daraus Schritt für Schritt eine sichtbare Karte aus Aussagen, Annahmen, offenen Fragen und Entscheidungen.</p>
         <div class="rules">
@@ -35,7 +37,7 @@
           <p><b>04 · Lokal sichern.</b> Inhalte bleiben in diesem Browser. Exportiere eine Sicherung, bevor du Browserdaten löschst oder das Gerät wechselst.</p>
         </div>
         <button class="primary" data-enter>Atlas öffnen</button>
-        <small>Noch keine echte KI, keine Cloud, keine Konten. Bitte keine persönlichen, medizinischen oder anderen sensiblen Daten eingeben.</small>
+        <small>Öffentlich zugängliche, aber noch nicht über Suchmaschinen beworbene Alpha. Noch keine echte KI, keine Cloud, keine Konten. Bitte keine persönlichen, medizinischen oder anderen sensiblen Daten eingeben.</small>
       </div>
       <div class="orbital" aria-hidden="true"><i></i><i></i><b></b></div>
     </section>
@@ -89,7 +91,8 @@
           <div class="stage"><svg data-lines aria-hidden="true"></svg><div data-nodes></div></div>
         </section>
         <aside class="panel history-panel" data-panel="history">
-          <header class="panel-head"><div><p class="eyebrow">ÄNDERUNGSSPUR</p><h2>Verlauf</h2></div><span class="prototype">append-only</span></header>
+          <header class="panel-head"><div><p class="eyebrow">ÄNDERUNGSSPUR</p><h2>Verlauf</h2></div><span class="prototype">append-only in der Oberfläche</span></header>
+          <p class="integrity-note">Neue Ereignisse werden in der Oberfläche angehängt. Lokal gespeicherte Browserdaten sind technisch nicht manipulationssicher.</p>
           <ol class="history-list" data-history></ol>
         </aside>
         <aside class="panel chat-panel active-side" data-panel="chat">
