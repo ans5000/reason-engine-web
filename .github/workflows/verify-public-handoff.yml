@@ -166,11 +166,11 @@ jobs:
             if (nodeCount < 5) throw new Error(`Atlas created only ${nodeCount} nodes`);
             const historyCount = await page.locator('[data-history] li').count();
             if (historyCount < 1) throw new Error('Atlas history is empty after creation');
-            await page.locator('[data-back-library]').first().click();
-            await page.locator('.atlas-card').waitFor();
+            await page.locator('[data-screen="workspace"] [data-back-library]').click();
+            await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
             const [download] = await Promise.all([
               page.waitForEvent('download'),
-              page.locator('[data-export-library]').click(),
+              page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
             ]);
             if (!download.suggestedFilename().endsWith('.json')) throw new Error('Library backup is not JSON');
             await context.close();
