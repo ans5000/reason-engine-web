@@ -194,7 +194,7 @@ jobs:
 
           async function exerciseAtlas(browser, base, label, expectedMarker, verifyTruth) {
             const context = await browser.newContext({
-              viewport: { width: 1280, height: 900 },
+              viewport: { width: 900, height: 900 },
               acceptDownloads: true,
               serviceWorkers: 'block',
             });
@@ -267,12 +267,13 @@ jobs:
                   history: []
                 }]
               };
-              page.once('dialog', (dialog) => dialog.accept());
+              page.once('dialog', async (dialog) => dialog.accept());
               await page.locator('[data-import-input]').setInputFiles({
                 name: 'manipulierter-import.json',
                 mimeType: 'application/json',
                 buffer: Buffer.from(JSON.stringify(tamperedBackup)),
               });
+              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').last().waitFor({ timeout: 30000 });
               await page.waitForFunction(() => {
                 const library = JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02'));
                 return library?.atlases?.length === 2;
