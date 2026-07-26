@@ -4,6 +4,10 @@
   const LIBRARY_KEY = 'reason-engine-atlas-library-v02';
   const LEGACY_KEY = 'reason-engine-atlas-v01';
   const ONBOARDING_KEY = 'reason-engine-atlas-onboarded-v02';
+  const CONFIRMATION_SUFFIXES = [
+    /; vom Nutzer bestätigt$/,
+    /; vom Nutzer als korrekt erfasst bestätigt$/
+  ];
   const EXAMPLE = 'Wir müssen ungefähr 50 Weihnachtsbäume im Krankenhaus verteilen. Bisher werden die Standorte auf einem alten Holzbrett notiert, auf dem noch Häkchen aus mehreren Jahren stehen. Änderungen gehen verloren, Zuständigkeiten sind unklar und am Ende weiß niemand sicher, ob jeder Baum am richtigen Ort steht.';
   const QUESTIONS = [
     'Wer ist an diesem Problem beteiligt oder davon betroffen?',
@@ -59,7 +63,6 @@
     } catch (error) {
       console.warn('Atlas library could not be read.', error);
     }
-
     const migrated = migrateLegacy();
     if (migrated) return migrated;
     return { version: '0.2', currentId: null, atlases: [] };
@@ -88,7 +91,14 @@
 
   function saveLibrary() {
     library.currentId = currentId;
-    localStorage.setItem(LIBRARY_KEY, JSON.stringify(library));
+    try {
+      localStorage.setItem(LIBRARY_KEY, JSON.stringify(library));
+      return true;
+    } catch (error) {
+      console.error('Atlas library could not be saved.', error);
+      window.alert('Der Atlas konnte nicht im Browser gespeichert werden. Exportiere vorhandene Daten und prüfe den freien Browserspeicher.');
+      return false;
+    }
   }
 
   function showScreen(name) {
@@ -103,8 +113,9 @@
   }
 
   function position(index) {
-    const positions = [[50, 10], [88, 34], [87, 68], [50, 88], [12, 68], [12, 34], [35, 27], [68, 28], [68, 67], [34, 68]];
-    const point = positions[index % positions.length];
+    const positions = [[50, 10], [88, 34], [50, 90], [12, 34], [88, 68], [12, 68], [35, 27], [68, 28], [68, 67], [34, 68]];
+    const dynamicIndex = Math.max(0, index - 4);
+    const point = positions[dynamicIndex % positions.length];
     return { x: point[0], y: point[1] };
   }
 
@@ -112,6 +123,30 @@
     atlas.history ||= [];
     atlas.history.push({ id: makeId('event'), at: now(), type, text });
     atlas.updatedAt = now();
+  }
+
+  function stripConfirmation(source = '') {
+    return CONFIRMATION_SUFFIXES.reduce((value, pattern) => value.replace(pattern, ''), source);
+  }
+
+  function clearConflictState(atlas, nodeId) {
+    const target = atlas.nodes.find((node) => node.id === nodeId);
+    const hadConflict = Boolean(target?.conflict || target?.conflictWith?.length);
+    atlas.nodes.forEach((node) => {
+      if (node.id === nodeId) {
+        delete node.conflict;
+        delete node.conflictWith;
+        return;
+      }
+      if (Array.isArray(node.conflictWith) && node.conflictWith.includes(nodeId)) {
+        node.conflictWith = node.conflictWith.filter((id) => id !== nodeId);
+        if (!node.conflictWith.length) {
+          delete node.conflictWith;
+          delete node.conflict;
+        }
+      }
+    });
+    return hadConflict;
   }
 
   function initialAtlas(text) {
@@ -130,10 +165,10 @@
       ],
       nodes: [
         { id: 'root', title: atlasTitle, body: text, kind: 'root', confirmed: true, source: 'Ursprüngliche Problembeschreibung', x: 50, y: 48 },
-        { id: makeId('node'), title: 'Beteiligte', body: 'Noch nicht geklärt.', kind: 'open', confirmed: false, source: 'Vorgeschlagener Klärungsraum', x: 18, y: 18 },
-        { id: makeId('node'), title: 'Gewünschtes Ergebnis', body: 'Noch nicht geklärt.', kind: 'open', confirmed: false, source: 'Vorgeschlagener Klärungsraum', x: 78, y: 18 },
-        { id: makeId('node'), title: 'Rahmenbedingungen', body: 'Noch nicht geklärt.', kind: 'open', confirmed: false, source: 'Vorgeschlagener Klärungsraum', x: 18, y: 76 },
-        { id: makeId('node'), title: 'Nächste Entscheidung', body: 'Noch nicht geklärt.', kind: 'open', confirmed: false, source: 'Vorgeschlagener Klärungsraum', x: 78, y: 76 }
+        { id: makeId('node'), topic: 'stakeholders', title: 'Beteiligte', body: 'Noch nicht geklärt.', kind: 'open', confirmed: false, source: 'Vorgeschlagener Klärungsraum', x: 18, y: 18 },
+        { id: makeId('node'), topic: 'outcome', title: 'Gewünschtes Ergebnis', body: 'Noch nicht geklärt.', kind: 'open', confirmed: false, source: 'Vorgeschlagener Klärungsraum', x: 78, y: 18 },
+        { id: makeId('node'), topic: 'constraints', title: 'Rahmenbedingungen', body: 'Noch nicht geklärt.', kind: 'open', confirmed: false, source: 'Vorgeschlagener Klärungsraum', x: 18, y: 76 },
+        { id: makeId('node'), topic: 'next-decision', title: 'Nächste Entscheidung', body: 'Noch nicht geklärt.', kind: 'open', confirmed: false, source: 'Vorgeschlagener Klärungsraum', x: 78, y: 76 }
       ],
       history: []
     };
@@ -152,10 +187,10 @@
   function label(kind, confirmed = false) {
     const labels = {
       root: 'Ausgangspunkt',
-      known: confirmed ? 'Aussage · bestätigt' : 'Aussage · unbestätigt',
-      assumption: confirmed ? 'Annahme · bestätigt' : 'Annahme · unbestätigt',
+      known: confirmed ? 'Aussage · geprüft' : 'Aussage · unbestätigt',
+      assumption: confirmed ? 'Annahme · geprüft' : 'Annahme · unbestätigt',
       open: 'Offene Frage',
-      decision: confirmed ? 'Entscheidung · bestätigt' : 'Entscheidung · unbestätigt'
+      decision: confirmed ? 'Entscheidung · geprüft' : 'Entscheidung · unbestätigt'
     };
     return labels[kind] || 'Eintrag';
   }
@@ -187,7 +222,6 @@
     const ordered = [...library.atlases].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
     emptyLibrary.hidden = ordered.length > 0;
     atlasList.hidden = ordered.length === 0;
-
     ordered.forEach((atlas) => {
       const card = document.createElement('article');
       card.className = 'atlas-card';
@@ -255,6 +289,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = `node${node.kind === 'root' ? ' root' : ''}`;
+      button.dataset.nodeId = node.id;
       button.dataset.kind = node.kind;
       button.dataset.confirmed = String(Boolean(node.confirmed));
       button.style.left = `${node.x}%`;
@@ -270,7 +305,6 @@
       button.append(kind, heading, body);
       button.addEventListener('click', () => openNode(node.id));
       nodes.append(button);
-
       if (node.id !== 'root') {
         const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', '50%');
@@ -309,7 +343,7 @@
     nodeBody.value = node.body;
     nodeKind.value = node.kind === 'root' ? 'known' : node.kind;
     nodeKind.disabled = node.kind === 'root';
-    nodeStatus.textContent = node.confirmed ? 'Bestätigt' : 'Vorläufig / unbestätigt';
+    nodeStatus.textContent = node.confirmed ? 'Vom Nutzer als korrekt erfasst' : 'Vorläufig / unbestätigt';
     nodeSource.textContent = node.source;
     $('[data-confirm-node]').hidden = node.kind === 'root' || node.confirmed;
     $('[data-delete-node]').hidden = node.kind === 'root';
@@ -347,13 +381,26 @@
       const node = atlas.nodes.find((item) => item.id === selectedNodeId);
       if (!node) return;
       const before = `${node.title}|${node.body}|${node.kind}`;
+      const wasConfirmed = Boolean(node.confirmed);
       node.title = nextTitle;
       node.body = nextBody;
       if (node.kind !== 'root') node.kind = nodeKind.value;
-      if (`${node.title}|${node.body}|${node.kind}` !== before) record(atlas, 'node_edited', `Eintrag „${node.title}“ bearbeitet.`);
+      const changed = `${node.title}|${node.body}|${node.kind}` !== before;
+      if (changed) {
+        record(atlas, 'node_edited', `Eintrag „${node.title}“ bearbeitet.`);
+        if (node.kind !== 'root' && wasConfirmed) {
+          node.confirmed = false;
+          node.source = stripConfirmation(node.source);
+          record(atlas, 'confirmation_invalidated', `Prüfstatus für „${node.title}“ nach einer Änderung aufgehoben.`);
+        }
+        if (node.kind !== 'root' && clearConflictState(atlas, node.id)) {
+          record(atlas, 'conflict_review_reset', `Widerspruchshinweise für „${node.title}“ nach einer Änderung zur erneuten Prüfung entfernt.`);
+        }
+      }
       if (node.id === 'root') {
         atlas.title = node.title;
         atlas.problem = node.body;
+        if (changed && !node.source.includes('vom Nutzer bearbeitet')) node.source += '; vom Nutzer bearbeitet';
       }
     }
     saveLibrary();
@@ -365,8 +412,8 @@
     const node = atlas?.nodes.find((item) => item.id === selectedNodeId);
     if (!node || node.kind === 'root' || node.confirmed) return;
     node.confirmed = true;
-    node.source = `${node.source}; vom Nutzer bestätigt`;
-    record(atlas, 'node_confirmed', `Eintrag „${node.title}“ bestätigt.`);
+    node.source = `${stripConfirmation(node.source)}; vom Nutzer als korrekt erfasst bestätigt`;
+    record(atlas, 'node_confirmed', `Eintrag „${node.title}“ als korrekt erfasst geprüft.`);
     saveLibrary();
     dialog.close();
     renderWorkspace();
@@ -375,7 +422,8 @@
   function deleteSelectedNode() {
     const atlas = currentAtlas();
     const node = atlas?.nodes.find((item) => item.id === selectedNodeId);
-    if (!node || node.id === 'root' || !confirm(`Eintrag „${node.title}“ entfernen?`)) return;
+    if (!node || node.id === 'root' || !window.confirm(`Eintrag „${node.title}“ entfernen?`)) return;
+    clearConflictState(atlas, node.id);
     atlas.nodes = atlas.nodes.filter((item) => item.id !== selectedNodeId);
     record(atlas, 'node_deleted', `Eintrag „${node.title}“ entfernt. Gesprächsnachrichten bleiben erhalten.`);
     saveLibrary();
@@ -385,7 +433,7 @@
 
   function deleteAtlas(id = currentId) {
     const atlas = library.atlases.find((item) => item.id === id);
-    if (!atlas || !confirm(`Atlas „${atlas.title}“ vollständig aus diesem Browser löschen?`)) return;
+    if (!atlas || !window.confirm(`Atlas „${atlas.title}“ vollständig aus diesem Browser löschen?`)) return;
     library.atlases = library.atlases.filter((item) => item.id !== id);
     if (currentId === id) currentId = null;
     saveLibrary();
