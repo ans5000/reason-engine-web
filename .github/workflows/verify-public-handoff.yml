@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   workflow_dispatch:
 
 permissions:
@@ -61,7 +64,7 @@ jobs:
 
           grep -Fq 'study-pilot-v0.1-2026-07-26' artifacts/study.html
           grep -Fq 'Sieh, ob deine Hausarbeit wirklich trägt.' artifacts/study.html
-          grep -Fq 'Founding Student Pass' artifacts/study.html
+          grep -Fq 'FOUNDING STUDENT PASS' artifacts/study.html
           grep -Fq 'Einmalig 10 €' artifacts/study.html
 
           grep -Fq 'Allow: /' artifacts/robots.txt
@@ -71,16 +74,67 @@ jobs:
 
       - name: Install browser for pixel handoff
         shell: bash
-        run: npx --yes playwright@1.54.1 install --with-deps chromium
+        run: |
+          npm install --no-save --no-package-lock playwright@1.54.1
+          npx playwright install --with-deps chromium
 
-      - name: Capture desktop and mobile screenshots
+      - name: Capture revealed desktop and mobile pages
         shell: bash
         run: |
           set -euo pipefail
-          npx --yes playwright@1.54.1 screenshot --browser=chromium --full-page --viewport-size="1440,1000" "https://reasonengine.de/?verify=${GITHUB_SHA}" artifacts/home-desktop.png
-          npx --yes playwright@1.54.1 screenshot --browser=chromium --full-page --viewport-size="390,844" "https://reasonengine.de/?verify=${GITHUB_SHA}" artifacts/home-mobile.png
-          npx --yes playwright@1.54.1 screenshot --browser=chromium --full-page --viewport-size="1440,1000" "https://reasonengine.de/study.html?verify=${GITHUB_SHA}" artifacts/study-desktop.png
-          npx --yes playwright@1.54.1 screenshot --browser=chromium --full-page --viewport-size="390,844" "https://reasonengine.de/study.html?verify=${GITHUB_SHA}" artifacts/study-mobile.png
+          node <<'NODE'
+          const { chromium } = require('playwright');
+
+          const captures = [
+            { url: 'https://reasonengine.de/', path: 'artifacts/home-desktop.png', width: 1440, height: 1000 },
+            { url: 'https://reasonengine.de/', path: 'artifacts/home-mobile.png', width: 390, height: 844 },
+            { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-desktop.png', width: 1440, height: 1000 },
+            { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-mobile.png', width: 390, height: 844 },
+          ];
+
+          async function exerciseRevealElements(page) {
+            const revealItems = await page.locator('.reveal').all();
+
+            for (const item of revealItems) {
+              await item.scrollIntoViewIfNeeded();
+              await page.waitForTimeout(140);
+            }
+
+            await page.evaluate(() => window.scrollTo(0, 0));
+            await page.waitForTimeout(400);
+          }
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+
+            try {
+              for (const capture of captures) {
+                const page = await browser.newPage({
+                  viewport: { width: capture.width, height: capture.height },
+                  deviceScaleFactor: 1,
+                });
+
+                const separator = capture.url.includes('?') ? '&' : '?';
+                await page.goto(`${capture.url}${separator}verify=${process.env.GITHUB_SHA}`, {
+                  waitUntil: 'networkidle',
+                  timeout: 60000,
+                });
+
+                await exerciseRevealElements(page);
+
+                const hiddenRevealItems = await page.locator('.reveal:not(.is-visible)').count();
+                if (hiddenRevealItems !== 0) {
+                  throw new Error(`${capture.url} still has ${hiddenRevealItems} hidden reveal elements`);
+                }
+
+                await page.screenshot({ path: capture.path, fullPage: true });
+                await page.close();
+              }
+            } finally {
+              await browser.close();
+            }
+          })();
+          NODE
 
       - name: Publish handoff evidence
         if: always()
