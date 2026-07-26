@@ -159,9 +159,9 @@
   --terrain: linear-gradient(145deg, #e7dfcf, #d9cfbc);
   position: absolute;
   z-index: 2;
-  width: 220px;
-  height: 190px;
-  padding: 27px 28px 25px;
+  width: 204px;
+  height: 177px;
+  padding: 24px 24px 22px;
   border: 0;
   clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
   color: var(--ink);
@@ -202,8 +202,8 @@
 .hex-field.root {
   --edge: #d2b277;
   --terrain: linear-gradient(145deg, #314b36, #17261d);
-  width: 244px;
-  height: 211px;
+  width: 226px;
+  height: 196px;
   color: var(--cream);
 }
 .hex-field.root::after { color: rgba(255,250,240,.66); background: rgba(255,255,255,.09); }
@@ -243,7 +243,7 @@
 .hex-field p {
   display: -webkit-box;
   margin: 0 auto;
-  max-width: 160px;
+  max-width: 148px;
   overflow: hidden;
   color: rgba(48, 56, 48, .72);
   font-size: .72rem;
