@@ -63,7 +63,8 @@ jobs:
           ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
         run: |
           set -euo pipefail
-          node .github/scripts/verify-atlas-restore-v081.mjs
+          mkdir -p artifacts
+          node .github/scripts/verify-atlas-restore-v081.mjs 2>&1 | tee artifacts/restore-browser.log
 
       - name: Publish restore evidence
         if: always()
