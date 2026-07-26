@@ -144,9 +144,9 @@
   function migrateAtlas(previous, sourceVersion) {
     const previousFields = Array.isArray(previous.fields) ? previous.fields : (Array.isArray(previous.nodes) ? previous.nodes : []);
     const occupied = new Set();
-    const fields = previousFields.map((item, index) => {
+    const fields = previousFields.map((item) => {
       const isRoot = item.id === 'root' || item.fieldType === 'problem' || item.kind === 'root';
-      const coordinate = isRoot ? { q: 0, r: 0 } : nextCoordinateFromSet(occupied, index);
+      const coordinate = isRoot ? { q: 0, r: 0 } : nextCoordinateFromSet(occupied);
       occupied.add(coordKey(coordinate.q, coordinate.r));
       const mappedType = isRoot ? 'problem' : mapLegacyType(item.fieldType || item.kind);
       const body = item.body || 'Noch nicht geklärt.';
@@ -535,19 +535,25 @@
       if (!from || !to) return;
       const a = axialToPixel(from.q, from.r);
       const b = axialToPixel(to.q, to.r);
+      const dx = b.x - a.x;
+      const dy = b.y - a.y;
+      const distance = Math.max(1, Math.hypot(dx, dy));
+      const inset = Math.min(96, distance * 0.42);
+      const start = { x: a.x + (dx / distance) * inset, y: a.y + (dy / distance) * inset };
+      const end = { x: b.x - (dx / distance) * inset, y: b.y - (dy / distance) * inset };
       const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
       group.setAttribute('class', `route route-${route.type}`);
       const bed = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      bed.setAttribute('x1', a.x);
-      bed.setAttribute('y1', a.y);
-      bed.setAttribute('x2', b.x);
-      bed.setAttribute('y2', b.y);
+      bed.setAttribute('x1', start.x);
+      bed.setAttribute('y1', start.y);
+      bed.setAttribute('x2', end.x);
+      bed.setAttribute('y2', end.y);
       bed.setAttribute('class', 'route-bed');
       const core = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      core.setAttribute('x1', a.x);
-      core.setAttribute('y1', a.y);
-      core.setAttribute('x2', b.x);
-      core.setAttribute('y2', b.y);
+      core.setAttribute('x1', start.x);
+      core.setAttribute('y1', start.y);
+      core.setAttribute('x2', end.x);
+      core.setAttribute('y2', end.y);
       core.setAttribute('class', 'route-core');
       group.append(bed, core);
       routesLayer.append(group);
