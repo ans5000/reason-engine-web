@@ -1,7 +1,7 @@
 {
   "name": "Atlas · Reason Engine",
   "short_name": "Atlas",
-  "description": "Lokaler Prototyp für sichtbare Probleme, Gespräche und Entscheidungen.",
+  "description": "Lokale Feldkarte für sichtbare Probleme, Gespräche, Wege und Entscheidungen.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
