@@ -6,7 +6,7 @@
   <meta name="description" content="Atlas, ein lokaler Reason-Engine-Prototyp für nachvollziehbare Probleme, Gespräche und Entscheidungen.">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#101712">
-  <meta name="reason-engine-build" content="atlas-app-v0.2-2026-07-26">
+  <meta name="reason-engine-build" content="atlas-app-v0.3-2026-07-26">
   <title>Atlas · Reason Engine</title>
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
@@ -16,22 +16,27 @@
 <body>
   <header class="topbar">
     <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="32" height="32"><span>Reason Engine</span></a>
-    <span class="local">Lokal · keine Übertragung</span>
+    <span class="local">Eingaben bleiben lokal</span>
   </header>
 
   <main>
     <section class="screen intro" data-screen="intro">
       <div class="intro-copy">
-        <p class="eyebrow">ATLAS · PROTOTYP v0.2</p>
+        <p class="eyebrow">ATLAS · PROTOTYP v0.3</p>
         <h1>Aus einem Problem wird ein begehbarer Atlas.</h1>
-        <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes Gespräch macht daraus Schritt für Schritt eine sichtbare Karte aus Aussagen, Annahmen, offenen Fragen und Entscheidungen.</p>
+        <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes, derzeit regelbasiertes Gespräch macht daraus Schritt für Schritt eine sichtbare Karte aus Aussagen, Annahmen, offenen Fragen und Entscheidungen.</p>
         <div class="rules">
           <p><b>01 · Erst erzählen.</b> Keine Formulare, keine besondere Sprache.</p>
           <p><b>02 · Dann sichtbar machen.</b> Der Atlas wächst mit dem Gespräch.</p>
           <p><b>03 · Dann prüfen.</b> Nichts wird stillschweigend als wahr übernommen.</p>
         </div>
+        <div class="data-boundary" aria-label="Datengrenze des Prototyps">
+          <strong>Lokale Datengrenze</strong>
+          <p>Die Seite selbst wird von GitHub Pages geladen. Deine Eingaben werden nicht an ein Modell oder eine Serverdatenbank gesendet, sondern nur im lokalen Browserspeicher abgelegt.</p>
+          <p><b>Keine Personen-, Patienten- oder vertraulichen Daten eingeben.</b> Exportiere wichtige Atlanten regelmäßig, weil Browserdaten gelöscht werden können.</p>
+        </div>
         <button class="primary" data-enter>Atlas öffnen</button>
-        <small>Noch keine echte KI, keine Cloud, keine Produktivdaten.</small>
+        <small>Noch keine echte KI, keine Cloud-Synchronisation und keine Produktivdaten.</small>
       </div>
       <div class="orbital" aria-hidden="true"><i></i><i></i><b></b></div>
     </section>
@@ -39,7 +44,7 @@
     <section class="screen library" data-screen="library" hidden>
       <div class="library-shell">
         <header class="library-head">
-          <div><p class="eyebrow">LOKALE ARBEITSRÄUME</p><h1>Deine Atlanten</h1><p>Jeder Atlas bleibt ausschließlich in diesem Browser gespeichert.</p></div>
+          <div><p class="eyebrow">LOKALE ARBEITSRÄUME</p><h1>Deine Atlanten</h1><p>Jeder Atlas bleibt im Speicher dieses Browsers. Exportiere wichtige Stände regelmäßig als JSON.</p></div>
           <button class="primary" data-new-atlas>Neuen Atlas anlegen</button>
         </header>
         <div class="atlas-list" data-atlas-list></div>
@@ -57,7 +62,7 @@
         <button class="back-link" type="button" data-back-library>← Zur Übersicht</button>
         <p class="eyebrow">DER AUSGANGSPUNKT</p>
         <h1>Worum geht es?</h1>
-        <p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt.</p>
+        <p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt. Keine personenbezogenen oder vertraulichen Angaben verwenden.</p>
         <label for="problem-input">Problem, Prozess oder Entscheidung</label>
         <textarea id="problem-input" minlength="20" maxlength="2400" rows="9" required placeholder="Zum Beispiel: Wir müssen ungefähr 50 Weihnachtsbäume im Krankenhaus verteilen …"></textarea>
         <div class="actions"><button class="link" type="button" data-example>Beispiel einsetzen</button><button class="primary" type="submit">Atlas anlegen</button></div>
@@ -76,7 +81,7 @@
           <div class="stage"><svg data-lines aria-hidden="true"></svg><div data-nodes></div></div>
         </section>
         <aside class="panel history-panel" data-panel="history">
-          <header class="panel-head"><div><p class="eyebrow">ÄNDERUNGSSPUR</p><h2>Verlauf</h2></div><span class="prototype">append-only</span></header>
+          <header class="panel-head"><div><p class="eyebrow">ÄNDERUNGSSPUR</p><h2>Verlauf</h2></div><span class="prototype">lokal · prototypisch</span></header>
           <ol class="history-list" data-history></ol>
         </aside>
         <aside class="panel chat-panel active-side" data-panel="chat">
@@ -104,7 +109,8 @@
         <option value="decision">Entscheidung</option>
       </select>
       <dl><div><dt>Status</dt><dd data-node-status></dd></div><div><dt>Herkunft</dt><dd data-node-source></dd></div></dl>
-      <div class="actions dialog-actions"><button class="danger" type="button" data-delete-node>Entfernen</button><span></span><button class="secondary" type="button" data-confirm-node>Bestätigen</button><button class="primary" value="save">Speichern</button></div>
+      <p class="confirmation-note">„Geprüft“ bedeutet nur: Du hast Inhalt und Einordnung als korrekt erfasst bestätigt. Es ist kein automatischer Wahrheitsbeweis.</p>
+      <div class="actions dialog-actions"><button class="danger" type="button" data-delete-node>Entfernen</button><span></span><button class="secondary" type="button" data-confirm-node>Erfassung bestätigen</button><button class="primary" value="save">Speichern</button></div>
     </form>
   </dialog>
 </body>
