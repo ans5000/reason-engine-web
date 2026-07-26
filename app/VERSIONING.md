@@ -4,33 +4,38 @@ Atlas uses separate version numbers for separate promises.
 
 ## App release
 
-The public interface is **Atlas v0.7.0**.
+The public interface is **Atlas v0.8.1**.
 
-This release makes the Reason Engine a visible city guide inside the territorial field map:
+Atlas v0.8 retains the city-guide field map and adds an object-centred Reason tool layer:
 
 - the problem remains the central hex field,
-- six clarification districts form the first ring,
-- every conversation input immediately creates a separate filled hex,
-- new hexes are placed next to the active district when a free neighboring slot exists,
-- the guide continuously exposes location, destination, route, gate, blocker and status,
-- relationships remain explicit roads,
-- field type, district and truth state remain separate,
-- possible contradictions remain lexical review hints,
-- the Markdown decision dossier includes the guide state.
+- every conversation input creates a separate filled field,
+- the guide exposes location, destination, route, gate, blocker and status,
+- Deep Dive, Ka-Tet, Audit, Pilot and Sources create local follow-up fields,
+- Relation connects distant fields through the visible Reason network,
+- field type, district and truth state remain separate.
 
-These functions are heuristics. They are not semantic AI, factual verification, autonomous planning or a guarantee that a contradiction or blocker is real.
+Atlas v0.8.1 adds a narrow Truth Gate at the two places where authority could otherwise become stale or forged:
+
+- changing a checked or decided field resets it to provisional,
+- confirmation provenance and derived verification metadata are removed after semantic edits,
+- JSON imports keep content, coordinates and routes but do not transfer checked or decided authority,
+- imported authority resets are disclosed and appended to the local history,
+- the visible confirmed-state label is rendered as `geprüft`.
+
+These functions are local interface rules. They are not semantic AI, factual verification, autonomous planning or a cryptographic trust system.
 
 ## Data schema
 
 The local Atlas library and individual Atlas records continue to use **schema v0.3**.
 
-Atlas v0.7 adds optional `district`, `districtKey`, `createdAt` and `guide` metadata. Existing v0.3 records remain valid; missing guide state is reconstructed locally from the current fields and clarification step.
+Atlas v0.8.1 does not require a schema migration. Existing v0.3 records remain valid. The Truth Gate changes how checked state is invalidated at edit and import boundaries, not the required record structure.
 
 Schema v0.3 uses typed fields with axial hex coordinates (`q`, `r`) and explicit routes. Existing v0.1 and v0.2 browser data is migrated locally when first opened.
 
 ## Backup format
 
-The backup format remains v0.3. Native field records preserve optional v0.7 metadata when exported. Import accepts current field backups and earlier node-based exports. A missing city-guide state is reconstructed after import.
+The backup format remains v0.3. Native field records preserve compatible field, route, guide and tool metadata. Import accepts current field backups and earlier node-based exports. Content and topology are restored, while non-root checked and decided states require renewed local review.
 
 ## Public-alpha status
 
@@ -40,6 +45,8 @@ The app is publicly reachable but intentionally carries `noindex,nofollow` durin
 
 The history is append-only in normal interface behavior. This is not a cryptographic guarantee. Browser data and exported files can be changed outside the interface.
 
-The city guide is a derived navigation aid, not an autonomous authority. Its route and blocker labels are generated from the current local Atlas state and remain user-correctable.
+The city guide and Reason tools are derived navigation and reasoning aids, not autonomous authorities. Their labels and generated fields remain user-correctable.
 
-The decision dossier is a derived local export. It reflects the current browser state and is not signed, hashed or independently verified.
+The Truth Gate prevents two specific forms of silent status drift inside the interface. It does not make browser storage or export files tamper-proof.
+
+Any dossier or JSON export reflects the current local browser state and is not signed, hashed or independently verified.
