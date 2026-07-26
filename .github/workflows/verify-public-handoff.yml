@@ -2,11 +2,9 @@ name: Verify public handoff
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -31,15 +29,18 @@ jobs:
         run: |
           set -euo pipefail
           node --check app/app.js
-          node --check app/reason-v0.6.js
+          node --check app/reason-v0.7.js
           node --check app/backup-v0.3.js
           grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
           grep -Fq 'href="app/"' index.html
           grep -Fq 'Öffentliche Alpha · lokal' index.html
-          grep -Fq 'atlas-app-v0.3-2026-07-26' app/index.html
+          grep -Fq 'atlas-app-v0.7.0-2026-07-26' app/index.html
+          grep -Fq 'ÖFFENTLICHE ALPHA v0.7' app/index.html
+          grep -Fq 'data-city-guide' app/reason-v0.7.js
+          grep -Fq 'jede Eingabe wird ein Hex' app/reason-v0.7.js
           grep -Fq 'noindex,nofollow' app/index.html
           grep -Fq 'Sicherung importieren' app/index.html
-          grep -Fq 'reason-engine-atlas-v03' app/sw.js
+          grep -Fq 'reason-engine-atlas-v07-city-guide' app/sw.js
 
       - name: Verify live public files and truth markers
         shell: bash
@@ -52,18 +53,10 @@ jobs:
             local output="$2"
             local separator="?"
             if [[ "$url" == *\?* ]]; then separator="&"; fi
-            curl \
-              --fail \
-              --silent \
-              --show-error \
-              --location \
-              --retry 18 \
-              --retry-all-errors \
-              --retry-delay 10 \
-              --connect-timeout 10 \
-              --max-time 45 \
-              "${url}${separator}verify=${GITHUB_SHA}" \
-              --output "$output"
+            curl --fail --silent --show-error --location \
+              --retry 18 --retry-all-errors --retry-delay 10 \
+              --connect-timeout 10 --max-time 45 \
+              "${url}${separator}verify=${GITHUB_SHA}" --output "$output"
           }
 
           fetch "https://reasonengine.de/" artifacts/home.html
@@ -83,8 +76,8 @@ jobs:
           grep -Fq 'FOUNDING STUDENT PASS' artifacts/study.html
           grep -Fq 'Einmalig 10 €' artifacts/study.html
 
-          grep -Eq 'atlas-app-v0\.(3|5|6)' artifacts/atlas-live.html
-          grep -Eq 'ÖFFENTLICHE ALPHA v0\.(3|5|6)' artifacts/atlas-live.html
+          grep -Eq 'atlas-app-v0\.(3|5|6|7)' artifacts/atlas-live.html
+          grep -Eq 'ÖFFENTLICHE ALPHA v0\.(3|5|6|7)' artifacts/atlas-live.html
           grep -Fq 'noindex,nofollow' artifacts/atlas-live.html
           grep -Fq 'Sicherung importieren' artifacts/atlas-live.html
           grep -Eq 'keine (echte|semantische) KI' artifacts/atlas-live.html
@@ -148,12 +141,13 @@ jobs:
             await page.waitForFunction(() => window.scrollY === 0);
           }
 
-          async function exerciseAtlas(browser, base, label) {
+          async function exerciseAtlas(browser, base, label, expectCityGuide) {
             const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true, serviceWorkers: 'block' });
             const page = await context.newPage();
             await page.goto(`${base}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
             const marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
-            if (!/^atlas-app-v0\.(3|5|6)/.test(marker || '')) throw new Error(`${label} returned build ${marker}`);
+            if (!/^atlas-app-v0\.(3|5|6|7)/.test(marker || '')) throw new Error(`${label} returned build ${marker}`);
+            if (expectCityGuide && marker !== 'atlas-app-v0.7.0-2026-07-26') throw new Error(`${label} did not return Atlas v0.7`);
             const robots = await page.locator('meta[name="robots"]').getAttribute('content');
             if (robots !== 'noindex,nofollow') throw new Error(`${label} is not protected by noindex,nofollow`);
             await page.locator('[data-enter]').click();
@@ -162,8 +156,19 @@ jobs:
             await page.locator('[data-example]').click();
             await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
             await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
-            const nodeCount = await page.locator('[data-nodes] .node').count();
-            if (nodeCount < 5) throw new Error(`${label} created only ${nodeCount} fields`);
+            const originalNodes = await page.locator('[data-nodes] .node').count();
+            if (originalNodes < 5) throw new Error(`${label} created only ${originalNodes} fields`);
+            if (expectCityGuide) {
+              await page.locator('[data-city-guide]').waitFor();
+              const originalLocation = await page.locator('[data-guide-location]').textContent();
+              await page.locator('#chat-input').fill('Die Haustechnik transportiert die Bäume zu den Stationen.');
+              await page.locator('[data-chat-form]').evaluate((form) => form.requestSubmit());
+              await page.locator('[data-screen="workspace"]:not([hidden])').waitFor({ timeout: 30000 });
+              await page.waitForFunction((count) => document.querySelectorAll('[data-nodes] .node').length === count + 1, originalNodes);
+              const newLocation = await page.locator('[data-guide-location]').textContent();
+              if (!newLocation || newLocation === originalLocation) throw new Error('City guide location did not advance after creating a hex');
+              if ((await page.locator('[data-guide-status]').textContent()) !== 'UNTERWEGS') throw new Error('City guide status did not remain underway');
+            }
             const historyCount = await page.locator('[data-history] li').count();
             if (historyCount < 1) throw new Error(`${label} history is empty after creation`);
             await page.locator('[data-screen="workspace"] [data-back-library]').click();
@@ -185,8 +190,8 @@ jobs:
                 await page.screenshot({ path: capture.path, fullPage: true, animations: 'disabled' });
                 await page.close();
               }
-              if (branchAtlas !== liveAtlas) await exerciseAtlas(browser, branchAtlas, 'branch Atlas');
-              await exerciseAtlas(browser, liveAtlas, 'production Atlas');
+              if (branchAtlas !== liveAtlas) await exerciseAtlas(browser, branchAtlas, 'branch Atlas', true);
+              await exerciseAtlas(browser, liveAtlas, 'production Atlas', false);
             } finally { await browser.close(); }
           })();
           NODE
