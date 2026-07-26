@@ -62,7 +62,7 @@
 
   function resetAuthority(field) {
     const hadAuthority = isTrusted(field);
-    field.state = /noch nicht geklärt/i.test(field.body || '') ? 'empty' : 'provisional';
+    field.state = /^noch nicht geklärt\.?$/i.test((field.body || '').trim()) ? 'empty' : 'provisional';
     field.confirmed = false;
     field.source = stripConfirmation(field.source || '');
     clearDerivedAuthority(field);
