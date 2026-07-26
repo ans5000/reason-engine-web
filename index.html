@@ -3,11 +3,17 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Reason Engine entwickelt KI-gestützte Entscheidungs- und Prozesssysteme, die Annahmen, Abhängigkeiten und Verantwortung sichtbar machen.">
-  <meta name="robots" content="noindex,nofollow">
+  <meta name="description" content="Reason Engine ist ein offenes Forschungs- und Pilotprojekt für nachvollziehbare Entscheidungen zwischen Mensch und KI.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
   <meta name="theme-color" content="#17140f">
-  <meta name="reason-engine-build" content="visual-homepage-restored-2026-07-26">
-  <title>Reason Engine · Komplexe Entscheidungen sichtbar machen</title>
+  <meta name="reason-engine-build" content="public-entrance-v0.6-2026-07-26">
+  <link rel="canonical" href="https://reasonengine.de/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Reason Engine · Entscheidungen mit KI, die später noch erklärbar sind">
+  <meta property="og:description" content="Ein offenes Forschungs- und Pilotprojekt für nachvollziehbare Entscheidungen zwischen Mensch und KI.">
+  <meta property="og:url" content="https://reasonengine.de/">
+  <meta property="og:image" content="https://reasonengine.de/assets/IMG_0472.jpeg">
+  <title>Reason Engine · Entscheidungen mit KI, die später noch erklärbar sind</title>
   <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="site.webmanifest">
   <link rel="preload" href="assets/IMG_0472.jpeg" as="image" fetchpriority="high">
@@ -16,238 +22,102 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Zum Inhalt springen</a>
-
   <header class="site-header" data-header>
     <div class="shell nav-shell">
-      <a class="brand" href="#top" aria-label="Reason Engine Startseite">
-        <img src="assets/mark.svg" width="34" height="34" alt="">
-        <span>Reason Engine</span>
-      </a>
-
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
-        <span class="sr-only">Navigation öffnen</span>
-        <span></span><span></span>
-      </button>
-
+      <a class="brand" href="#top" aria-label="Reason Engine Startseite"><img src="assets/mark.svg" width="34" height="34" alt=""><span>Reason Engine</span></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle><span class="sr-only">Navigation öffnen</span><span></span><span></span></button>
       <nav id="site-nav" class="site-nav" aria-label="Hauptnavigation" data-nav>
-        <a href="#arbeitsweise">Arbeitsweise</a>
-        <a href="#projekte">Projekte</a>
-        <a href="#prinzipien">Prinzipien</a>
-        <a href="#pilot">Pilot</a>
-        <a class="nav-cta" href="mailto:ohno5001@gmail.com?subject=Pilotgespräch%20Reason%20Engine">Gespräch vereinbaren</a>
+        <a href="#warum">Warum</a><a href="#dossier">Dossier</a><a href="#felder">Testfelder</a><a href="#person">Person</a><a href="#status">Status</a><a class="nav-cta" href="mailto:ohno5001@gmail.com?subject=Pilotfall%20f%C3%BCr%20Reason%20Engine">Pilotfall vorschlagen</a>
       </nav>
     </div>
   </header>
-
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
       <img class="hero-image" src="assets/IMG_0472.jpeg" width="1448" height="1086" fetchpriority="high" decoding="async" alt="Zwei Menschen arbeiten in einer hölzernen Bibliothek gemeinsam an einem großen Modell; daneben steht ein MacBook.">
       <div class="hero-shade" aria-hidden="true"></div>
-      <div class="shell hero-inner">
-        <div class="hero-copy reveal">
-          <p class="eyebrow light">KI UND MENSCH</p>
-          <h1 id="hero-title">Wir machen komplexe Entscheidungen sichtbar.</h1>
-          <p class="hero-lead">
-            Reason Engine entwickelt KI-gestützte Entscheidungs- und Prozesssysteme für Organisationen,
-            in denen Wissen über Menschen, Dokumente und Werkzeuge verteilt ist.
-          </p>
-          <p class="hero-detail">
-            Annahmen, Abhängigkeiten, Verantwortlichkeiten und nächste Schritte bleiben nachvollziehbar,
-            statt in einer Black Box zu verschwinden.
-          </p>
-          <div class="hero-actions">
-            <a class="button button-light" href="#pilot">Pilotprozess prüfen</a>
-            <a class="button button-ghost" href="#arbeitsweise">Unsere Arbeitsweise</a>
+      <div class="shell hero-inner"><div class="hero-copy reveal">
+        <p class="eyebrow light">ÖFFENTLICHES FORSCHUNGS- UND PILOTPROJEKT</p>
+        <h1 id="hero-title">Entscheidungen mit KI, die später noch erklärbar sind.</h1>
+        <p class="hero-lead">Reason Engine untersucht, wie Quellen, Annahmen, Unsicherheit und Verantwortung in komplexen Entscheidungen sichtbar bleiben können.</p>
+        <p class="hero-detail">Wir testen den Ansatz an kleinen, klar begrenzten realen Fällen. Kein fertiges Produktkostüm, keine behauptete Produktionsreife.</p>
+        <div class="hero-actions"><a class="button button-light" href="#felder">Echten Anwendungsfall ansehen</a><a class="button button-ghost" href="#dossier">So soll ein Dossier aussehen</a></div>
+        <p class="hero-truth">Frühe Entwicklungsphase · Reale Fälle zuerst · Behauptungen nur innerhalb ihrer Evidenz</p>
+      </div></div>
+    </section>
+
+    <section class="problem-section" id="warum" aria-labelledby="problem-title">
+      <div class="shell problem-layout">
+        <div class="section-head reveal"><p class="eyebrow">DAS KONKRETE PROBLEM</p><h2 id="problem-title">Antworten sind schnell. Begründungen verschwinden.</h2></div>
+        <div class="problem-example reveal">
+          <p class="problem-lead">Drei Wochen nach einer Entscheidung weiß niemand mehr, welche Zahl aus einer Quelle kam, welche Annahme von der KI stammte und warum eine Alternative verworfen wurde.</p>
+          <div class="problem-points">
+            <div><span>01</span><p><strong>Quellen verschwimmen.</strong> Beobachtung, Erinnerung und Vermutung landen im selben Absatz.</p></div>
+            <div><span>02</span><p><strong>Unsicherheit verschwindet.</strong> Flüssige Sprache klingt sicherer als die Evidenz.</p></div>
+            <div><span>03</span><p><strong>Verantwortung zerfasert.</strong> Prüfung, Freigabe und Korrektur bleiben ohne klare Spur.</p></div>
           </div>
-          <p class="hero-truth">Frühe Entwicklungsphase. Reale Prozesse zuerst, Produktversprechen später.</p>
         </div>
       </div>
     </section>
 
-    <section class="mechanism-section" id="arbeitsweise" aria-labelledby="mechanism-title">
+    <section class="mechanism-section" id="dossier" aria-labelledby="mechanism-title">
       <div class="shell mechanism-grid">
         <div class="mechanism-copy reveal">
-          <p class="eyebrow">WIE REASON ENGINE ARBEITET</p>
-          <h2 id="mechanism-title">Aus einem Gespräch wird ein prüfbarer Prozess.</h2>
-          <p>
-            Reason Engine trennt direkte Aussagen, modellseitige Ableitungen, offene Fragen und bestätigte Regeln.
-            So entsteht keine bloße Zusammenfassung, sondern ein korrigierbarer Entscheidungsraum.
-          </p>
+          <p class="eyebrow">SICHTBARES ERGEBNIS</p><h2 id="mechanism-title">Ein korrigierbares Entscheidungsdossier.</h2>
+          <p>Reason Engine soll nicht nur Ergebnisse festhalten, sondern den Weg dorthin: Aussage, Quelle, Status, Unsicherheit, Gegenposition, Verantwortlichkeit, Entscheidung und spätere Korrektur.</p>
           <ol class="method-steps">
-            <li><span>01</span><div><strong>Erfassen</strong><p>Reale Abläufe und Fachwissen in natürlicher Sprache aufnehmen.</p></div></li>
-            <li><span>02</span><div><strong>Strukturieren</strong><p>Rollen, Schritte, Annahmen und Abhängigkeiten sichtbar machen.</p></div></li>
-            <li><span>03</span><div><strong>Prüfen</strong><p>Unsicherheit, Konflikte und Inferenz ausdrücklich kennzeichnen.</p></div></li>
-            <li><span>04</span><div><strong>Handeln</strong><p>Verantwortung, Freigaben und nächste Schritte festlegen.</p></div></li>
+            <li><span>01</span><div><strong>Erfassen</strong><p>Aussagen, Quellen und den realen Kontext aufnehmen.</p></div></li>
+            <li><span>02</span><div><strong>Trennen</strong><p>Beobachtung, Ableitung und Hypothese auseinanderhalten.</p></div></li>
+            <li><span>03</span><div><strong>Prüfen</strong><p>Konflikte, Grenzen, Gegenargumente und offene Fragen suchen.</p></div></li>
+            <li><span>04</span><div><strong>Entscheiden</strong><p>Geltungsbereich, Verantwortung und nächsten Schritt festhalten.</p></div></li>
+            <li><span>05</span><div><strong>Korrigieren</strong><p>Neue Erkenntnisse ergänzen, ohne die frühere Spur zu löschen.</p></div></li>
           </ol>
         </div>
-
-        <article class="reason-artifact reveal" aria-label="Beispiel eines strukturierten Gesprächsausschnitts">
-          <div class="artifact-head">
-            <span>P2 / PROCESS DISCOVERY</span>
-            <span>VALIDATION ARTEFACT</span>
-          </div>
-          <div class="artifact-row heard">
-            <span class="artifact-label">GEHÖRT</span>
-            <p>„Die Werkstatt wird meistens vor dem Angebot einbezogen.“</p>
-          </div>
-          <div class="artifact-row inferred">
-            <span class="artifact-label">ABGELEITET · OFFEN</span>
-            <p>Eine technische Prüfung ist vor jedem verbindlichen Preis notwendig.</p>
-          </div>
-          <div class="artifact-row open">
-            <span class="artifact-label">ZU KLÄREN</span>
-            <p>Gibt es eine Wertgrenze, unterhalb derer der Verkauf selbst entscheiden darf?</p>
-          </div>
-          <div class="artifact-row confirmed">
-            <span class="artifact-label">BESTÄTIGT</span>
-            <p>Bis zu einer definierten Grenze ist eine vorläufige Bewertung unter festgelegten Bedingungen möglich.</p>
-          </div>
-          <p class="artifact-note">Beispielstruktur, keine behauptete Betriebsregel.</p>
+        <article class="reason-artifact reveal" aria-label="Beispiel eines Reason-Engine-Dossiers">
+          <div class="artifact-head"><span>BEISPIELDOSSIER</span><span>NICHT RUNTIME-ERZWUNGEN</span></div>
+          <div class="artifact-row heard"><span class="artifact-label">AUSSAGE + QUELLE</span><p>„Die Werkstatt wird meistens vor dem Angebot einbezogen.“ · Gesprächsnotiz, 25. Juli 2026</p></div>
+          <div class="artifact-row inferred"><span class="artifact-label">ABLEITUNG · OFFEN</span><p>Eine technische Prüfung könnte vor verbindlichen Preisen notwendig sein.</p></div>
+          <div class="artifact-row open"><span class="artifact-label">GEGENPOSITION</span><p>Bei standardisierten Fällen könnte der Verkauf innerhalb klarer Grenzen selbst entscheiden.</p></div>
+          <div class="artifact-row confirmed"><span class="artifact-label">NÄCHSTER SCHRITT</span><p>Wertgrenze und Ausnahmen in zwei realen Fällen prüfen.</p></div>
+          <p class="artifact-note">So soll ein Reason-Engine-Dossier aufgebaut sein. Die Darstellung ist ein Entwurf, keine behauptete Produktfunktion.</p>
         </article>
       </div>
     </section>
 
-    <section class="projects-section" id="projekte" aria-labelledby="projects-title">
+    <section class="projects-section" id="felder" aria-labelledby="projects-title">
       <div class="shell">
-        <div class="section-head reveal">
-          <p class="eyebrow">WAS GERADE ENTSTEHT</p>
-          <h2 id="projects-title">Vier Räume, ein gemeinsamer Kern.</h2>
-          <p>Keine erfundenen Produkte. Wir zeigen, was konzeptionell feststeht, was im Feld geprüft wird und was noch Entwurf ist.</p>
-        </div>
-
+        <div class="section-head reveal"><p class="eyebrow">REALE UND GEPLANTE TESTFELDER</p><h2 id="projects-title">Ein Kern. Mehrere verständliche Eingänge.</h2><p>Jedes Feld hat einen anderen Zweck und einen ehrlichen Status. Kein Projektname muss allein erklären, warum er existiert.</p></div>
         <div class="project-grid">
-          <article class="project-card project-core reveal">
-            <div class="project-meta"><span>01</span><span>FOUNDATION</span></div>
-            <h3>Reason Engine</h3>
-            <p>Der generische Normen-, Evidenz- und Entscheidungskern. Er trennt Behauptung, Beleg, Inferenz, Entscheidung und Korrektur.</p>
-            <span class="status-chip">Kernarchitektur aktiv</span>
-          </article>
-
-          <article class="project-card project-p2 reveal">
-            <div class="project-meta"><span>02</span><span>EXTERNAL PILOT</span></div>
-            <h3>P2 Engine</h3>
-            <p>Der erste externe kommerzielle Validierungsraum: Prozess- und Entscheidungssysteme für den Landmaschinenhandel.</p>
-            <span class="status-chip">Discovery pending</span>
-          </article>
-
-          <article class="project-card project-atlas reveal">
-            <div class="project-meta"><span>03</span><span>SPATIAL INTERFACE</span></div>
-            <h3>Atlas / Engine City</h3>
-            <p>Eine räumliche Oberfläche für komplexe Systeme, Beziehungen und Entscheidungen. Vom großen Ganzen bis zum einzelnen Artefakt.</p>
-            <span class="status-chip">Konzept in Entwicklung</span>
-          </article>
-
-          <article class="project-card project-lab reveal">
-            <div class="project-meta"><span>04</span><span>RESEARCH</span></div>
-            <h3>Discovery & Reason Labs</h3>
-            <p>Beobachtungen, Hypothesen, Fehler und neue Verfahren bleiben auffindbar, prüfbar und von bestätigtem Wissen getrennt.</p>
-            <span class="status-chip">Research in progress</span>
-          </article>
+          <article class="project-card project-study reveal"><div class="project-meta"><span>01</span><span>STUDIUM</span></div><h3>Reason Engine Study</h3><p>Für Hausarbeiten und wissenschaftliche Essays: Thesen mit Quellen verbinden, Annahmen markieren und argumentative Lücken vor der Abgabe erkennen.</p><a class="card-link" href="study.html">Study-Pilot entdecken →</a><span class="status-chip">Anwendungsprototyp geplant</span></article>
+          <article class="project-card project-p2 reveal"><div class="project-meta"><span>02</span><span>BETRIEBLICHER FELDFALL</span></div><h3>Weihnachtsbaumlogistik</h3><p>Rund 50 Bäume werden in einem großen Gebäude verteilt. Der bisherige Ablauf nutzt handschriftliche Notizen und ein seit Jahren wiederverwendetes Holzbrett. Der Fall soll Standorte, Zuständigkeiten und Statusänderungen nachvollziehbar machen.</p><span class="status-chip">Beobachtungsfall in Vorbereitung</span></article>
+          <article class="project-card project-atlas reveal"><div class="project-meta"><span>03</span><span>RÄUMLICHE OBERFLÄCHE</span></div><h3>Atlas / Engine City</h3><p>Eine geplante räumliche Navigation durch Projekte, Wissensobjekte und ihre Beziehungen: vom großen Ganzen bis zum einzelnen Artefakt.</p><span class="status-chip">Konzept in Entwicklung</span></article>
+          <article class="project-card project-lab reveal"><div class="project-meta"><span>04</span><span>FORSCHUNG</span></div><h3>Discovery & Reason Labs</h3><p>Beobachtungen, Hypothesen, Versuche, Fehler und Korrekturen bleiben auffindbar und von bestätigtem Wissen getrennt.</p><span class="status-chip">Aktiver Forschungsraum</span></article>
         </div>
       </div>
     </section>
 
-    <section class="manifest-section" aria-labelledby="manifest-title">
-      <div class="shell manifest-grid">
-        <figure class="manifest-image reveal">
-          <img src="assets/IMG_0473.jpeg" width="1122" height="1402" loading="lazy" decoding="async" alt="Abstrakte Darstellung einer schwebenden Kugel, geometrischer Beziehungen und einer verborgenen Tiefe unter einer dunklen Oberfläche.">
-        </figure>
-        <div class="manifest-copy reveal">
-          <p class="eyebrow light">MANIFESTMOMENT</p>
-          <h2 id="manifest-title">Was sichtbar ist, ist selten das ganze System.</h2>
-          <p>
-            Entscheidungen entstehen aus Annahmen, Beziehungen, Abhängigkeiten und Folgen.
-            Reason Engine macht diese Strukturen prüfbar, ohne vorzugeben, Unsicherheit vollständig beseitigen zu können.
-          </p>
-          <blockquote>„Wahrheit statt Wunschdenken“ bedeutet nicht, dass alles gewiss sein muss. Es bedeutet, dass Ungewissheit sichtbar bleibt.</blockquote>
-        </div>
-      </div>
-    </section>
+    <section class="manifest-section" aria-labelledby="manifest-title"><div class="shell manifest-grid">
+      <figure class="manifest-image reveal"><img src="assets/IMG_0473.jpeg" width="1122" height="1402" loading="lazy" decoding="async" alt="Abstrakte Darstellung einer schwebenden Kugel, geometrischer Beziehungen und einer verborgenen Tiefe unter einer dunklen Oberfläche."></figure>
+      <div class="manifest-copy reveal"><p class="eyebrow light">DIE GRUNDIDEE</p><h2 id="manifest-title">Was sichtbar ist, ist selten das ganze System.</h2><p>Entscheidungen entstehen aus Quellen, Annahmen, Beziehungen, Abhängigkeiten und Folgen. Reason Engine versucht, diese Strukturen prüfbar zu machen, ohne Unsicherheit wegzuformulieren.</p><blockquote>„Wahrheit statt Wunschdenken“ bedeutet nicht, dass alles gewiss sein muss. Es bedeutet, dass Ungewissheit sichtbar bleibt.</blockquote></div>
+    </div></section>
 
-    <section class="principles-section" id="prinzipien" aria-labelledby="principles-title">
-      <div class="shell">
-        <div class="section-head reveal">
-          <p class="eyebrow">PRINZIPIEN IN ARBEITSKLEIDUNG</p>
-          <h2 id="principles-title">Haltung muss sich im System prüfen lassen.</h2>
-        </div>
+    <section class="founder-section" id="person" aria-labelledby="founder-title"><div class="shell founder-layout">
+      <div class="founder-label reveal"><p class="eyebrow">DIE PERSON HINTER DEM PROJEKT</p><p class="founder-name">Stefan Preuss<br><span>Gründer und erster Feldbeobachter</span></p></div>
+      <div class="founder-copy reveal"><h2 id="founder-title">Warum ich Reason Engine baue.</h2><p>Ich habe erlebt, wie schnell Wissen über Gespräche, Dokumente, Projekte und KI-Antworten hinweg zerfällt. Reason Engine entstand aus dem Versuch, nicht nur Ergebnisse zu behalten, sondern nachvollziehbar zu machen, wie sie entstanden sind, worauf sie beruhen und wo sie korrigiert werden müssen.</p><p>Das Projekt beginnt deshalb nicht mit einer großen Plattformbehauptung. Es beginnt mit überschaubaren Fällen, sichtbaren Grenzen und der Frage, ob der Ansatz außerhalb seiner eigenen Architektur tatsächlich hilft.</p></div>
+    </div></section>
 
-        <div class="principle-grid">
-          <article class="principle-card reveal">
-            <span>WAHRHEIT</span>
-            <h3>Unsicherheit dokumentieren</h3>
-            <p>Wir simulieren keine falsche Eindeutigkeit. Offene Punkte, Konflikte und Grenzen bleiben sichtbar.</p>
-          </article>
-          <article class="principle-card reveal">
-            <span>VERANTWORTUNG</span>
-            <h3>Begründungen zurückverfolgen</h3>
-            <p>Aussagen, Entscheidungen und Ergebnisse bleiben auf Quellen, Annahmen und verantwortliche Rollen zurückführbar.</p>
-          </article>
-          <article class="principle-card reveal">
-            <span>LERNEN</span>
-            <h3>Korrekturen erhalten</h3>
-            <p>Neue Erkenntnisse überschreiben die Vergangenheit nicht. Sie verbessern das System mit nachvollziehbarer Spur.</p>
-          </article>
-          <article class="principle-card reveal">
-            <span>OFFENHEIT</span>
-            <h3>Fachwissen im Team halten</h3>
-            <p>Wissen bleibt für beteiligte Menschen sichtbar und kontrollierbar, statt im Modell zu verschwinden.</p>
-          </article>
-        </div>
+    <section class="status-section" id="status" aria-labelledby="status-title"><div class="shell">
+      <div class="section-head reveal"><p class="eyebrow">BETRIEBSWAHRER STATUS</p><h2 id="status-title">Heute möglich. Noch nicht behauptet.</h2><p>Die öffentliche Seite trennt nutzbare Zusammenarbeit von zukünftiger Produktvision.</p></div>
+      <div class="truth-grid">
+        <article class="truth-card available reveal"><span>HEUTE MÖGLICH</span><ul><li>einen begrenzten Fall strukturiert aufnehmen</li><li>Aussagen, Quellen und Annahmen trennen</li><li>offene Fragen und Gegenpositionen sichtbar machen</li><li>gemeinsam ein einfaches Dossier erproben</li></ul></article>
+        <article class="truth-card not-claimed reveal"><span>NOCH NICHT BEHAUPTET</span><ul><li>fertige Softwareplattform</li><li>automatische Durchsetzung aller Regeln</li><li>produktionsreifer Teambetrieb</li><li>flächendeckende Feldvalidierung</li></ul></article>
       </div>
-    </section>
+    </div></section>
 
-    <section class="pilot-section" id="pilot" aria-labelledby="pilot-title">
-      <div class="shell pilot-card reveal">
-        <div class="pilot-copy">
-          <p class="eyebrow light">AKTUELLER EINSTIEG</p>
-          <h2 id="pilot-title">Einen realen Prozess gemeinsam prüfen.</h2>
-          <p>
-            Wir beginnen nicht mit einem Großprojekt. Wir untersuchen einen klar begrenzten Prozess und prüfen an anonymisierten Fällen,
-            ob Reason Engine einen praktischen Unterschied macht.
-          </p>
-          <div class="hero-actions">
-            <a class="button button-light" href="mailto:ohno5001@gmail.com?subject=Pilotgespräch%20Reason%20Engine">Pilotgespräch vereinbaren</a>
-            <a class="button button-ghost" href="#pilot-rahmen">Was ein Pilot umfasst</a>
-          </div>
-        </div>
-        <div class="pilot-boundary" id="pilot-rahmen">
-          <div><span>1</span><p><strong>Ein Prozess</strong><br>Kein versteckter ERP-Neubau.</p></div>
-          <div><span>2</span><p><strong>Maximal zwei Testfälle</strong><br>Anonymisiert oder synthetisch.</p></div>
-          <div><span>3</span><p><strong>Klarer Endpunkt</strong><br>Stoppen, nicht bauen oder bezahltes Angebot.</p></div>
-          <div><span>4</span><p><strong>Keine Produktivabhängigkeit</strong><br>Validierung bleibt Validierung.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="status-section" aria-labelledby="status-title">
-      <div class="shell status-layout">
-        <div class="reveal">
-          <p class="eyebrow">AKTUELLER STAND</p>
-          <h2 id="status-title">Die Werkstatt steht. Der Nutzen muss sich im Feld beweisen.</h2>
-        </div>
-        <dl class="status-list reveal">
-          <div><dt>Reason Engine Kern</dt><dd>konzeptionell etabliert</dd></div>
-          <div><dt>P2 Foundation</dt><dd>angelegt, unvalidiert</dd></div>
-          <div><dt>Erster Feldtest</dt><dd>ausstehend</dd></div>
-          <div><dt>Zahlungsbereitschaft</dt><dd>noch nicht bewiesen</dd></div>
-        </dl>
-      </div>
-    </section>
+    <section class="pilot-section" id="pilot" aria-labelledby="pilot-title"><div class="shell pilot-card reveal">
+      <div class="pilot-copy"><p class="eyebrow light">BEGRENZTER EINSTIEG</p><h2 id="pilot-title">Einen Pilotfall prüfen.</h2><p>Wir betrachten gemeinsam einen überschaubaren Entscheidungs-, Forschungs- oder Prozessfall und prüfen, ob der Reason-Engine-Ansatz einen nachvollziehbaren Mehrwert erzeugt.</p><div class="hero-actions"><a class="button button-light" href="mailto:ohno5001@gmail.com?subject=Pilotfall%20f%C3%BCr%20Reason%20Engine">Pilotfall vorschlagen</a><a class="button button-ghost" href="#pilot-rahmen">Pilotgrenzen ansehen</a></div></div>
+      <div class="pilot-boundary" id="pilot-rahmen"><div><span>1</span><p><strong>Ein klarer Fall</strong><br>Kein versteckter Komplettumbau.</p></div><div><span>2</span><p><strong>Begrenzte Evidenz</strong><br>Beobachtungen und Annahmen bleiben getrennt.</p></div><div><span>3</span><p><strong>Sichtbares Ergebnis</strong><br>Dossier, offene Fragen und nächster Schritt.</p></div><div><span>4</span><p><strong>Ehrlicher Endpunkt</strong><br>Stoppen, weiter testen oder ein Angebot definieren.</p></div></div>
+    </div></section>
   </main>
-
-  <footer class="site-footer">
-    <div class="shell footer-grid">
-      <div>
-        <a class="brand footer-brand" href="#top"><img src="assets/mark.svg" width="32" height="32" alt=""><span>Reason Engine</span></a>
-        <p>KI-gestützte Systeme für Entscheidungen, bei denen menschliche Verantwortung nicht verloren gehen darf.</p>
-      </div>
-      <div class="footer-links">
-        <a href="https://github.com/ans5000/reason-engine" rel="noopener noreferrer">GitHub</a>
-        <a href="impressum.html">Impressum</a>
-        <a href="datenschutz.html">Datenschutz</a>
-      </div>
-      <p class="footer-status">Öffentliche Vorschau · Frühe Entwicklungsphase · Keine behaupteten Kundenergebnisse</p>
-    </div>
-  </footer>
+  <footer class="site-footer"><div class="shell footer-grid"><div><a class="brand footer-brand" href="#top"><img src="assets/mark.svg" width="32" height="32" alt=""><span>Reason Engine</span></a><p>Ein offenes Forschungs- und Pilotprojekt für nachvollziehbare Entscheidungen zwischen Mensch und KI.</p></div><div class="footer-links"><a href="study.html">Study</a><a href="https://github.com/ans5000/reason-engine" rel="noopener noreferrer">GitHub</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div><p class="footer-status">Öffentliches Projekt · Frühe Entwicklungsphase · Keine behaupteten Kundenergebnisse oder Produktionsreife</p></div></footer>
 </body>
 </html>
