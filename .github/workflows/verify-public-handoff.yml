@@ -35,10 +35,14 @@ jobs:
           grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
           grep -Fq 'href="app/"' index.html
           grep -Fq 'Öffentliche Alpha · lokal' index.html
-          grep -Fq 'atlas-app-v0.3-2026-07-26' app/index.html
+          grep -Fq 'atlas-app-v0.3.1-2026-07-26' app/index.html
           grep -Fq 'noindex,nofollow' app/index.html
           grep -Fq 'Sicherung importieren' app/index.html
-          grep -Fq 'reason-engine-atlas-v03' app/sw.js
+          grep -Fq 'confirmation_invalidated' app/app.js
+          grep -Fq 'node.confirmed = false' app/app.js
+          grep -Fq 'Importierte Bestätigungsstatus wurden nicht übernommen' app/backup-v0.3.js
+          grep -Fq "confirmed: isRoot" app/backup-v0.3.js
+          grep -Fq 'reason-engine-atlas-v031' app/sw.js
 
       - name: Verify live public files and truth markers
         shell: bash
@@ -87,14 +91,16 @@ jobs:
           grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
           grep -Fq 'https://reasonengine.de/' artifacts/sitemap.xml
           grep -Fq 'https://reasonengine.de/study.html' artifacts/sitemap.xml
+          ! grep -Fq 'https://reasonengine.de/app/' artifacts/sitemap.xml
 
           if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
             fetch "https://reasonengine.de/app/" artifacts/atlas.html
             grep -Fq 'public-entrance-v0.7-2026-07-26' artifacts/home.html
             grep -Fq 'href="app/"' artifacts/home.html
-            grep -Fq 'atlas-app-v0.3-2026-07-26' artifacts/atlas.html
-            grep -Fq 'ÖFFENTLICHE ALPHA v0.3' artifacts/atlas.html
+            grep -Fq 'atlas-app-v0.3.1-2026-07-26' artifacts/atlas.html
+            grep -Fq 'ÖFFENTLICHE ALPHA v0.3.1' artifacts/atlas.html
             grep -Fq 'Sicherung importieren' artifacts/atlas.html
+            grep -Fq 'Jede spätere Änderung hebt diesen Status wieder auf.' artifacts/atlas.html
           fi
 
       - name: Start branch preview for Atlas
@@ -156,16 +162,46 @@ jobs:
           async function exerciseAtlas(browser) {
             const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true });
             const page = await context.newPage();
+            const atlasOrigin = new URL(process.env.ATLAS_BASE).origin;
+            const externalRequests = [];
+            const writeRequests = [];
+
+            page.on('request', (request) => {
+              const url = new URL(request.url());
+              if (url.origin !== atlasOrigin) externalRequests.push(request.url());
+              if (!['GET', 'HEAD'].includes(request.method())) writeRequests.push(`${request.method()} ${request.url()}`);
+            });
+
             await page.goto(`${process.env.ATLAS_BASE}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
             await page.locator('[data-enter]').click();
             await page.locator('[data-new-atlas]').first().click();
             await page.locator('[data-example]').click();
             await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
             await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
+
             const nodeCount = await page.locator('[data-nodes] .node').count();
             if (nodeCount < 5) throw new Error(`Atlas created only ${nodeCount} nodes`);
-            const historyCount = await page.locator('[data-history] li').count();
-            if (historyCount < 1) throw new Error('Atlas history is empty after creation');
+
+            await page.locator('[data-tab="chat"]').click();
+            await page.locator('#chat-input').fill('Die Haustechnik ist verantwortlich.');
+            await page.locator('[data-chat-form]').evaluate((form) => form.requestSubmit());
+            await page.locator('[data-tab="atlas"]').click();
+
+            let target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+            await target.click();
+            await page.locator('[data-confirm-node]').click();
+            target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+            if (await target.getAttribute('data-confirmed') !== 'true') throw new Error('Atlas entry was not marked as checked.');
+
+            await target.click();
+            await page.locator('[data-node-body]').fill('Die Haustechnik und die Gärtnerei sind gemeinsam verantwortlich.');
+            await page.locator('button[value="save"]').click();
+            target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+            if (await target.getAttribute('data-confirmed') !== 'false') throw new Error('Edited entry kept its checked status.');
+
+            await page.locator('[data-tab="history"]').click();
+            await page.getByText('Bestätigung für „Die Haustechnik ist verantwortlich“ nach einer Änderung aufgehoben.').waitFor();
+
             await page.locator('[data-screen="workspace"] [data-back-library]').click();
             await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
             const [download] = await Promise.all([
@@ -173,6 +209,44 @@ jobs:
               page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
             ]);
             if (!download.suggestedFilename().endsWith('.json')) throw new Error('Library backup is not JSON');
+
+            const tamperedBackup = {
+              kind: 'reason-engine-atlas-backup',
+              version: '0.3',
+              atlases: [{
+                title: 'Manipulierter Import',
+                problem: 'Dieser importierte Testfall prüft die Bestätigungsgrenze.',
+                nodes: [
+                  { id: 'root', title: 'Manipulierter Import', body: 'Ausgangspunkt', kind: 'root', confirmed: true },
+                  { id: 'forged', title: 'Gefälschte Bestätigung', body: 'Diese Aussage kam bestätigt aus einer Datei.', kind: 'known', confirmed: true, source: 'Manipulierte JSON-Datei' }
+                ],
+                messages: [],
+                history: []
+              }]
+            };
+
+            page.once('dialog', (dialog) => dialog.accept());
+            await page.locator('[data-import-input]').setInputFiles({
+              name: 'manipulierter-import.json',
+              mimeType: 'application/json',
+              buffer: Buffer.from(JSON.stringify(tamperedBackup)),
+            });
+            await page.waitForLoadState('networkidle');
+            await page.waitForFunction(() => {
+              const library = JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02'));
+              return library?.atlases?.length === 2;
+            });
+
+            const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02')));
+            const imported = stored.atlases.find((atlas) => atlas.title === 'Manipulierter Import');
+            const forged = imported?.nodes.find((node) => node.title === 'Gefälschte Bestätigung');
+            if (!forged || forged.confirmed !== false) throw new Error('Imported JSON preserved a forged checked status.');
+            if (!imported.history.some((event) => event.type === 'confirmation_invalidated')) throw new Error('Import invalidation was not recorded.');
+
+            if (externalRequests.length) throw new Error(`External Atlas requests detected: ${externalRequests.join(', ')}`);
+            if (writeRequests.length) throw new Error(`Atlas network writes detected: ${writeRequests.join(', ')}`);
+
+            await page.screenshot({ path: 'artifacts/atlas-truth-acceptance.png', fullPage: true });
             await context.close();
           }
 
@@ -195,7 +269,10 @@ jobs:
             } finally {
               await browser.close();
             }
-          })();
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
           NODE
 
       - name: Publish handoff evidence
