@@ -2,12 +2,11 @@ name: Verify Atlas backup restore
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
+      - ".github/scripts/verify-atlas-restore-v081.mjs"
       - ".github/workflows/verify-atlas-restore.yml"
       - "app/**"
   workflow_dispatch:
@@ -20,12 +19,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify-production-restore:
-    name: Export and restore production Atlas
+  verify-atlas-restore:
+    name: Export and restore Atlas v0.8.1
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 22
 
     steps:
+      - name: Check out proposed source
+        uses: actions/checkout@v4
+
+      - name: Verify restore source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app/truth-gate-v0.8.1.js
+          node --check app/backup-v0.3.js
+          node --check .github/scripts/verify-atlas-restore-v081.mjs
+          grep -Fq 'atlas-app-v0.8.1-2026-07-26' app/index.html
+          grep -Fq 'truth-gate-v0.8.1.js' app/index.html
+          grep -Fq 'reason-engine-atlas-v081-truth-gate' app/sw.js
+
+      - name: Start branch preview
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          nohup python3 -m http.server 4173 > /tmp/reason-engine-preview.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:4173/app/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/reason-engine-preview.log
+          exit 1
+
       - name: Install browser
         shell: bash
         run: |
@@ -34,98 +59,11 @@ jobs:
 
       - name: Exercise complete backup cycle
         shell: bash
+        env:
+          ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
         run: |
           set -euo pipefail
-          mkdir -p artifacts
-          node <<'NODE'
-          const fs = require('fs');
-          const { chromium } = require('playwright');
-
-          const base = 'https://reasonengine.de/app/';
-          const backupPath = `${process.cwd()}/artifacts/atlas-production-backup.json`;
-
-          (async () => {
-            const browser = await chromium.launch({ headless: true });
-            const context = await browser.newContext({
-              viewport: { width: 1280, height: 900 },
-              acceptDownloads: true,
-              serviceWorkers: 'block',
-            });
-            const page = await context.newPage();
-
-            try {
-              await page.goto(`${base}?restore=${process.env.GITHUB_SHA}`, {
-                waitUntil: 'networkidle',
-                timeout: 60000,
-              });
-
-              const marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
-              if (!/^atlas-app-v0\.(3|5|6|7)/.test(marker || '')) {
-                throw new Error(`Unexpected production build: ${marker}`);
-              }
-
-              await page.locator('[data-enter]').click();
-              await page.locator('[data-screen="library"]:not([hidden]) [data-new-atlas]').first().click();
-              await page.locator('[data-example]').click();
-              await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
-              await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
-
-              const originalNodes = await page.locator('[data-nodes] .node').count();
-              if (originalNodes < 5) throw new Error(`Original Atlas has only ${originalNodes} nodes`);
-
-              await page.locator('[data-screen="workspace"] [data-back-library]').click();
-              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
-
-              const [download] = await Promise.all([
-                page.waitForEvent('download'),
-                page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
-              ]);
-              await download.saveAs(backupPath);
-
-              const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-              if (backup.kind !== 'reason-engine-atlas-backup') throw new Error('Backup kind is invalid');
-              if (backup.version !== '0.3') throw new Error(`Backup version is ${backup.version}`);
-              if (!Array.isArray(backup.atlases) || backup.atlases.length !== 1) throw new Error('Backup does not contain exactly one Atlas');
-              if (!Array.isArray(backup.atlases[0].nodes) || backup.atlases[0].nodes.length < 5) throw new Error('Backup lost Atlas nodes');
-
-              await page.evaluate(() => localStorage.clear());
-              await page.reload({ waitUntil: 'networkidle' });
-              await page.locator('[data-enter]').click();
-              await page.locator('[data-screen="library"]:not([hidden])').waitFor();
-              if (await page.locator('.atlas-card').count()) throw new Error('Library was not empty after clearing local storage');
-
-              let dialogMessage = '';
-              page.once('dialog', async (dialog) => {
-                dialogMessage = dialog.message();
-                await dialog.accept();
-              });
-              await page.locator('[data-import-input]').setInputFiles(backupPath);
-              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor({ timeout: 30000 });
-              if (!dialogMessage.includes('1 Atlas')) throw new Error(`Unexpected import dialog: ${dialogMessage}`);
-
-              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card-open').click();
-              await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
-
-              const restoredNodes = await page.locator('[data-nodes] .node').count();
-              if (restoredNodes !== originalNodes) {
-                throw new Error(`Restore changed node count from ${originalNodes} to ${restoredNodes}`);
-              }
-              const importedHistory = await page.locator('[data-history] li').allTextContents();
-              if (!importedHistory.some((entry) => entry.includes('lokalen JSON-Sicherung importiert'))) {
-                throw new Error('Restore event is missing from the history');
-              }
-
-              await page.screenshot({
-                path: 'artifacts/atlas-restored-production.png',
-                fullPage: true,
-                animations: 'disabled',
-              });
-            } finally {
-              await context.close();
-              await browser.close();
-            }
-          })();
-          NODE
+          node .github/scripts/verify-atlas-restore-v081.mjs
 
       - name: Publish restore evidence
         if: always()
