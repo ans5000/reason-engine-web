@@ -32,9 +32,7 @@ async function capture(browser, [url, path, width, height, reveal]) {
   if (reveal) {
     for (const item of await page.locator('.reveal').all()) {
       await item.scrollIntoViewIfNeeded();
-    }
-    if (await page.locator('.reveal:not(.is-visible)').count()) {
-      throw new Error(`${url} has hidden reveal content`);
+      await page.waitForTimeout(140);
     }
   }
   await page.evaluate(() => {
@@ -42,6 +40,10 @@ async function capture(browser, [url, path, width, height, reveal]) {
     window.scrollTo(0, 0);
   });
   await page.waitForFunction(() => window.scrollY === 0);
+  await page.waitForTimeout(400);
+  if (reveal && await page.locator('.reveal:not(.is-visible)').count()) {
+    throw new Error(`${url} has hidden reveal content`);
+  }
   await page.screenshot({ path, fullPage: true, animations: 'disabled' });
   await page.close();
 }
