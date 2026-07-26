@@ -1,4 +1,4 @@
-const CACHE='reason-engine-atlas-v05';
+const CACHE='reason-engine-atlas-v051';
 const ASSETS=['./','./index.html','./styles.css','./workspace.css','./alpha-v0.3.css','./hex-v0.5.css','./reason-v0.5.js','./app.js','./backup-v0.3.js','./manifest.webmanifest','../assets/mark.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
