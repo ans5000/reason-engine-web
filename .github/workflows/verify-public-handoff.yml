@@ -104,7 +104,8 @@ jobs:
           IS_PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
         run: |
           set -euo pipefail
-          node .github/scripts/verify-atlas-v081.mjs
+          mkdir -p artifacts
+          node .github/scripts/verify-atlas-v081.mjs 2>&1 | tee artifacts/public-handoff-browser.log
 
       - name: Publish handoff evidence
         if: always()
