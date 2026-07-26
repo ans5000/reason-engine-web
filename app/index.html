@@ -6,7 +6,7 @@
   <meta name="description" content="Atlas, ein lokaler Reason-Engine-Prototyp für nachvollziehbare Probleme, Gespräche und Entscheidungen.">
   <meta name="robots" content="noindex,nofollow">
   <meta name="theme-color" content="#101712">
-  <meta name="reason-engine-build" content="atlas-app-v0.1-2026-07-26">
+  <meta name="reason-engine-build" content="atlas-app-v0.2-2026-07-26">
   <title>Atlas · Reason Engine</title>
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
@@ -18,35 +18,68 @@
     <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="32" height="32"><span>Reason Engine</span></a>
     <span class="local">Lokal · keine Übertragung</span>
   </header>
+
   <main>
     <section class="screen intro" data-screen="intro">
       <div class="intro-copy">
-        <p class="eyebrow">ATLAS · PROTOTYP v0.1</p>
+        <p class="eyebrow">ATLAS · PROTOTYP v0.2</p>
         <h1>Aus einem Problem wird ein begehbarer Atlas.</h1>
         <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes Gespräch macht daraus Schritt für Schritt eine sichtbare Karte aus Aussagen, Annahmen, offenen Fragen und Entscheidungen.</p>
-        <div class="rules"><p><b>01 · Erst erzählen.</b> Keine Formulare, keine besondere Sprache.</p><p><b>02 · Dann sichtbar machen.</b> Der Atlas wächst mit dem Gespräch.</p><p><b>03 · Dann prüfen.</b> Nichts wird stillschweigend als wahr übernommen.</p></div>
-        <button class="primary" data-start>Ersten Atlas anlegen</button>
+        <div class="rules">
+          <p><b>01 · Erst erzählen.</b> Keine Formulare, keine besondere Sprache.</p>
+          <p><b>02 · Dann sichtbar machen.</b> Der Atlas wächst mit dem Gespräch.</p>
+          <p><b>03 · Dann prüfen.</b> Nichts wird stillschweigend als wahr übernommen.</p>
+        </div>
+        <button class="primary" data-enter>Atlas öffnen</button>
         <small>Noch keine echte KI, keine Cloud, keine Produktivdaten.</small>
       </div>
       <div class="orbital" aria-hidden="true"><i></i><i></i><b></b></div>
     </section>
+
+    <section class="screen library" data-screen="library" hidden>
+      <div class="library-shell">
+        <header class="library-head">
+          <div><p class="eyebrow">LOKALE ARBEITSRÄUME</p><h1>Deine Atlanten</h1><p>Jeder Atlas bleibt ausschließlich in diesem Browser gespeichert.</p></div>
+          <button class="primary" data-new-atlas>Neuen Atlas anlegen</button>
+        </header>
+        <div class="atlas-list" data-atlas-list></div>
+        <div class="empty-library" data-empty-library hidden>
+          <p class="eyebrow">NOCH LEER</p>
+          <h2>Der erste Weg beginnt mit einem Problem.</h2>
+          <p>Beschreibe einen realen Prozess, eine Entscheidung oder eine Situation, die gerade unübersichtlich ist.</p>
+          <button class="primary" data-new-atlas>Ersten Atlas anlegen</button>
+        </div>
+      </div>
+    </section>
+
     <section class="screen problem" data-screen="problem" hidden>
       <form class="problem-card" data-problem-form>
-        <p class="eyebrow">DER AUSGANGSPUNKT</p><h1>Worum geht es?</h1><p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt.</p>
+        <button class="back-link" type="button" data-back-library>← Zur Übersicht</button>
+        <p class="eyebrow">DER AUSGANGSPUNKT</p>
+        <h1>Worum geht es?</h1>
+        <p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt.</p>
         <label for="problem-input">Problem, Prozess oder Entscheidung</label>
         <textarea id="problem-input" minlength="20" maxlength="2400" rows="9" required placeholder="Zum Beispiel: Wir müssen ungefähr 50 Weihnachtsbäume im Krankenhaus verteilen …"></textarea>
         <div class="actions"><button class="link" type="button" data-example>Beispiel einsetzen</button><button class="primary" type="submit">Atlas anlegen</button></div>
       </form>
     </section>
+
     <section class="screen workspace" data-screen="workspace" hidden>
-      <header class="workspace-head"><div><p class="eyebrow">AKTUELLER ATLAS</p><h1 data-title>Neuer Atlas</h1></div><div class="actions"><button class="secondary" data-export>Exportieren</button><button class="danger" data-reset>Zurücksetzen</button></div></header>
-      <nav class="tabs"><button class="active" data-tab="atlas">Atlas</button><button data-tab="chat">Gespräch</button></nav>
+      <header class="workspace-head">
+        <div class="workspace-title"><button class="back-link" type="button" data-back-library>← Alle Atlanten</button><p class="eyebrow">AKTUELLER ATLAS</p><h1 data-title>Neuer Atlas</h1></div>
+        <div class="actions"><button class="secondary" data-add-node>Eintrag hinzufügen</button><button class="secondary" data-export>Exportieren</button><button class="danger" data-delete-atlas>Atlas löschen</button></div>
+      </header>
+      <nav class="tabs"><button class="active" data-tab="atlas">Atlas</button><button data-tab="chat">Gespräch</button><button data-tab="history">Verlauf</button></nav>
       <div class="workgrid">
         <section class="panel atlas-panel active" data-panel="atlas">
           <header class="panel-head"><div><p class="eyebrow">SICHTBARE STRUKTUR</p><h2>Atlas</h2></div><p class="legend"><span>Aussage</span><span>Annahme</span><span>Offen</span><span>Entscheidung</span></p></header>
           <div class="stage"><svg data-lines aria-hidden="true"></svg><div data-nodes></div></div>
         </section>
-        <aside class="panel chat-panel" data-panel="chat">
+        <aside class="panel history-panel" data-panel="history">
+          <header class="panel-head"><div><p class="eyebrow">ÄNDERUNGSSPUR</p><h2>Verlauf</h2></div><span class="prototype">append-only</span></header>
+          <ol class="history-list" data-history></ol>
+        </aside>
+        <aside class="panel chat-panel active-side" data-panel="chat">
           <header class="panel-head"><div><p class="eyebrow">KLÄRENDES GESPRÄCH</p><h2>Gespräch</h2></div><span class="prototype">regelbasiert</span></header>
           <div class="messages" data-messages aria-live="polite"></div>
           <form class="composer" data-chat-form><textarea id="chat-input" rows="3" maxlength="1200" required placeholder="Antworte frei oder korrigiere den Atlas …"></textarea><button class="primary" type="submit">Senden</button></form>
@@ -54,6 +87,25 @@
       </div>
     </section>
   </main>
-  <dialog data-node-dialog><button class="close" data-close>×</button><p class="eyebrow" data-node-kind>ATLAS-EINTRAG</p><h2 data-node-title></h2><p data-node-body></p><dl><div><dt>Status</dt><dd data-node-status></dd></div><div><dt>Herkunft</dt><dd data-node-source></dd></div></dl><div class="actions"><button class="secondary" data-confirm>Bestätigen</button><button class="danger" data-delete>Entfernen</button></div></dialog>
+
+  <dialog data-node-dialog>
+    <form method="dialog" data-node-form>
+      <button class="close" value="cancel" aria-label="Dialog schließen">×</button>
+      <p class="eyebrow" data-node-dialog-label>ATLAS-EINTRAG</p>
+      <label for="node-title">Titel</label>
+      <input id="node-title" data-node-title maxlength="90" required>
+      <label for="node-body">Inhalt</label>
+      <textarea id="node-body" data-node-body rows="6" maxlength="1600" required></textarea>
+      <label for="node-kind">Einordnung</label>
+      <select id="node-kind" data-node-kind>
+        <option value="known">Aussage</option>
+        <option value="assumption">Annahme</option>
+        <option value="open">Offene Frage</option>
+        <option value="decision">Entscheidung</option>
+      </select>
+      <dl><div><dt>Status</dt><dd data-node-status></dd></div><div><dt>Herkunft</dt><dd data-node-source></dd></div></dl>
+      <div class="actions dialog-actions"><button class="danger" type="button" data-delete-node>Entfernen</button><span></span><button class="secondary" type="button" data-confirm-node>Bestätigen</button><button class="primary" value="save">Speichern</button></div>
+    </form>
+  </dialog>
 </body>
 </html>
