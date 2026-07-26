@@ -122,14 +122,14 @@
     anchor.remove();
     URL.revokeObjectURL(url);
   };
-  const section = (title, entries) => `## ${title}\n\n${entries.length ? entries.map((node) => `- **${node.title}** [${node.confirmed ? 'bestätigt' : 'unbestätigt'}${node.conflict ? ', Widerspruchshinweis' : ''}]\n  Gebiet: ${node.district || node.topic || 'nicht zugeordnet'}\n  ${node.body}\n  Herkunft: ${node.source}`).join('\n') : 'Noch keine Einträge.'}\n`;
+  const section = (title, entries) => `## ${title}\n\n${entries.length ? entries.map((node) => `- **${node.title}** [${node.confirmed ? 'geprüft' : 'unbestätigt'}${node.conflict ? ', Widerspruchshinweis' : ''}]\n  Gebiet: ${node.district || node.topic || 'nicht zugeordnet'}\n  ${node.body}\n  Herkunft: ${node.source}`).join('\n') : 'Noch keine Einträge.'}\n`;
 
   document.querySelector('[data-export-dossier]')?.addEventListener('click', () => {
     const library = read();
     const atlas = current(library);
     if (!atlas) return;
     const byKind = (kind) => atlas.nodes.filter((node) => node.kind === kind);
-    const dossier = `# Entscheidungsdossier: ${atlas.title}\n\nErstellt: ${new Intl.DateTimeFormat('de-DE', { dateStyle: 'long', timeStyle: 'short' }).format(new Date())}\nAtlas App: v0.5.0\nDatenschema: v0.2\n\n## Ausgangspunkt\n\n${atlas.problem}\n\n${section('Bestätigte Aussagen', atlas.nodes.filter((node) => node.kind === 'known' && node.confirmed))}\n${section('Unbestätigte Aussagen', atlas.nodes.filter((node) => node.kind === 'known' && !node.confirmed))}\n${section('Annahmen', byKind('assumption'))}\n${section('Offene Fragen', byKind('open'))}\n${section('Entscheidungen', byKind('decision'))}\n${section('Zu prüfende Widerspruchshinweise', atlas.nodes.filter((node) => node.conflict))}\n## Transparenzgrenze\n\nDieses Dossier wurde lokal aus einem regelbasierten Hex-Atlas erzeugt. Einordnungen, Gebietszuordnungen und Widerspruchshinweise sind keine verifizierten Tatsachen und keine KI-Bewertung. Browserdaten und Exportdateien sind technisch nicht manipulationssicher.\n`;
+    const dossier = `# Entscheidungsdossier: ${atlas.title}\n\nErstellt: ${new Intl.DateTimeFormat('de-DE', { dateStyle: 'long', timeStyle: 'short' }).format(new Date())}\nAtlas App: v0.5.1\nDatenschema: v0.2\n\n## Ausgangspunkt\n\n${atlas.problem}\n\n${section('Geprüfte Aussagen', atlas.nodes.filter((node) => node.kind === 'known' && node.confirmed))}\n${section('Unbestätigte Aussagen', atlas.nodes.filter((node) => node.kind === 'known' && !node.confirmed))}\n${section('Annahmen', byKind('assumption'))}\n${section('Offene Fragen', byKind('open'))}\n${section('Entscheidungen', byKind('decision'))}\n${section('Zu prüfende Widerspruchshinweise', atlas.nodes.filter((node) => node.conflict))}\n## Transparenzgrenze\n\nDieses Dossier wurde lokal aus einem regelbasierten Hex-Atlas erzeugt. Einordnungen, Gebietszuordnungen, Prüfstatus und Widerspruchshinweise sind keine verifizierten Tatsachen und keine KI-Bewertung. Browserdaten und Exportdateien sind technisch nicht manipulationssicher.\n`;
     record(atlas, 'dossier_exported', 'Entscheidungsdossier als Markdown exportiert.');
     write(library);
     download(`${atlas.title.toLowerCase().replace(/[^a-z0-9äöüß]+/gi, '-').replace(/^-|-$/g, '') || 'atlas'}-entscheidungsdossier.md`, dossier);
