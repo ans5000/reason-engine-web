@@ -114,8 +114,9 @@
   }
 
   function position(index) {
-    const positions = [[50, 10], [88, 34], [87, 68], [50, 88], [12, 68], [12, 34], [35, 27], [68, 28], [68, 67], [34, 68]];
-    const point = positions[index % positions.length];
+    const positions = [[50, 10], [88, 34], [50, 90], [12, 34], [88, 68], [12, 68], [35, 27], [68, 28], [68, 67], [34, 68]];
+    const dynamicIndex = Math.max(0, index - 4);
+    const point = positions[dynamicIndex % positions.length];
     return { x: point[0], y: point[1] };
   }
 
