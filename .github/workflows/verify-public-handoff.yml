@@ -64,7 +64,7 @@ jobs:
 
           grep -Fq 'study-pilot-v0.1-2026-07-26' artifacts/study.html
           grep -Fq 'Sieh, ob deine Hausarbeit wirklich trägt.' artifacts/study.html
-          grep -Fq 'Founding Student Pass' artifacts/study.html
+          grep -Fq 'FOUNDING STUDENT PASS' artifacts/study.html
           grep -Fq 'Einmalig 10 €' artifacts/study.html
 
           grep -Fq 'Allow: /' artifacts/robots.txt
