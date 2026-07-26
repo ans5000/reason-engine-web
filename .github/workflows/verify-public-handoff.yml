@@ -2,11 +2,9 @@ name: Verify public handoff
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -18,208 +16,92 @@ concurrency:
 
 jobs:
   verify-public-domain:
-    name: Verify reasonengine.de
+    name: Verify reasonengine.de and Atlas v0.4.1
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 22
 
     steps:
       - name: Check out proposed source
         uses: actions/checkout@v4
 
-      - name: Verify source truth and JavaScript syntax
+      - name: Verify source truth and syntax
         shell: bash
         run: |
           set -euo pipefail
           node --check app/app.js
+          node --check app/reason-v0.4.js
           node --check app/backup-v0.3.js
-          grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
-          grep -Fq 'href="app/"' index.html
-          grep -Fq 'Öffentliche Alpha · lokal' index.html
-          grep -Fq 'atlas-app-v0.3-2026-07-26' app/index.html
+          node --check .github/scripts/verify-atlas-v041.mjs
+          grep -Fq 'atlas-app-v0.4.1-2026-07-26' app/index.html
+          grep -Fq 'reason-engine-app-version" content="0.4.1' app/index.html
+          grep -Fq 'reason-engine-data-schema" content="0.2' app/index.html
           grep -Fq 'noindex,nofollow' app/index.html
-          grep -Fq 'Sicherung importieren' app/index.html
-          grep -Fq 'reason-engine-atlas-v03' app/sw.js
+          grep -Fq 'confirmation_invalidated' app/app.js
+          grep -Fq 'conflict_review_reset' app/app.js
+          grep -Fq 'Importierte Prüfstatus wurden nicht übernommen' app/backup-v0.3.js
+          grep -Fq 'Importierte Widerspruchshinweise wurden nicht übernommen' app/backup-v0.3.js
+          grep -Fq 'reason-engine-atlas-v041' app/sw.js
 
-      - name: Verify live public files and truth markers
+      - name: Verify public entrance files
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p artifacts
-
           fetch() {
-            local url="$1"
-            local output="$2"
-            local separator="?"
-            if [[ "$url" == *\?* ]]; then separator="&"; fi
-            curl \
-              --fail \
-              --silent \
-              --show-error \
-              --location \
-              --retry 18 \
-              --retry-all-errors \
-              --retry-delay 10 \
-              --connect-timeout 10 \
-              --max-time 45 \
-              "${url}${separator}verify=${GITHUB_SHA}" \
-              --output "$output"
+            curl --fail --silent --show-error --location \
+              --retry 18 --retry-all-errors --retry-delay 10 \
+              --connect-timeout 10 --max-time 45 \
+              "$1?verify=${GITHUB_SHA}" --output "$2"
           }
-
-          fetch "https://reasonengine.de/" artifacts/home.html
-          fetch "https://reasonengine.de/study.html" artifacts/study.html
-          fetch "https://reasonengine.de/app/" artifacts/atlas-live.html
-          fetch "https://reasonengine.de/robots.txt" artifacts/robots.txt
-          fetch "https://reasonengine.de/sitemap.xml" artifacts/sitemap.xml
-
+          fetch https://reasonengine.de/ artifacts/home.html
+          fetch https://reasonengine.de/study.html artifacts/study.html
+          fetch https://reasonengine.de/app/ artifacts/atlas-live.html
+          fetch https://reasonengine.de/robots.txt artifacts/robots.txt
+          fetch https://reasonengine.de/sitemap.xml artifacts/sitemap.xml
           grep -Fq 'public-entrance-v0.7-2026-07-26' artifacts/home.html
-          grep -Fq 'Entscheidungen mit KI, die später noch erklärbar sind.' artifacts/home.html
           grep -Fq 'href="app/"' artifacts/home.html
-          grep -Fq 'Weihnachtsbaumlogistik' artifacts/home.html
-          grep -Fq 'Heute möglich. Noch nicht behauptet.' artifacts/home.html
-
           grep -Fq 'study-pilot-v0.1-2026-07-26' artifacts/study.html
-          grep -Fq 'Sieh, ob deine Hausarbeit wirklich trägt.' artifacts/study.html
-          grep -Fq 'FOUNDING STUDENT PASS' artifacts/study.html
-          grep -Fq 'Einmalig 10 €' artifacts/study.html
-
-          grep -Fq 'atlas-app-v0.3-2026-07-26' artifacts/atlas-live.html
-          grep -Fq 'ÖFFENTLICHE ALPHA v0.3' artifacts/atlas-live.html
           grep -Fq 'noindex,nofollow' artifacts/atlas-live.html
-          grep -Fq 'Sicherung importieren' artifacts/atlas-live.html
-          grep -Fq 'keine echte KI' artifacts/atlas-live.html
-
           grep -Fq 'Allow: /' artifacts/robots.txt
-          grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
-          grep -Fq 'https://reasonengine.de/' artifacts/sitemap.xml
           grep -Fq 'https://reasonengine.de/study.html' artifacts/sitemap.xml
-          if grep -Fq 'https://reasonengine.de/app/' artifacts/sitemap.xml; then
-            echo 'Atlas must remain outside the public sitemap during alpha.' >&2
-            exit 1
+          ! grep -Fq 'https://reasonengine.de/app/' artifacts/sitemap.xml
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            grep -Fq 'atlas-app-v0.4.0-2026-07-26' artifacts/atlas-live.html
+          else
+            grep -Fq 'atlas-app-v0.4.1-2026-07-26' artifacts/atlas-live.html
           fi
 
-      - name: Start branch preview for Atlas
+      - name: Start branch preview
         if: github.event_name == 'pull_request'
         shell: bash
         run: |
-          nohup python3 -m http.server 4173 > /tmp/reason-engine-preview.log 2>&1 &
+          nohup python3 -m http.server 4173 > /tmp/atlas-v041-preview.log 2>&1 &
           for attempt in $(seq 1 20); do
-            if curl --fail --silent http://127.0.0.1:4173/app/ > /dev/null; then exit 0; fi
+            curl --fail --silent http://127.0.0.1:4173/app/ > /dev/null && exit 0
             sleep 1
           done
-          cat /tmp/reason-engine-preview.log
+          cat /tmp/atlas-v041-preview.log
           exit 1
 
-      - name: Install browser for handoff and interaction tests
+      - name: Install browser
         shell: bash
         run: |
           npm install --no-save --no-package-lock playwright@1.54.1
           npx playwright install --with-deps chromium
 
-      - name: Capture pages and exercise branch plus production Atlas
+      - name: Exercise Atlas truth boundaries
         shell: bash
         env:
-          BRANCH_ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
-          LIVE_ATLAS_BASE: https://reasonengine.de/app/
-        run: |
-          set -euo pipefail
-          node <<'NODE'
-          const { chromium } = require('playwright');
-
-          const liveAtlas = process.env.LIVE_ATLAS_BASE;
-          const branchAtlas = process.env.BRANCH_ATLAS_BASE;
-          const captures = [
-            { url: 'https://reasonengine.de/', path: 'artifacts/home-desktop.png', width: 1440, height: 1000, reveal: true },
-            { url: 'https://reasonengine.de/', path: 'artifacts/home-mobile.png', width: 390, height: 844, reveal: true },
-            { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-desktop.png', width: 1440, height: 1000, reveal: true },
-            { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-mobile.png', width: 390, height: 844, reveal: true },
-            { url: liveAtlas, path: 'artifacts/atlas-live-desktop.png', width: 1440, height: 1000, reveal: false },
-            { url: liveAtlas, path: 'artifacts/atlas-live-mobile.png', width: 390, height: 844, reveal: false },
-          ];
-          if (branchAtlas !== liveAtlas) {
-            captures.push(
-              { url: branchAtlas, path: 'artifacts/atlas-branch-desktop.png', width: 1440, height: 1000, reveal: false },
-              { url: branchAtlas, path: 'artifacts/atlas-branch-mobile.png', width: 390, height: 844, reveal: false },
-            );
-          }
-
-          async function prepareLongCapture(page, reveal) {
-            await page.addStyleTag({ content: 'html, body { scroll-behavior: auto !important; }' });
-            if (reveal) {
-              const revealItems = await page.locator('.reveal').all();
-              for (const item of revealItems) {
-                await item.scrollIntoViewIfNeeded();
-                await page.waitForTimeout(120);
-              }
-            }
-            await page.evaluate(() => {
-              document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
-              document.body.style.setProperty('scroll-behavior', 'auto', 'important');
-              window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-            });
-            await page.waitForFunction(() => window.scrollY === 0);
-          }
-
-          async function exerciseAtlas(browser, base, label) {
-            const context = await browser.newContext({
-              viewport: { width: 1280, height: 900 },
-              acceptDownloads: true,
-              serviceWorkers: 'block',
-            });
-            const page = await context.newPage();
-            await page.goto(`${base}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
-            const marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
-            if (marker !== 'atlas-app-v0.3-2026-07-26') throw new Error(`${label} returned build ${marker}`);
-            const robots = await page.locator('meta[name="robots"]').getAttribute('content');
-            if (robots !== 'noindex,nofollow') throw new Error(`${label} is not protected by noindex,nofollow`);
-            await page.locator('[data-enter]').click();
-            await page.locator('[data-screen="library"]:not([hidden])').waitFor();
-            await page.locator('[data-screen="library"]:not([hidden]) [data-new-atlas]').first().click();
-            await page.locator('[data-example]').click();
-            await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
-            await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
-            const nodeCount = await page.locator('[data-nodes] .node').count();
-            if (nodeCount < 5) throw new Error(`${label} created only ${nodeCount} nodes`);
-            const historyCount = await page.locator('[data-history] li').count();
-            if (historyCount < 1) throw new Error(`${label} history is empty after creation`);
-            await page.locator('[data-screen="workspace"] [data-back-library]').click();
-            await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
-            const [download] = await Promise.all([
-              page.waitForEvent('download'),
-              page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
-            ]);
-            if (!download.suggestedFilename().endsWith('.json')) throw new Error(`${label} backup is not JSON`);
-            await context.close();
-          }
-
-          (async () => {
-            const browser = await chromium.launch({ headless: true });
-            try {
-              for (const capture of captures) {
-                const page = await browser.newPage({ viewport: { width: capture.width, height: capture.height }, deviceScaleFactor: 1 });
-                const separator = capture.url.includes('?') ? '&' : '?';
-                await page.goto(`${capture.url}${separator}verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
-                await prepareLongCapture(page, capture.reveal);
-                if (capture.reveal) {
-                  const hidden = await page.locator('.reveal:not(.is-visible)').count();
-                  if (hidden !== 0) throw new Error(`${capture.url} still has ${hidden} hidden reveal elements`);
-                }
-                await page.screenshot({ path: capture.path, fullPage: true, animations: 'disabled' });
-                await page.close();
-              }
-              if (branchAtlas !== liveAtlas) await exerciseAtlas(browser, branchAtlas, 'branch Atlas');
-              await exerciseAtlas(browser, liveAtlas, 'production Atlas');
-            } finally {
-              await browser.close();
-            }
-          })();
-          NODE
+          BRANCH_ATLAS: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
+          LIVE_ATLAS: https://reasonengine.de/app/
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+        run: node .github/scripts/verify-atlas-v041.mjs
 
       - name: Publish handoff evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: public-handoff-evidence
+          name: atlas-v041-handoff-evidence
           path: artifacts/
           if-no-files-found: warn
           retention-days: 14
