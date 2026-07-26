@@ -92,22 +92,16 @@ jobs:
             { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-mobile.png', width: 390, height: 844 },
           ];
 
-          async function revealWholePage(page) {
-            await page.evaluate(async () => {
-              const pause = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-              const step = Math.max(420, Math.floor(window.innerHeight * 0.72));
-              const height = document.documentElement.scrollHeight;
+          async function exerciseRevealElements(page) {
+            const revealItems = await page.locator('.reveal').all();
 
-              for (let y = 0; y < height; y += step) {
-                window.scrollTo(0, y);
-                await pause(110);
-              }
+            for (const item of revealItems) {
+              await item.scrollIntoViewIfNeeded();
+              await page.waitForTimeout(140);
+            }
 
-              window.scrollTo(0, document.documentElement.scrollHeight);
-              await pause(250);
-              window.scrollTo(0, 0);
-              await pause(350);
-            });
+            await page.evaluate(() => window.scrollTo(0, 0));
+            await page.waitForTimeout(400);
           }
 
           (async () => {
@@ -126,7 +120,7 @@ jobs:
                   timeout: 60000,
                 });
 
-                await revealWholePage(page);
+                await exerciseRevealElements(page);
 
                 const hiddenRevealItems = await page.locator('.reveal:not(.is-visible)').count();
                 if (hiddenRevealItems !== 0) {
