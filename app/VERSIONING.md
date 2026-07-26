@@ -4,23 +4,26 @@ Atlas uses separate version numbers for separate promises.
 
 ## App release
 
-The public interface is currently **Atlas v0.4.0**.
+The public interface is currently **Atlas v0.5.0**.
 
 This number describes the shipped product surface: interface, disclosures, behavior and release-level changes.
 
-Atlas v0.4 adds a local rule-based reasoning layer that:
+Atlas v0.5 changes the spatial grammar from a radial node diagram to a growing hex landscape:
 
-- assigns answers to the active clarification topic instead of always creating unrelated cards,
-- flags possible contradictions through lexical overlap plus opposing negation,
-- exports a Markdown decision dossier grouped by confirmation state and entry type.
+- the root problem occupies the central hex,
+- existing clarification spaces remain visible as surrounding fields,
+- every submitted conversation entry creates a new, automatically filled hex,
+- new hexes are assigned to the active clarification district,
+- the map expands in a deterministic honeycomb spiral,
+- newly created hexes receive a short arrival animation.
 
-These functions are heuristics. They are not semantic AI, factual verification or a guarantee that a contradiction is real.
+Atlas v0.5 retains the local rule-based reasoning layer from v0.4. Topic assignment, entry classification and contradiction hints remain heuristics. They are not semantic AI, factual verification or a guarantee that a contradiction is real.
 
 ## Data schema
 
 The local Atlas library and individual Atlas records currently use **schema v0.2**.
 
-A new app release does not require a data-schema change when stored JSON remains compatible. Atlas v0.4 stores optional topic and contradiction metadata on records while preserving compatibility with existing v0.2 libraries and backups. Schema numbers change only when the required structure or interpretation of persisted data changes.
+A new app release does not require a data-schema change when stored JSON remains compatible. Atlas v0.5 stores optional `district` and `createdAt` metadata on new records while preserving compatibility with existing v0.2 libraries and backups. Older records without these fields remain renderable as hexes.
 
 ## Backup format
 
