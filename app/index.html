@@ -29,7 +29,7 @@
       <div class="intro-copy">
         <p class="eyebrow">ATLAS · ÖFFENTLICHE ALPHA v0.3.1</p>
         <h1>Aus einem Problem wird ein begehbarer Atlas.</h1>
-        <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes Gespräch macht daraus Schritt für Schritt eine sichtbare Karte aus Aussagen, Annahmen, offenen Fragen und Entscheidungen.</p>
+        <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes, derzeit regelbasiertes Gespräch macht daraus Schritt für Schritt eine sichtbare Karte aus Aussagen, Annahmen, offenen Fragen und Entscheidungen.</p>
         <div class="rules">
           <p><b>01 · Erst erzählen.</b> Keine Formulare, keine besondere Sprache.</p>
           <p><b>02 · Dann sichtbar machen.</b> Der Atlas wächst mit dem Gespräch.</p>
@@ -37,7 +37,7 @@
           <p><b>04 · Lokal sichern.</b> Inhalte bleiben in diesem Browser. Exportiere eine Sicherung, bevor du Browserdaten löschst oder das Gerät wechselst.</p>
         </div>
         <button class="primary" data-enter>Atlas öffnen</button>
-        <small>Öffentlich zugängliche, aber noch nicht über Suchmaschinen beworbene Alpha. Noch keine echte KI, keine Cloud, keine Konten. Bitte keine persönlichen, medizinischen oder anderen sensiblen Daten eingeben.</small>
+        <small>Öffentlich zugängliche, aber noch nicht über Suchmaschinen beworbene Alpha. Die App-Dateien werden von GitHub Pages geladen; deine Eingaben werden nicht an eine Modell-API oder Serverdatenbank gesendet. Bitte keine persönlichen, medizinischen oder anderen sensiblen Daten eingeben.</small>
       </div>
       <div class="orbital" aria-hidden="true"><i></i><i></i><b></b></div>
     </section>
@@ -72,7 +72,7 @@
         <button class="back-link" type="button" data-back-library>← Zur Übersicht</button>
         <p class="eyebrow">DER AUSGANGSPUNKT</p>
         <h1>Worum geht es?</h1>
-        <p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt.</p>
+        <p>Beschreibe das Problem so, wie du es einem Menschen erzählen würdest. Unordnung ist erlaubt. Keine personenbezogenen oder vertraulichen Angaben verwenden.</p>
         <label for="problem-input">Problem, Prozess oder Entscheidung</label>
         <textarea id="problem-input" minlength="20" maxlength="2400" rows="9" required placeholder="Zum Beispiel: Wir müssen ungefähr 50 Weihnachtsbäume im Krankenhaus verteilen …"></textarea>
         <div class="actions"><button class="link" type="button" data-example>Beispiel einsetzen</button><button class="primary" type="submit">Atlas anlegen</button></div>
@@ -120,7 +120,8 @@
         <option value="decision">Entscheidung</option>
       </select>
       <dl><div><dt>Status</dt><dd data-node-status></dd></div><div><dt>Herkunft</dt><dd data-node-source></dd></div></dl>
-      <div class="actions dialog-actions"><button class="danger" type="button" data-delete-node>Entfernen</button><span></span><button class="secondary" type="button" data-confirm-node>Bestätigen</button><button class="primary" value="save">Speichern</button></div>
+      <p class="confirmation-note">„Geprüft“ bedeutet nur: Du hast Inhalt und Einordnung als korrekt erfasst bestätigt. Es ist kein automatischer Wahrheitsbeweis. Jede spätere Änderung hebt diesen Status wieder auf.</p>
+      <div class="actions dialog-actions"><button class="danger" type="button" data-delete-node>Entfernen</button><span></span><button class="secondary" type="button" data-confirm-node>Erfassung bestätigen</button><button class="primary" value="save">Speichern</button></div>
     </form>
   </dialog>
 </body>
