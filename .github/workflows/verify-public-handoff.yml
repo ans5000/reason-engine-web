@@ -36,6 +36,7 @@ jobs:
           node --check app/backup-v0.3.js
           node --check .github/scripts/verify-atlas-v081.mjs
           node --check .github/scripts/verify-atlas-viewport-v081.mjs
+          node --check .github/scripts/verify-atlas-touch-edit-v081.mjs
           grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
           grep -Fq 'href="app/"' index.html
           grep -Fq 'atlas-app-v0.8.1-2026-07-26' app/index.html
@@ -43,10 +44,13 @@ jobs:
           grep -Fq 'ÖFFENTLICHE ALPHA v0.8.1' app/index.html
           grep -Fq 'truth-gate-v0.8.1.js' app/index.html
           grep -Fq 'viewport-center-v0.8.1.js' app/index.html
-          grep -Fq 'reason-engine-atlas-v081-viewport-hotfix' app/sw.js
+          grep -Fq 'reason-engine-atlas-v081-touch-edit-hotfix' app/sw.js
           grep -Fq 'noindex,nofollow' app/index.html
           grep -Fq 'import_trust_reset' app/truth-gate-v0.8.1.js
           grep -Fq 'field_truth_reset' app/truth-gate-v0.8.1.js
+          grep -Fq '.hex-toolbox{position:absolute' app/reason-tools-v0.8.css
+          grep -Fq 'pointer-events:none' app/reason-tools-v0.8.css
+          grep -Fq '.hex-shell:hover .hex-tool,.hex-shell:focus-within .hex-tool{pointer-events:auto}' app/reason-tools-v0.8.css
 
       - name: Verify live public files and boundaries
         shell: bash
@@ -101,6 +105,15 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.54.1
           npx playwright install --with-deps chromium
+
+      - name: Verify Atlas touch editing
+        shell: bash
+        env:
+          ATLAS_TOUCH_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/index.html' || 'https://reasonengine.de/app/index.html' }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node .github/scripts/verify-atlas-touch-edit-v081.mjs 2>&1 | tee artifacts/atlas-touch-edit.log
 
       - name: Exercise Atlas truth boundaries and capture evidence
         shell: bash
