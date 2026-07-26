@@ -1,8 +1,14 @@
-# Atlas App Prototype v0.1
+# Atlas App Prototype v0.2
 
-Browser-only Reason Engine interaction prototype.
+Lokaler, statischer Reason-Engine-Prototyp unter `/app/`.
 
-- No model API
-- No account or server database
-- Browser localStorage only
-- No personal or patient data
+## v0.2
+- mehrere Atlanten im lokalen Browser speichern
+- bestehende v0.1-Daten automatisch übernehmen
+- Atlas-Einträge manuell anlegen und bearbeiten
+- Typen und Inhalte korrigieren
+- bestätigte Einträge sichtbar halten
+- append-only Änderungsverlauf je Atlas
+- JSON-Export mit Verlauf
+
+Keine Modell-API, keine Serverdatenbank, keine Übertragung von Eingaben und keine Produktivdaten.
