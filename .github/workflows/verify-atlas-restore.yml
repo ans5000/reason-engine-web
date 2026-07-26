@@ -40,7 +40,7 @@ jobs:
           grep -Fq 'atlas-viewport-hotfix-2026-07-26' app/index.html
           grep -Fq 'truth-gate-v0.8.1.js' app/index.html
           grep -Fq 'viewport-center-v0.8.1.js' app/index.html
-          grep -Fq 'reason-engine-atlas-v081-viewport-hotfix' app/sw.js
+          grep -Fq 'reason-engine-atlas-v081-touch-edit-hotfix' app/sw.js
 
       - name: Start branch preview
         if: github.event_name == 'pull_request'
