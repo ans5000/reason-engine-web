@@ -15,10 +15,11 @@
 
   const nativeSetItem = Storage.prototype.setItem;
   const nativeAlert = window.alert.bind(window);
-  let selectedFieldId = null;
+  const pendingResetFields = new Set();
   let importContext = null;
   let importResetCount = 0;
   let importGuardTimer = null;
+  let reloadQueued = false;
 
   function now() {
     return new Date().toISOString();
@@ -38,16 +39,20 @@
     }
   }
 
-  function writeLibrary(library) {
-    nativeSetItem.call(localStorage, LIBRARY_KEY, JSON.stringify(library));
-  }
-
-  function currentAtlas(library) {
-    return library?.atlases?.find((atlas) => atlas.id === library.currentId) || null;
-  }
-
   function stripConfirmation(source = '') {
     return SOURCE_SUFFIXES.reduce((value, pattern) => value.replace(pattern, ''), source);
+  }
+
+  function isTrusted(field) {
+    return Boolean(field?.confirmed || TRUSTED_STATES.has(field?.state));
+  }
+
+  function hasDerivedAuthority(field) {
+    return DERIVED_KEYS.some((key) => Object.prototype.hasOwnProperty.call(field || {}, key));
+  }
+
+  function signature(field) {
+    return `${field?.title || ''}\u0000${field?.body || ''}\u0000${field?.fieldType || ''}`;
   }
 
   function clearDerivedAuthority(field) {
@@ -55,7 +60,7 @@
   }
 
   function resetAuthority(field) {
-    const hadAuthority = Boolean(field.confirmed || TRUSTED_STATES.has(field.state));
+    const hadAuthority = isTrusted(field);
     field.state = /noch nicht geklärt/i.test(field.body || '') ? 'empty' : 'provisional';
     field.confirmed = false;
     field.source = stripConfirmation(field.source || '');
@@ -63,17 +68,64 @@
     return hadAuthority;
   }
 
-  function record(atlas, type, text) {
+  function record(atlas, type, text, details = {}) {
     atlas.history ||= [];
-    atlas.history.push({ id: makeId(), at: now(), type, text });
+    atlas.history.push({ id: makeId(), at: now(), type, text, ...details });
     atlas.updatedAt = now();
   }
 
-  function sanitizeImportedValue(serialized) {
-    const library = JSON.parse(serialized);
-    if (!library || !Array.isArray(library.atlases) || !importContext) return serialized;
+  function preserveOrRecordReset(beforeAtlas, nextAtlas, field) {
+    nextAtlas.history ||= [];
+    const alreadyPresent = nextAtlas.history.some((event) => event.type === 'field_truth_reset' && event.fieldId === field.id);
+    if (alreadyPresent) return;
+    const prior = beforeAtlas?.history?.find((event) => event.type === 'field_truth_reset' && event.fieldId === field.id);
+    if (prior) {
+      nextAtlas.history.push(prior);
+      return;
+    }
+    record(nextAtlas, 'field_truth_reset', `Prüfstatus von „${field.title}“ nach einer inhaltlichen Änderung aufgehoben.`, { fieldId: field.id });
+  }
 
+  function sanitizeSemanticEdits(beforeLibrary, nextLibrary) {
+    if (!beforeLibrary?.atlases || !nextLibrary?.atlases) return 0;
+    const beforeAtlases = new Map(beforeLibrary.atlases.map((atlas) => [atlas.id, atlas]));
     let resets = 0;
+
+    nextLibrary.atlases.forEach((nextAtlas) => {
+      const beforeAtlas = beforeAtlases.get(nextAtlas.id);
+      if (!beforeAtlas || !Array.isArray(nextAtlas.fields)) return;
+      const beforeFields = new Map((beforeAtlas.fields || []).map((field) => [field.id, field]));
+
+      nextAtlas.fields.forEach((nextField) => {
+        if (nextField.id === 'root') return;
+        const beforeField = beforeFields.get(nextField.id);
+        if (!beforeField) return;
+        const key = `${nextAtlas.id}:${nextField.id}`;
+        const semanticChanged = signature(beforeField) !== signature(nextField);
+        const mustReset = pendingResetFields.has(key) || (
+          semanticChanged && (
+            isTrusted(beforeField) ||
+            isTrusted(nextField) ||
+            hasDerivedAuthority(beforeField) ||
+            hasDerivedAuthority(nextField)
+          )
+        );
+        if (!mustReset) return;
+
+        resetAuthority(nextField);
+        pendingResetFields.add(key);
+        preserveOrRecordReset(beforeAtlas, nextAtlas, nextField);
+        resets += 1;
+      });
+    });
+
+    return resets;
+  }
+
+  function sanitizeImportedLibrary(library) {
+    if (!library || !Array.isArray(library.atlases) || !importContext) return 0;
+    let resets = 0;
+
     library.atlases.forEach((atlas) => {
       if (importContext.existingIds.has(atlas.id) || !Array.isArray(atlas.fields)) return;
       let atlasResets = 0;
@@ -92,21 +144,38 @@
     });
 
     importResetCount = resets;
-    return JSON.stringify(library);
+    return resets;
+  }
+
+  function queueWorkspaceReload() {
+    if (reloadQueued) return;
+    reloadQueued = true;
+    queueMicrotask(() => {
+      sessionStorage.setItem(REOPEN_KEY, 'true');
+      location.reload();
+    });
   }
 
   Storage.prototype.setItem = function setItemWithTruthGate(key, value) {
-    if (this === localStorage && key === LIBRARY_KEY && importContext) {
-      clearTimeout(importGuardTimer);
-      try {
-        value = sanitizeImportedValue(value);
-      } catch (error) {
-        console.error('Atlas import trust reset failed.', error);
-      } finally {
+    if (this !== localStorage || key !== LIBRARY_KEY) return nativeSetItem.call(this, key, value);
+
+    try {
+      const beforeLibrary = readLibrary();
+      const nextLibrary = JSON.parse(value);
+      const editResets = sanitizeSemanticEdits(beforeLibrary, nextLibrary);
+      if (importContext) {
+        clearTimeout(importGuardTimer);
+        sanitizeImportedLibrary(nextLibrary);
         importContext = null;
       }
+      const result = nativeSetItem.call(this, key, JSON.stringify(nextLibrary));
+      if (editResets) queueWorkspaceReload();
+      return result;
+    } catch (error) {
+      console.error('Atlas truth gate could not validate a storage write.', error);
+      importContext = null;
+      return nativeSetItem.call(this, key, value);
     }
-    return nativeSetItem.call(this, key, value);
   };
 
   window.alert = (message) => {
@@ -119,67 +188,12 @@
     nativeAlert(message);
   };
 
-  function inferFieldId(button) {
-    if (button.dataset.fieldId) return button.dataset.fieldId;
-    const library = readLibrary();
-    const atlas = currentAtlas(library);
-    const buttons = [...document.querySelectorAll('[data-fields] .hex-field')];
-    const index = buttons.indexOf(button);
-    return index >= 0 ? atlas?.fields?.[index]?.id || null : null;
-  }
-
-  document.addEventListener('click', (event) => {
-    const button = event.target.closest?.('[data-fields] .hex-field');
-    if (button) selectedFieldId = inferFieldId(button);
-  }, true);
-
   document.addEventListener('change', (event) => {
     if (!event.target.matches?.('[data-import-input]')) return;
     const library = readLibrary();
     importContext = { existingIds: new Set((library?.atlases || []).map((atlas) => atlas.id)) };
     clearTimeout(importGuardTimer);
     importGuardTimer = setTimeout(() => { importContext = null; }, 15000);
-  }, true);
-
-  document.addEventListener('click', (event) => {
-    const saveButton = event.target.closest?.('[data-field-form] button[value="save"]');
-    if (!saveButton || !selectedFieldId) return;
-    const form = saveButton.closest('[data-field-form]');
-    if (!form) return;
-
-    const beforeLibrary = readLibrary();
-    const beforeAtlas = currentAtlas(beforeLibrary);
-    const beforeField = beforeAtlas?.fields?.find((field) => field.id === selectedFieldId);
-    if (!beforeField || beforeField.id === 'root') return;
-
-    const nextTitle = form.querySelector('[data-field-title]')?.value.trim() || '';
-    const nextBody = form.querySelector('[data-field-body]')?.value.trim() || '';
-    const nextType = form.querySelector('[data-field-type]')?.value || beforeField.fieldType;
-    const semanticChanged = nextTitle !== beforeField.title || nextBody !== beforeField.body || nextType !== beforeField.fieldType;
-    if (!semanticChanged) return;
-
-    const wasTrusted = Boolean(beforeField.confirmed || TRUSTED_STATES.has(beforeField.state));
-    const fieldId = selectedFieldId;
-
-    setTimeout(() => {
-      const library = readLibrary();
-      const atlas = currentAtlas(library);
-      const field = atlas?.fields?.find((item) => item.id === fieldId);
-      if (!field) return;
-
-      const remainedTrusted = Boolean(field.confirmed || TRUSTED_STATES.has(field.state));
-      resetAuthority(field);
-      record(
-        atlas,
-        'field_truth_reset',
-        wasTrusted || remainedTrusted
-          ? `Prüfstatus von „${field.title}“ nach einer inhaltlichen Änderung aufgehoben.`
-          : `Abgeleitete Prüfhinweise von „${field.title}“ nach einer inhaltlichen Änderung zurückgesetzt.`
-      );
-      writeLibrary(library);
-      sessionStorage.setItem(REOPEN_KEY, 'true');
-      location.reload();
-    }, 0);
   }, true);
 
   function relabelCheckedState() {
