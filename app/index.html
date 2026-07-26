@@ -7,33 +7,34 @@
   <meta name="robots" content="noindex,nofollow">
   <meta name="referrer" content="no-referrer">
   <meta name="theme-color" content="#101712">
-  <meta name="reason-engine-app-version" content="0.3.1">
+  <meta name="reason-engine-app-version" content="0.4.0">
   <meta name="reason-engine-data-schema" content="0.2">
-  <meta name="reason-engine-build" content="atlas-app-v0.3.1-2026-07-26">
+  <meta name="reason-engine-build" content="atlas-app-v0.4.0-2026-07-26">
   <title>Atlas · Reason Engine</title>
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="alpha-v0.3.css">
+  <script src="reason-v0.4.js" defer></script>
   <script src="app.js" defer></script>
   <script src="backup-v0.3.js" defer></script>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="32" height="32"><span>Reason Engine</span></a>
-    <span class="local">Öffentliche Alpha v0.3.1 · lokal · nicht indexiert</span>
+    <span class="local">Öffentliche Alpha v0.4 · lokal · nicht indexiert</span>
   </header>
 
   <main>
     <section class="screen intro" data-screen="intro">
       <div class="intro-copy">
-        <p class="eyebrow">ATLAS · ÖFFENTLICHE ALPHA v0.3.1</p>
+        <p class="eyebrow">ATLAS · ÖFFENTLICHE ALPHA v0.4</p>
         <h1>Aus einem Problem wird ein begehbarer Atlas.</h1>
-        <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes Gespräch macht daraus Schritt für Schritt eine sichtbare Karte aus Aussagen, Annahmen, offenen Fragen und Entscheidungen.</p>
+        <p class="lead">Du beschreibst ein Problem in deinen eigenen Worten. Ein klärendes Gespräch ordnet Antworten bestehenden Themen zu, markiert mögliche Widersprüche und erzeugt daraus ein überprüfbares Entscheidungsdossier.</p>
         <div class="rules">
           <p><b>01 · Erst erzählen.</b> Keine Formulare, keine besondere Sprache.</p>
-          <p><b>02 · Dann sichtbar machen.</b> Der Atlas wächst mit dem Gespräch.</p>
-          <p><b>03 · Dann prüfen.</b> Nichts wird stillschweigend als wahr übernommen.</p>
+          <p><b>02 · Dann zuordnen.</b> Antworten landen in sichtbaren Klärungsräumen statt in einem Kartenhaufen.</p>
+          <p><b>03 · Dann prüfen.</b> Einordnungen und Widerspruchshinweise bleiben ausdrücklich vorläufig.</p>
           <p><b>04 · Lokal sichern.</b> Inhalte bleiben in diesem Browser. Exportiere eine Sicherung, bevor du Browserdaten löschst oder das Gerät wechselst.</p>
         </div>
         <button class="primary" data-enter>Atlas öffnen</button>
@@ -82,12 +83,12 @@
     <section class="screen workspace" data-screen="workspace" hidden>
       <header class="workspace-head">
         <div class="workspace-title"><button class="back-link" type="button" data-back-library>← Alle Atlanten</button><p class="eyebrow">AKTUELLER ATLAS</p><h1 data-title>Neuer Atlas</h1></div>
-        <div class="actions"><button class="secondary" data-add-node>Eintrag hinzufügen</button><button class="secondary" data-export>Atlas exportieren</button><button class="danger" data-delete-atlas>Atlas löschen</button></div>
+        <div class="actions"><button class="secondary" data-add-node>Eintrag hinzufügen</button><button class="secondary" data-export-dossier>Dossier exportieren</button><button class="secondary" data-export>Atlas exportieren</button><button class="danger" data-delete-atlas>Atlas löschen</button></div>
       </header>
       <nav class="tabs"><button class="active" data-tab="atlas">Atlas</button><button data-tab="chat">Gespräch</button><button data-tab="history">Verlauf</button></nav>
       <div class="workgrid">
         <section class="panel atlas-panel active" data-panel="atlas">
-          <header class="panel-head"><div><p class="eyebrow">SICHTBARE STRUKTUR</p><h2>Atlas</h2></div><p class="legend"><span>Aussage</span><span>Annahme</span><span>Offen</span><span>Entscheidung</span></p></header>
+          <header class="panel-head"><div><p class="eyebrow">SICHTBARE STRUKTUR</p><h2>Atlas</h2></div><p class="legend"><span>Aussage</span><span>Annahme</span><span>Offen</span><span>Entscheidung</span><span>Widerspruch</span></p></header>
           <div class="stage"><svg data-lines aria-hidden="true"></svg><div data-nodes></div></div>
         </section>
         <aside class="panel history-panel" data-panel="history">
@@ -96,7 +97,7 @@
           <ol class="history-list" data-history></ol>
         </aside>
         <aside class="panel chat-panel active-side" data-panel="chat">
-          <header class="panel-head"><div><p class="eyebrow">KLÄRENDES GESPRÄCH</p><h2>Gespräch</h2></div><span class="prototype">regelbasiert</span></header>
+          <header class="panel-head"><div><p class="eyebrow">KLÄRENDES GESPRÄCH</p><h2>Gespräch</h2></div><span class="prototype">regelbasiert · Themenzuordnung</span></header>
           <div class="messages" data-messages aria-live="polite"></div>
           <form class="composer" data-chat-form><textarea id="chat-input" rows="3" maxlength="1200" required placeholder="Antworte frei oder korrigiere den Atlas …"></textarea><button class="primary" type="submit">Senden</button></form>
         </aside>
