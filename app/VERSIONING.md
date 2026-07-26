@@ -4,15 +4,23 @@ Atlas uses separate version numbers for separate promises.
 
 ## App release
 
-The public interface is currently **Atlas v0.4.0**.
+The public interface is currently **Atlas v0.4.1**.
 
 This number describes the shipped product surface: interface, disclosures, behavior and release-level changes.
 
-Atlas v0.4 adds a local rule-based reasoning layer that:
+Atlas v0.4 introduced a local rule-based reasoning layer that:
 
 - assigns answers to the active clarification topic instead of always creating unrelated cards,
 - flags possible contradictions through lexical overlap plus opposing negation,
-- exports a Markdown decision dossier grouped by confirmation state and entry type.
+- exports a Markdown decision dossier grouped by checked state and entry type.
+
+Atlas v0.4.1 hardens the status boundaries around that layer:
+
+- editing a checked entry removes its checked status,
+- editing or deleting an entry removes contradiction hints whose evidence has changed,
+- imported JSON never transfers checked status or contradiction hints as trusted state,
+- imported topic metadata remains available so restored clarification spaces do not silently fragment,
+- the offline cache is versioned so existing browsers receive the corrected implementation.
 
 These functions are heuristics. They are not semantic AI, factual verification or a guarantee that a contradiction is real.
 
@@ -20,11 +28,13 @@ These functions are heuristics. They are not semantic AI, factual verification o
 
 The local Atlas library and individual Atlas records currently use **schema v0.2**.
 
-A new app release does not require a data-schema change when stored JSON remains compatible. Atlas v0.4 stores optional topic and contradiction metadata on records while preserving compatibility with existing v0.2 libraries and backups. Schema numbers change only when the required structure or interpretation of persisted data changes.
+A new app release does not require a data-schema change when stored JSON remains compatible. Atlas v0.4.1 stores optional topic and contradiction metadata on records while preserving compatibility with existing v0.2 libraries and backups. Schema numbers change only when the required structure or interpretation of persisted data changes.
 
 ## Backup format
 
 Backup code may have its own implementation release name while still reading and writing schema v0.2 data. Compatibility must be checked against the data schema, not inferred from the app release number.
+
+A JSON backup is treated as data, not authority. Imported checked states and contradiction hints are deliberately reset and recorded in history so they can be reviewed again in the receiving browser.
 
 ## Public-alpha status
 
