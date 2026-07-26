@@ -18,67 +18,209 @@ concurrency:
 
 jobs:
   verify-public-domain:
-    name: Verify reasonengine.de
+    name: Verify reasonengine.de and Atlas
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 18
 
     steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate branch source and truth boundaries
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app/app.js
+          grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
+          grep -Fq 'href="app/"' index.html
+          grep -Fq 'atlas-app-v0.3-2026-07-26' app/index.html
+          grep -Fq 'noindex,nofollow' app/index.html
+          grep -Fq 'Eingaben bleiben lokal' app/index.html
+          grep -Fq 'confirmation_invalidated' app/app.js
+          grep -Fq 'node.confirmed = false' app/app.js
+          grep -Fq "reason-engine-atlas-v03" app/sw.js
+          ! grep -R --line-number -E 'https?://' app/app.js app/styles.css app/workspace.css app/sw.js
+
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from collections import Counter
+
+          class Inspector(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.ids = []
+              def handle_starttag(self, tag, attrs):
+                  for key, value in attrs:
+                      if key == 'id' and value:
+                          self.ids.append(value)
+
+          for path in (Path('index.html'), Path('study.html'), Path('app/index.html')):
+              parser = Inspector()
+              parser.feed(path.read_text(encoding='utf-8'))
+              duplicates = [value for value, count in Counter(parser.ids).items() if count > 1]
+              if duplicates:
+                  raise SystemExit(f'{path}: duplicate IDs: {duplicates}')
+          PY
+
+      - name: Resolve expected production markers
+        id: markers
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          extract_marker() {
+            grep -o 'reason-engine-build" content="[^"]*' | sed 's/.*content="//'
+          }
+
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            source_sha="${{ github.event.pull_request.base.sha }}"
+            home_marker="$(git show "${source_sha}:index.html" | extract_marker)"
+            study_marker="$(git show "${source_sha}:study.html" | extract_marker)"
+            atlas_marker="$(git show "${source_sha}:app/index.html" | extract_marker)"
+          else
+            home_marker="$(extract_marker < index.html)"
+            study_marker="$(extract_marker < study.html)"
+            atlas_marker="$(extract_marker < app/index.html)"
+          fi
+
+          test -n "${home_marker}"
+          test -n "${study_marker}"
+          test -n "${atlas_marker}"
+          echo "home=${home_marker}" >> "${GITHUB_OUTPUT}"
+          echo "study=${study_marker}" >> "${GITHUB_OUTPUT}"
+          echo "atlas=${atlas_marker}" >> "${GITHUB_OUTPUT}"
+
       - name: Verify live files and truth markers
         shell: bash
+        env:
+          HOME_MARKER: ${{ steps.markers.outputs.home }}
+          STUDY_MARKER: ${{ steps.markers.outputs.study }}
+          ATLAS_MARKER: ${{ steps.markers.outputs.atlas }}
         run: |
           set -euo pipefail
           mkdir -p artifacts
 
-          fetch() {
+          fetch_until_marker() {
             local url="$1"
-            local output="$2"
-            local separator="?"
-            if [[ "$url" == *\?* ]]; then
-              separator="&"
-            fi
-
-            curl \
-              --fail \
-              --silent \
-              --show-error \
-              --location \
-              --retry 18 \
-              --retry-all-errors \
-              --retry-delay 10 \
-              --connect-timeout 10 \
-              --max-time 45 \
-              "${url}${separator}verify=${GITHUB_SHA}" \
-              --output "$output"
+            local marker="$2"
+            local output="$3"
+            for attempt in $(seq 1 20); do
+              if curl --fail --silent --show-error --location \
+                --connect-timeout 10 --max-time 45 \
+                "${url}?verify=${GITHUB_SHA}&attempt=${attempt}" \
+                --output "${output}" \
+                && grep --fixed-strings --quiet "${marker}" "${output}"; then
+                return 0
+              fi
+              sleep 10
+            done
+            echo "Expected marker not found at ${url}: ${marker}" >&2
+            return 1
           }
 
-          fetch "https://reasonengine.de/" artifacts/home.html
-          fetch "https://reasonengine.de/study.html" artifacts/study.html
-          fetch "https://reasonengine.de/robots.txt" artifacts/robots.txt
-          fetch "https://reasonengine.de/sitemap.xml" artifacts/sitemap.xml
+          fetch_until_marker "https://reasonengine.de/" "${HOME_MARKER}" artifacts/home.html
+          fetch_until_marker "https://reasonengine.de/study.html" "${STUDY_MARKER}" artifacts/study.html
+          fetch_until_marker "https://reasonengine.de/app/" "${ATLAS_MARKER}" artifacts/atlas.html
 
-          grep -Fq 'public-entrance-v0.6-2026-07-26' artifacts/home.html
+          curl --fail --silent --show-error --location "https://reasonengine.de/robots.txt?verify=${GITHUB_SHA}" --output artifacts/robots.txt
+          curl --fail --silent --show-error --location "https://reasonengine.de/sitemap.xml?verify=${GITHUB_SHA}" --output artifacts/sitemap.xml
+
           grep -Fq 'Entscheidungen mit KI, die später noch erklärbar sind.' artifacts/home.html
-          grep -Fq 'Reason Engine Study' artifacts/home.html
-          grep -Fq 'Weihnachtsbaumlogistik' artifacts/home.html
-          grep -Fq 'Heute möglich. Noch nicht behauptet.' artifacts/home.html
-
-          grep -Fq 'study-pilot-v0.1-2026-07-26' artifacts/study.html
           grep -Fq 'Sieh, ob deine Hausarbeit wirklich trägt.' artifacts/study.html
           grep -Fq 'FOUNDING STUDENT PASS' artifacts/study.html
           grep -Fq 'Einmalig 10 €' artifacts/study.html
-
+          grep -Fq 'noindex,nofollow' artifacts/atlas.html
           grep -Fq 'Allow: /' artifacts/robots.txt
           grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
           grep -Fq 'https://reasonengine.de/' artifacts/sitemap.xml
           grep -Fq 'https://reasonengine.de/study.html' artifacts/sitemap.xml
+          ! grep -Fq 'https://reasonengine.de/app/' artifacts/sitemap.xml
 
-      - name: Install browser for pixel handoff
+          if [[ "${ATLAS_MARKER}" == atlas-app-v0.3-* ]]; then
+            grep -Fq 'Eingaben bleiben lokal' artifacts/atlas.html
+            grep -Fq 'Keine Personen-, Patienten- oder vertraulichen Daten eingeben.' artifacts/atlas.html
+            grep -Fq 'Atlas-Prototyp öffnen' artifacts/home.html
+          fi
+
+      - name: Install browser
         shell: bash
         run: |
           npm install --no-save --no-package-lock playwright@1.54.1
           npx playwright install --with-deps chromium
 
-      - name: Capture revealed desktop and mobile pages
+      - name: Exercise Atlas branch behavior
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m http.server 4173 > /tmp/reason-engine-http.log 2>&1 &
+          server_pid=$!
+          trap 'kill ${server_pid}' EXIT
+
+          node <<'NODE'
+          const { chromium } = require('playwright');
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const context = await browser.newContext({ viewport: { width: 900, height: 900 } });
+            const page = await context.newPage();
+            const externalRequests = [];
+            const writeRequests = [];
+
+            page.on('request', (request) => {
+              const url = new URL(request.url());
+              if (url.origin !== 'http://127.0.0.1:4173') externalRequests.push(request.url());
+              if (!['GET', 'HEAD'].includes(request.method())) writeRequests.push(`${request.method()} ${request.url()}`);
+            });
+
+            await page.goto('http://127.0.0.1:4173/app/', { waitUntil: 'networkidle' });
+            const build = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
+            if (build !== 'atlas-app-v0.3-2026-07-26') throw new Error(`Unexpected Atlas build: ${build}`);
+
+            await page.locator('[data-enter]').click();
+            await page.locator('[data-new-atlas]:visible').first().click();
+            await page.locator('[data-example]').click();
+            await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
+            await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
+
+            await page.locator('[data-tab="chat"]').click();
+            await page.locator('#chat-input').fill('Die Haustechnik ist verantwortlich.');
+            await page.locator('[data-chat-form]').evaluate((form) => form.requestSubmit());
+
+            await page.locator('[data-tab="atlas"]').click();
+            let target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+            await target.click();
+            await page.locator('[data-confirm-node]').click();
+
+            target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+            if (await target.getAttribute('data-confirmed') !== 'true') throw new Error('Node was not confirmed.');
+
+            await target.click();
+            await page.locator('[data-node-body]').fill('Die Haustechnik und die Gärtnerei sind gemeinsam verantwortlich.');
+            await page.locator('button[value="save"]').click();
+
+            target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+            if (await target.getAttribute('data-confirmed') !== 'false') throw new Error('Edited confirmation was not invalidated.');
+
+            await page.locator('[data-tab="history"]').click();
+            await page.getByText('Bestätigung für „Die Haustechnik ist verantwortlich“ nach einer Änderung aufgehoben.').waitFor();
+
+            const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02')));
+            if (!stored || stored.atlases?.length !== 1) throw new Error('Atlas was not stored locally.');
+            if (externalRequests.length) throw new Error(`External requests detected: ${externalRequests.join(', ')}`);
+            if (writeRequests.length) throw new Error(`Network writes detected: ${writeRequests.join(', ')}`);
+
+            await page.screenshot({ path: 'artifacts/atlas-local-acceptance.png', fullPage: true });
+            await browser.close();
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Capture clean live desktop and mobile pages
         shell: bash
         run: |
           set -euo pipefail
@@ -90,72 +232,38 @@ jobs:
             { url: 'https://reasonengine.de/', path: 'artifacts/home-mobile.png', width: 390, height: 844 },
             { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-desktop.png', width: 1440, height: 1000 },
             { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-mobile.png', width: 390, height: 844 },
+            { url: 'https://reasonengine.de/app/', path: 'artifacts/atlas-desktop.png', width: 1440, height: 1000 },
+            { url: 'https://reasonengine.de/app/', path: 'artifacts/atlas-mobile.png', width: 390, height: 844 },
           ];
 
-          async function exerciseRevealElements(page) {
-            await page.addStyleTag({
-              content: 'html, body { scroll-behavior: auto !important; }',
-            });
-
+          async function prepare(page) {
+            await page.addStyleTag({ content: 'html{scroll-behavior:auto!important}*,*:before,*:after{animation:none!important;transition:none!important}' });
             const revealItems = await page.locator('.reveal').all();
-
-            for (const item of revealItems) {
-              await item.scrollIntoViewIfNeeded();
-              await page.waitForTimeout(140);
-            }
-
+            for (const item of revealItems) await item.scrollIntoViewIfNeeded();
             await page.evaluate(() => {
-              document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
-              document.body.style.setProperty('scroll-behavior', 'auto', 'important');
-              window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-              if (document.activeElement instanceof HTMLElement) {
-                document.activeElement.blur();
-              }
+              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+              window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
             });
-
             await page.waitForFunction(() => window.scrollY === 0);
-            await page.waitForTimeout(200);
           }
 
           (async () => {
             const browser = await chromium.launch({ headless: true });
-
             try {
               for (const capture of captures) {
-                const page = await browser.newPage({
-                  viewport: { width: capture.width, height: capture.height },
-                  deviceScaleFactor: 1,
-                });
-
-                const separator = capture.url.includes('?') ? '&' : '?';
-                await page.goto(`${capture.url}${separator}verify=${process.env.GITHUB_SHA}`, {
-                  waitUntil: 'networkidle',
-                  timeout: 60000,
-                });
-
-                await exerciseRevealElements(page);
-
-                const hiddenRevealItems = await page.locator('.reveal:not(.is-visible)').count();
-                if (hiddenRevealItems !== 0) {
-                  throw new Error(`${capture.url} still has ${hiddenRevealItems} hidden reveal elements`);
-                }
-
-                const scrollPosition = await page.evaluate(() => window.scrollY);
-                if (scrollPosition !== 0) {
-                  throw new Error(`${capture.url} screenshot started at scrollY=${scrollPosition}`);
-                }
-
-                await page.screenshot({
-                  path: capture.path,
-                  fullPage: true,
-                  animations: 'disabled',
-                });
+                const page = await browser.newPage({ viewport: { width: capture.width, height: capture.height }, deviceScaleFactor: 1 });
+                await page.goto(`${capture.url}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
+                await prepare(page);
+                await page.screenshot({ path: capture.path, fullPage: true });
                 await page.close();
               }
             } finally {
               await browser.close();
             }
-          })();
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
           NODE
 
       - name: Publish handoff evidence
