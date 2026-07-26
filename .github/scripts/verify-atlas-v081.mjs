@@ -6,7 +6,7 @@ const branchBase = process.env.BRANCH_ATLAS_BASE;
 const liveBase = process.env.LIVE_ATLAS_BASE || 'https://reasonengine.de/app/';
 const isPullRequest = process.env.IS_PULL_REQUEST === 'true';
 const branchMarker = 'atlas-app-v0.8.1-2026-07-26';
-const liveMarker = isPullRequest ? 'atlas-app-v0.8.0-2026-07-26' : branchMarker;
+const liveMarker = branchMarker;
 const artifacts = path.resolve('artifacts');
 fs.mkdirSync(artifacts, { recursive: true });
 
