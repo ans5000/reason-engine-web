@@ -4,6 +4,10 @@
   const LIBRARY_KEY = 'reason-engine-atlas-library-v02';
   const LEGACY_KEY = 'reason-engine-atlas-v01';
   const ONBOARDING_KEY = 'reason-engine-atlas-onboarded-v02';
+  const CONFIRMATION_SUFFIXES = [
+    /; vom Nutzer bestätigt$/,
+    /; vom Nutzer als korrekt erfasst bestätigt$/
+  ];
   const EXAMPLE = 'Wir müssen ungefähr 50 Weihnachtsbäume im Krankenhaus verteilen. Bisher werden die Standorte auf einem alten Holzbrett notiert, auf dem noch Häkchen aus mehreren Jahren stehen. Änderungen gehen verloren, Zuständigkeiten sind unklar und am Ende weiß niemand sicher, ob jeder Baum am richtigen Ort steht.';
   const QUESTIONS = [
     'Wer ist an diesem Problem beteiligt oder davon betroffen?',
@@ -88,7 +92,14 @@
 
   function saveLibrary() {
     library.currentId = currentId;
-    localStorage.setItem(LIBRARY_KEY, JSON.stringify(library));
+    try {
+      localStorage.setItem(LIBRARY_KEY, JSON.stringify(library));
+      return true;
+    } catch (error) {
+      console.error('Atlas library could not be saved.', error);
+      window.alert('Der Atlas konnte nicht im Browser gespeichert werden. Exportiere vorhandene Daten und prüfe den freien Browserspeicher.');
+      return false;
+    }
   }
 
   function showScreen(name) {
@@ -112,6 +123,10 @@
     atlas.history ||= [];
     atlas.history.push({ id: makeId('event'), at: now(), type, text });
     atlas.updatedAt = now();
+  }
+
+  function stripConfirmation(source = '') {
+    return CONFIRMATION_SUFFIXES.reduce((value, pattern) => value.replace(pattern, ''), source);
   }
 
   function initialAtlas(text) {
@@ -152,10 +167,10 @@
   function label(kind, confirmed = false) {
     const labels = {
       root: 'Ausgangspunkt',
-      known: confirmed ? 'Aussage · bestätigt' : 'Aussage · unbestätigt',
-      assumption: confirmed ? 'Annahme · bestätigt' : 'Annahme · unbestätigt',
+      known: confirmed ? 'Aussage · geprüft' : 'Aussage · unbestätigt',
+      assumption: confirmed ? 'Annahme · geprüft' : 'Annahme · unbestätigt',
       open: 'Offene Frage',
-      decision: confirmed ? 'Entscheidung · bestätigt' : 'Entscheidung · unbestätigt'
+      decision: confirmed ? 'Entscheidung · geprüft' : 'Entscheidung · unbestätigt'
     };
     return labels[kind] || 'Eintrag';
   }
@@ -255,6 +270,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.className = `node${node.kind === 'root' ? ' root' : ''}`;
+      button.dataset.nodeId = node.id;
       button.dataset.kind = node.kind;
       button.dataset.confirmed = String(Boolean(node.confirmed));
       button.style.left = `${node.x}%`;
@@ -309,7 +325,7 @@
     nodeBody.value = node.body;
     nodeKind.value = node.kind === 'root' ? 'known' : node.kind;
     nodeKind.disabled = node.kind === 'root';
-    nodeStatus.textContent = node.confirmed ? 'Bestätigt' : 'Vorläufig / unbestätigt';
+    nodeStatus.textContent = node.confirmed ? 'Vom Nutzer als korrekt erfasst' : 'Vorläufig / unbestätigt';
     nodeSource.textContent = node.source;
     $('[data-confirm-node]').hidden = node.kind === 'root' || node.confirmed;
     $('[data-delete-node]').hidden = node.kind === 'root';
@@ -347,13 +363,25 @@
       const node = atlas.nodes.find((item) => item.id === selectedNodeId);
       if (!node) return;
       const before = `${node.title}|${node.body}|${node.kind}`;
+      const wasConfirmed = Boolean(node.confirmed);
       node.title = nextTitle;
       node.body = nextBody;
       if (node.kind !== 'root') node.kind = nodeKind.value;
-      if (`${node.title}|${node.body}|${node.kind}` !== before) record(atlas, 'node_edited', `Eintrag „${node.title}“ bearbeitet.`);
+      const changed = `${node.title}|${node.body}|${node.kind}` !== before;
+
+      if (changed) {
+        record(atlas, 'node_edited', `Eintrag „${node.title}“ bearbeitet.`);
+        if (node.kind !== 'root' && wasConfirmed) {
+          node.confirmed = false;
+          node.source = stripConfirmation(node.source);
+          record(atlas, 'confirmation_invalidated', `Bestätigung für „${node.title}“ nach einer Änderung aufgehoben.`);
+        }
+      }
+
       if (node.id === 'root') {
         atlas.title = node.title;
         atlas.problem = node.body;
+        if (changed && !node.source.includes('vom Nutzer bearbeitet')) node.source += '; vom Nutzer bearbeitet';
       }
     }
     saveLibrary();
@@ -365,8 +393,8 @@
     const node = atlas?.nodes.find((item) => item.id === selectedNodeId);
     if (!node || node.kind === 'root' || node.confirmed) return;
     node.confirmed = true;
-    node.source = `${node.source}; vom Nutzer bestätigt`;
-    record(atlas, 'node_confirmed', `Eintrag „${node.title}“ bestätigt.`);
+    node.source = `${stripConfirmation(node.source)}; vom Nutzer als korrekt erfasst bestätigt`;
+    record(atlas, 'node_confirmed', `Eintrag „${node.title}“ als korrekt erfasst bestätigt.`);
     saveLibrary();
     dialog.close();
     renderWorkspace();
@@ -375,7 +403,7 @@
   function deleteSelectedNode() {
     const atlas = currentAtlas();
     const node = atlas?.nodes.find((item) => item.id === selectedNodeId);
-    if (!node || node.id === 'root' || !confirm(`Eintrag „${node.title}“ entfernen?`)) return;
+    if (!node || node.id === 'root' || !window.confirm(`Eintrag „${node.title}“ entfernen?`)) return;
     atlas.nodes = atlas.nodes.filter((item) => item.id !== selectedNodeId);
     record(atlas, 'node_deleted', `Eintrag „${node.title}“ entfernt. Gesprächsnachrichten bleiben erhalten.`);
     saveLibrary();
@@ -385,7 +413,7 @@
 
   function deleteAtlas(id = currentId) {
     const atlas = library.atlases.find((item) => item.id === id);
-    if (!atlas || !confirm(`Atlas „${atlas.title}“ vollständig aus diesem Browser löschen?`)) return;
+    if (!atlas || !window.confirm(`Atlas „${atlas.title}“ vollständig aus diesem Browser löschen?`)) return;
     library.atlases = library.atlases.filter((item) => item.id !== id);
     if (currentId === id) currentId = null;
     saveLibrary();
