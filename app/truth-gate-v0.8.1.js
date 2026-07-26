@@ -3,7 +3,6 @@
 
   const LIBRARY_KEY = 'reason-engine-atlas-library-v03';
   const REOPEN_KEY = 'reason-engine-atlas-reopen-v07';
-  const DIAGNOSTIC_KEY = 'reason-engine-atlas-truth-gate-diagnostic';
   const TRUSTED_STATES = new Set(['confirmed', 'decided']);
   const SOURCE_SUFFIXES = [
     /; vom Nutzer bestätigt$/,
@@ -88,8 +87,7 @@
   }
 
   function sanitizeSemanticEdits(beforeLibrary, nextLibrary) {
-    const comparisons = [];
-    if (!beforeLibrary?.atlases || !nextLibrary?.atlases) return { resets: 0, comparisons };
+    if (!beforeLibrary?.atlases || !nextLibrary?.atlases) return 0;
     const beforeAtlases = new Map(beforeLibrary.atlases.map((atlas) => [atlas.id, atlas]));
     let resets = 0;
 
@@ -103,15 +101,15 @@
         const beforeField = beforeFields.get(nextField.id);
         if (!beforeField) return;
         const key = `${nextAtlas.id}:${nextField.id}`;
-        const beforeSignature = signature(beforeField);
-        const nextSignature = signature(nextField);
-        const semanticChanged = beforeSignature !== nextSignature;
-        const beforeTrusted = isTrusted(beforeField);
-        const nextTrusted = isTrusted(nextField);
-        const pending = pendingResetFields.has(key);
-        const derived = hasDerivedAuthority(beforeField) || hasDerivedAuthority(nextField);
-        const mustReset = pending || (semanticChanged && (beforeTrusted || nextTrusted || derived));
-        comparisons.push({ atlasId: nextAtlas.id, fieldId: nextField.id, semanticChanged, beforeTrusted, nextTrusted, pending, derived, mustReset, beforeSignature, nextSignature });
+        const semanticChanged = signature(beforeField) !== signature(nextField);
+        const mustReset = pendingResetFields.has(key) || (
+          semanticChanged && (
+            isTrusted(beforeField) ||
+            isTrusted(nextField) ||
+            hasDerivedAuthority(beforeField) ||
+            hasDerivedAuthority(nextField)
+          )
+        );
         if (!mustReset) return;
 
         resetAuthority(nextField);
@@ -121,7 +119,7 @@
       });
     });
 
-    return { resets, comparisons };
+    return resets;
   }
 
   function sanitizeImportedLibrary(library) {
@@ -164,19 +162,16 @@
     try {
       const beforeLibrary = readLibrary();
       const nextLibrary = JSON.parse(value);
-      const semanticResult = sanitizeSemanticEdits(beforeLibrary, nextLibrary);
-      let importedResets = 0;
+      const editResets = sanitizeSemanticEdits(beforeLibrary, nextLibrary);
       if (importContext) {
         clearTimeout(importGuardTimer);
-        importedResets = sanitizeImportedLibrary(nextLibrary);
+        sanitizeImportedLibrary(nextLibrary);
         importContext = null;
       }
-      sessionStorage.setItem(DIAGNOSTIC_KEY, JSON.stringify({ at: now(), editResets: semanticResult.resets, importedResets, comparisons: semanticResult.comparisons }));
       const result = nativeSetItem.call(this, key, JSON.stringify(nextLibrary));
-      if (semanticResult.resets) queueWorkspaceReload();
+      if (editResets) queueWorkspaceReload();
       return result;
     } catch (error) {
-      sessionStorage.setItem(DIAGNOSTIC_KEY, JSON.stringify({ at: now(), error: String(error?.stack || error) }));
       console.error('Atlas truth gate could not validate a storage write.', error);
       importContext = null;
       return nativeSetItem.call(this, key, value);
