@@ -49,7 +49,7 @@ try {
 
   const checkedField = page.locator('[data-fields] .hex-field:not(.root)').first();
   const checkedTitle = (await checkedField.locator('strong').textContent())?.trim();
-  await checkedField.click();
+  await checkedField.evaluate((element) => element.click());
   await page.locator('[data-confirm-field]').click();
   await page.locator('[data-fields] .hex-field:not(.root)').first().waitFor();
 
