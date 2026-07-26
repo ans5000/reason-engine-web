@@ -1,0 +1,53 @@
+/* Image Quality Pass v0.1
+   Keeps the existing visual direction while removing effects that exaggerate
+   compression and softness on large and high-density displays. */
+
+body::before {
+  opacity: .025;
+}
+
+.hero {
+  height: min(860px, 100svh);
+}
+
+.hero-image {
+  object-position: center 46%;
+  filter: saturate(.96) contrast(1.06) brightness(.94);
+  transform: none;
+  image-rendering: auto;
+}
+
+.hero-shade {
+  background:
+    linear-gradient(90deg,
+      rgba(14,12,9,.91) 0%,
+      rgba(14,12,9,.76) 30%,
+      rgba(14,12,9,.38) 55%,
+      rgba(14,12,9,.08) 78%,
+      rgba(14,12,9,.16) 100%),
+    linear-gradient(0deg, rgba(12,10,8,.48), transparent 44%);
+}
+
+.manifest-image img {
+  filter: saturate(.96) contrast(1.05) brightness(1.01);
+}
+
+@media (max-width: 760px) {
+  .hero {
+    min-height: 720px;
+    height: 92svh;
+  }
+
+  .hero-image {
+    object-position: 61% center;
+  }
+
+  .hero-shade {
+    background:
+      linear-gradient(0deg,
+        rgba(14,12,9,.92) 0%,
+        rgba(14,12,9,.70) 45%,
+        rgba(14,12,9,.28) 72%,
+        rgba(14,12,9,.18) 100%);
+  }
+}
