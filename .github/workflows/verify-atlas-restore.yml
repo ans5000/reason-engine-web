@@ -1,0 +1,171 @@
+name: Verify Atlas backup restore
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/verify-atlas-restore.yml"
+      - "app/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas-restore-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-restore:
+    name: Export and restore Atlas
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out proposed source
+        uses: actions/checkout@v4
+
+      - name: Start branch preview
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          nohup python3 -m http.server 4174 > /tmp/reason-engine-restore-preview.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:4174/app/ > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/reason-engine-restore-preview.log
+          exit 1
+
+      - name: Install browser
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock playwright@1.54.1
+          npx playwright install --with-deps chromium
+
+      - name: Exercise complete backup cycle
+        shell: bash
+        env:
+          ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4174/app/' || 'https://reasonengine.de/app/' }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node <<'NODE'
+          const fs = require('fs');
+          const { chromium } = require('playwright');
+
+          const base = process.env.ATLAS_BASE;
+          const expectedMarker = 'atlas-app-v0.3.1-2026-07-26';
+          const backupPath = `${process.cwd()}/artifacts/atlas-backup.json`;
+
+          async function waitForBuild(page) {
+            for (let attempt = 1; attempt <= 20; attempt += 1) {
+              await page.goto(`${base}?restore=${process.env.GITHUB_SHA}&attempt=${attempt}`, {
+                waitUntil: 'networkidle',
+                timeout: 60000,
+              });
+              const marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
+              if (marker === expectedMarker) return;
+              await page.waitForTimeout(10000);
+            }
+            throw new Error(`Expected ${expectedMarker} at ${base}`);
+          }
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const context = await browser.newContext({
+              viewport: { width: 1280, height: 900 },
+              acceptDownloads: true,
+              serviceWorkers: 'block',
+            });
+            const page = await context.newPage();
+
+            try {
+              await waitForBuild(page);
+              await page.locator('[data-enter]').click();
+              await page.locator('[data-screen="library"]:not([hidden]) [data-new-atlas]').first().click();
+              await page.locator('[data-example]').click();
+              await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
+              await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
+
+              await page.locator('[data-tab="chat"]').click();
+              await page.locator('#chat-input').fill('Die Haustechnik ist verantwortlich.');
+              await page.locator('[data-chat-form]').evaluate((form) => form.requestSubmit());
+              await page.locator('[data-tab="atlas"]').click();
+              let checkedNode = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+              await checkedNode.click();
+              await page.locator('[data-confirm-node]').click();
+              checkedNode = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+              if (await checkedNode.getAttribute('data-confirmed') !== 'true') throw new Error('Source Atlas did not retain the checked status before export.');
+
+              const originalNodes = await page.locator('[data-nodes] .node').count();
+              if (originalNodes < 6) throw new Error(`Original Atlas has only ${originalNodes} nodes`);
+
+              await page.locator('[data-screen="workspace"] [data-back-library]').click();
+              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
+              const [download] = await Promise.all([
+                page.waitForEvent('download'),
+                page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
+              ]);
+              await download.saveAs(backupPath);
+
+              const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
+              if (backup.kind !== 'reason-engine-atlas-backup') throw new Error('Backup kind is invalid');
+              if (backup.version !== '0.3') throw new Error(`Backup version is ${backup.version}`);
+              if (!Array.isArray(backup.atlases) || backup.atlases.length !== 1) throw new Error('Backup does not contain exactly one Atlas');
+              const exportedCheckedNode = backup.atlases[0].nodes.find((node) => node.title === 'Die Haustechnik ist verantwortlich');
+              if (!exportedCheckedNode?.confirmed) throw new Error('Backup did not preserve the source checked status as historical input.');
+
+              await page.evaluate(() => localStorage.clear());
+              await page.reload({ waitUntil: 'networkidle' });
+              await page.locator('[data-enter]').click();
+              await page.locator('[data-screen="library"]:not([hidden])').waitFor();
+              if (await page.locator('.atlas-card').count()) throw new Error('Library was not empty after clearing local storage');
+
+              let dialogMessage = '';
+              page.once('dialog', async (dialog) => {
+                dialogMessage = dialog.message();
+                await dialog.accept();
+              });
+              await page.locator('[data-import-input]').setInputFiles(backupPath);
+              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor({ timeout: 30000 });
+              if (!dialogMessage.includes('Bestätigungsstatus')) throw new Error(`Import dialog did not disclose trust reset: ${dialogMessage}`);
+
+              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card-open').click();
+              await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
+              const restoredNodes = await page.locator('[data-nodes] .node').count();
+              if (restoredNodes !== originalNodes) throw new Error(`Restore changed node count from ${originalNodes} to ${restoredNodes}`);
+
+              const restoredCheckedNode = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+              if (await restoredCheckedNode.getAttribute('data-confirmed') !== 'false') throw new Error('Restore trusted a checked status from JSON.');
+              const importedHistory = await page.locator('[data-history] li').allTextContents();
+              if (!importedHistory.some((entry) => entry.includes('lokalen JSON-Sicherung importiert'))) throw new Error('Restore event is missing from history');
+              if (!importedHistory.some((entry) => entry.includes('Bestätigungsstatus wurden nicht übernommen'))) throw new Error('Trust-reset event is missing from history');
+
+              await page.screenshot({
+                path: 'artifacts/atlas-restored.png',
+                fullPage: true,
+                animations: 'disabled',
+              });
+            } finally {
+              await context.close();
+              await browser.close();
+            }
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
+          NODE
+
+      - name: Publish restore evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-restore-evidence
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
