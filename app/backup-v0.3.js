@@ -69,13 +69,17 @@
     const requestedKind = ALLOWED_KINDS.has(raw?.kind) ? raw.kind : 'known';
     const isRoot = index === 0 || raw?.id === 'root' || requestedKind === 'root';
     const fallback = position(index);
+    const importedConfirmation = !isRoot && Boolean(raw?.confirmed);
+    const originalSource = asText(raw?.source, 'Aus JSON-Sicherung importiert').slice(0, 200);
     return {
       id: isRoot ? 'root' : makeId('node'),
       title: asText(raw?.title, isRoot ? 'Importierter Ausgangspunkt' : 'Importierter Eintrag').slice(0, 90),
       body: asText(raw?.body, 'Ohne Inhalt').slice(0, 1600),
       kind: isRoot ? 'root' : requestedKind,
-      confirmed: isRoot ? true : Boolean(raw?.confirmed),
-      source: asText(raw?.source, 'Aus JSON-Sicherung importiert').slice(0, 240),
+      confirmed: isRoot,
+      source: importedConfirmation
+        ? `${originalSource}; frühere Bestätigung beim Import aufgehoben`.slice(0, 240)
+        : originalSource,
       x: Number.isFinite(Number(raw?.x)) ? Math.min(95, Math.max(5, Number(raw.x))) : fallback.x,
       y: Number.isFinite(Number(raw?.y)) ? Math.min(95, Math.max(5, Number(raw.y))) : fallback.y
     };
@@ -86,6 +90,7 @@
     const rawProblem = asText(raw.problem || raw.body, 'Importierter Atlas');
     const title = asText(raw.title, rawProblem.split(/[.!?]/)[0] || 'Importierter Atlas').slice(0, 90);
     const rawNodes = Array.isArray(raw.nodes) ? raw.nodes : [];
+    const hadImportedConfirmations = rawNodes.some((node, index) => index > 0 && node?.kind !== 'root' && Boolean(node?.confirmed));
     const nodes = rawNodes.length ? rawNodes.slice(0, 250).map(normalizeNode) : [normalizeNode({ id: 'root', title, body: rawProblem }, 0)];
     if (!nodes.some((node) => node.id === 'root')) nodes.unshift(normalizeNode({ id: 'root', title, body: rawProblem }, 0));
 
@@ -103,6 +108,9 @@
     })) : [];
 
     history.push({ id: makeId('event'), at: now(), type: 'imported', text: 'Atlas aus einer lokalen JSON-Sicherung importiert.' });
+    if (hadImportedConfirmations) {
+      history.push({ id: makeId('event'), at: now(), type: 'confirmation_invalidated', text: 'Importierte Bestätigungsstatus wurden nicht übernommen und müssen erneut geprüft werden.' });
+    }
 
     return {
       id: makeId('atlas'),
@@ -135,7 +143,7 @@
     library.atlases.push(...imported);
     library.currentId = imported[0].id;
     saveLibrary(library);
-    alert(`${imported.length} Atlas${imported.length === 1 ? '' : 'se'} wurde${imported.length === 1 ? '' : 'n'} importiert.`);
+    alert(`${imported.length} Atlas${imported.length === 1 ? '' : 'se'} wurde${imported.length === 1 ? '' : 'n'} importiert. Bestätigungsstatus aus Dateien werden aus Sicherheitsgründen nicht übernommen.`);
     location.reload();
   }
 

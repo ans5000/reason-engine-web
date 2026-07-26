@@ -31,11 +31,14 @@ Public, static and dependency-free entrance for `reasonengine.de`.
 
 ## Atlas truth boundary
 
-Atlas v0.3 is a usable browser prototype, not a production application.
+Atlas v0.3.1 is a usable browser prototype, not a production application.
 
 - Data is stored only in the current browser through `localStorage`.
 - Users can export and import a JSON backup.
 - Clearing browser data can destroy unsaved local workspaces.
+- Editing a checked entry automatically removes its checked status.
+- Imported JSON never carries checked status into the new local library; imported entries must be reviewed again.
+- “Checked” means correctly captured by the user, not proven true.
 - No account, cloud database, model API or automatic truth enforcement exists.
 - Personal, medical and other sensitive data must not be entered.
 

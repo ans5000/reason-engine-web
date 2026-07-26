@@ -20,7 +20,7 @@ jobs:
   verify-public-domain:
     name: Verify reasonengine.de
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 22
 
     steps:
       - name: Check out proposed source
@@ -35,10 +35,13 @@ jobs:
           grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
           grep -Fq 'href="app/"' index.html
           grep -Fq 'Öffentliche Alpha · lokal' index.html
-          grep -Fq 'atlas-app-v0.3-2026-07-26' app/index.html
+          grep -Fq 'atlas-app-v0.3.1-2026-07-26' app/index.html
           grep -Fq 'noindex,nofollow' app/index.html
           grep -Fq 'Sicherung importieren' app/index.html
-          grep -Fq 'reason-engine-atlas-v03' app/sw.js
+          grep -Fq 'confirmation_invalidated' app/app.js
+          grep -Fq 'node.confirmed = false' app/app.js
+          grep -Fq 'Importierte Bestätigungsstatus wurden nicht übernommen' app/backup-v0.3.js
+          grep -Fq 'reason-engine-atlas-v031' app/sw.js
 
       - name: Verify live public files and truth markers
         shell: bash
@@ -65,11 +68,34 @@ jobs:
               --output "$output"
           }
 
+          fetch_until_marker() {
+            local url="$1"
+            local marker="$2"
+            local output="$3"
+            for attempt in $(seq 1 20); do
+              if curl --fail --silent --show-error --location \
+                --connect-timeout 10 --max-time 45 \
+                "${url}?verify=${GITHUB_SHA}&attempt=${attempt}" \
+                --output "${output}" \
+                && grep -Fq "${marker}" "${output}"; then
+                return 0
+              fi
+              sleep 10
+            done
+            echo "Expected marker not found at ${url}: ${marker}" >&2
+            return 1
+          }
+
           fetch "https://reasonengine.de/" artifacts/home.html
           fetch "https://reasonengine.de/study.html" artifacts/study.html
-          fetch "https://reasonengine.de/app/" artifacts/atlas-live.html
           fetch "https://reasonengine.de/robots.txt" artifacts/robots.txt
           fetch "https://reasonengine.de/sitemap.xml" artifacts/sitemap.xml
+
+          expected_atlas='atlas-app-v0.3-2026-07-26'
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            expected_atlas='atlas-app-v0.3.1-2026-07-26'
+          fi
+          fetch_until_marker "https://reasonengine.de/app/" "${expected_atlas}" artifacts/atlas-live.html
 
           grep -Fq 'public-entrance-v0.7-2026-07-26' artifacts/home.html
           grep -Fq 'Entscheidungen mit KI, die später noch erklärbar sind.' artifacts/home.html
@@ -82,11 +108,13 @@ jobs:
           grep -Fq 'FOUNDING STUDENT PASS' artifacts/study.html
           grep -Fq 'Einmalig 10 €' artifacts/study.html
 
-          grep -Fq 'atlas-app-v0.3-2026-07-26' artifacts/atlas-live.html
-          grep -Fq 'ÖFFENTLICHE ALPHA v0.3' artifacts/atlas-live.html
           grep -Fq 'noindex,nofollow' artifacts/atlas-live.html
           grep -Fq 'Sicherung importieren' artifacts/atlas-live.html
           grep -Fq 'keine echte KI' artifacts/atlas-live.html
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            grep -Fq 'ÖFFENTLICHE ALPHA v0.3.1' artifacts/atlas-live.html
+            grep -Fq 'Jede spätere Änderung hebt diesen Status wieder auf.' artifacts/atlas-live.html
+          fi
 
           grep -Fq 'Allow: /' artifacts/robots.txt
           grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
@@ -120,6 +148,7 @@ jobs:
         env:
           BRANCH_ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
           LIVE_ATLAS_BASE: https://reasonengine.de/app/
+          IS_PULL_REQUEST: ${{ github.event_name == 'pull_request' }}
         run: |
           set -euo pipefail
           node <<'NODE'
@@ -127,6 +156,9 @@ jobs:
 
           const liveAtlas = process.env.LIVE_ATLAS_BASE;
           const branchAtlas = process.env.BRANCH_ATLAS_BASE;
+          const isPullRequest = process.env.IS_PULL_REQUEST === 'true';
+          const liveMarker = isPullRequest ? 'atlas-app-v0.3-2026-07-26' : 'atlas-app-v0.3.1-2026-07-26';
+          const branchMarker = 'atlas-app-v0.3.1-2026-07-26';
           const captures = [
             { url: 'https://reasonengine.de/', path: 'artifacts/home-desktop.png', width: 1440, height: 1000, reveal: true },
             { url: 'https://reasonengine.de/', path: 'artifacts/home-mobile.png', width: 390, height: 844, reveal: true },
@@ -160,16 +192,25 @@ jobs:
             await page.waitForFunction(() => window.scrollY === 0);
           }
 
-          async function exerciseAtlas(browser, base, label) {
+          async function exerciseAtlas(browser, base, label, expectedMarker, verifyTruth) {
             const context = await browser.newContext({
               viewport: { width: 1280, height: 900 },
               acceptDownloads: true,
               serviceWorkers: 'block',
             });
             const page = await context.newPage();
+            const atlasOrigin = new URL(base).origin;
+            const externalRequests = [];
+            const writeRequests = [];
+            page.on('request', (request) => {
+              const url = new URL(request.url());
+              if (url.origin !== atlasOrigin) externalRequests.push(request.url());
+              if (!['GET', 'HEAD'].includes(request.method())) writeRequests.push(`${request.method()} ${request.url()}`);
+            });
+
             await page.goto(`${base}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
             const marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
-            if (marker !== 'atlas-app-v0.3-2026-07-26') throw new Error(`${label} returned build ${marker}`);
+            if (marker !== expectedMarker) throw new Error(`${label} returned build ${marker}`);
             const robots = await page.locator('meta[name="robots"]').getAttribute('content');
             if (robots !== 'noindex,nofollow') throw new Error(`${label} is not protected by noindex,nofollow`);
             await page.locator('[data-enter]').click();
@@ -180,8 +221,29 @@ jobs:
             await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
             const nodeCount = await page.locator('[data-nodes] .node').count();
             if (nodeCount < 5) throw new Error(`${label} created only ${nodeCount} nodes`);
-            const historyCount = await page.locator('[data-history] li').count();
-            if (historyCount < 1) throw new Error(`${label} history is empty after creation`);
+
+            if (verifyTruth) {
+              await page.locator('[data-tab="chat"]').click();
+              await page.locator('#chat-input').fill('Die Haustechnik ist verantwortlich.');
+              await page.locator('[data-chat-form]').evaluate((form) => form.requestSubmit());
+              await page.locator('[data-tab="atlas"]').click();
+
+              let target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+              await target.click();
+              await page.locator('[data-confirm-node]').click();
+              target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+              if (await target.getAttribute('data-confirmed') !== 'true') throw new Error(`${label} did not mark the entry as checked.`);
+
+              await target.click();
+              await page.locator('[data-node-body]').fill('Die Haustechnik und die Gärtnerei sind gemeinsam verantwortlich.');
+              await page.locator('button[value="save"]').click();
+              target = page.locator('button.node').filter({ hasText: 'Die Haustechnik ist verantwortlich' }).first();
+              if (await target.getAttribute('data-confirmed') !== 'false') throw new Error(`${label} kept a checked status after editing.`);
+
+              await page.locator('[data-tab="history"]').click();
+              await page.getByText('Bestätigung für „Die Haustechnik ist verantwortlich“ nach einer Änderung aufgehoben.').waitFor();
+            }
+
             await page.locator('[data-screen="workspace"] [data-back-library]').click();
             await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
             const [download] = await Promise.all([
@@ -189,6 +251,41 @@ jobs:
               page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
             ]);
             if (!download.suggestedFilename().endsWith('.json')) throw new Error(`${label} backup is not JSON`);
+
+            if (verifyTruth) {
+              const tamperedBackup = {
+                kind: 'reason-engine-atlas-backup',
+                version: '0.3',
+                atlases: [{
+                  title: 'Manipulierter Import',
+                  problem: 'Dieser importierte Testfall prüft die Bestätigungsgrenze.',
+                  nodes: [
+                    { id: 'root', title: 'Manipulierter Import', body: 'Ausgangspunkt', kind: 'root', confirmed: true },
+                    { id: 'forged', title: 'Gefälschte Bestätigung', body: 'Diese Aussage kam bestätigt aus einer Datei.', kind: 'known', confirmed: true, source: 'Manipulierte JSON-Datei' }
+                  ],
+                  messages: [],
+                  history: []
+                }]
+              };
+              page.once('dialog', (dialog) => dialog.accept());
+              await page.locator('[data-import-input]').setInputFiles({
+                name: 'manipulierter-import.json',
+                mimeType: 'application/json',
+                buffer: Buffer.from(JSON.stringify(tamperedBackup)),
+              });
+              await page.waitForFunction(() => {
+                const library = JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02'));
+                return library?.atlases?.length === 2;
+              });
+              const stored = await page.evaluate(() => JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02')));
+              const imported = stored.atlases.find((atlas) => atlas.title === 'Manipulierter Import');
+              const forged = imported?.nodes.find((node) => node.title === 'Gefälschte Bestätigung');
+              if (!forged || forged.confirmed !== false) throw new Error(`${label} preserved a forged imported checked status.`);
+              if (!imported.history.some((event) => event.type === 'confirmation_invalidated')) throw new Error(`${label} did not record import invalidation.`);
+            }
+
+            if (externalRequests.length) throw new Error(`${label} made external requests: ${externalRequests.join(', ')}`);
+            if (writeRequests.length) throw new Error(`${label} made network writes: ${writeRequests.join(', ')}`);
             await context.close();
           }
 
@@ -207,12 +304,15 @@ jobs:
                 await page.screenshot({ path: capture.path, fullPage: true, animations: 'disabled' });
                 await page.close();
               }
-              if (branchAtlas !== liveAtlas) await exerciseAtlas(browser, branchAtlas, 'branch Atlas');
-              await exerciseAtlas(browser, liveAtlas, 'production Atlas');
+              if (branchAtlas !== liveAtlas) await exerciseAtlas(browser, branchAtlas, 'branch Atlas', branchMarker, true);
+              await exerciseAtlas(browser, liveAtlas, 'production Atlas', liveMarker, !isPullRequest);
             } finally {
               await browser.close();
             }
-          })();
+          })().catch((error) => {
+            console.error(error);
+            process.exit(1);
+          });
           NODE
 
       - name: Publish handoff evidence
