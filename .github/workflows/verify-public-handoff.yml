@@ -32,14 +32,18 @@ jobs:
           node --check app/reason-v0.7.js
           node --check app/reason-tools-v0.8.js
           node --check app/truth-gate-v0.8.1.js
+          node --check app/viewport-center-v0.8.1.js
           node --check app/backup-v0.3.js
           node --check .github/scripts/verify-atlas-v081.mjs
+          node --check .github/scripts/verify-atlas-viewport-v081.mjs
           grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
           grep -Fq 'href="app/"' index.html
           grep -Fq 'atlas-app-v0.8.1-2026-07-26' app/index.html
+          grep -Fq 'atlas-viewport-hotfix-2026-07-26' app/index.html
           grep -Fq 'ÖFFENTLICHE ALPHA v0.8.1' app/index.html
           grep -Fq 'truth-gate-v0.8.1.js' app/index.html
-          grep -Fq 'reason-engine-atlas-v081-truth-gate' app/sw.js
+          grep -Fq 'viewport-center-v0.8.1.js' app/index.html
+          grep -Fq 'reason-engine-atlas-v081-viewport-hotfix' app/sw.js
           grep -Fq 'noindex,nofollow' app/index.html
           grep -Fq 'import_trust_reset' app/truth-gate-v0.8.1.js
           grep -Fq 'field_truth_reset' app/truth-gate-v0.8.1.js
@@ -73,6 +77,10 @@ jobs:
           grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
           grep -Fq 'https://reasonengine.de/' artifacts/sitemap.xml
           grep -Fq 'https://reasonengine.de/study.html' artifacts/sitemap.xml
+          if [[ "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
+            grep -Fq 'atlas-viewport-hotfix-2026-07-26' artifacts/atlas-live.html
+            grep -Fq 'viewport-center-v0.8.1.js' artifacts/atlas-live.html
+          fi
           if grep -Fq 'https://reasonengine.de/app/' artifacts/sitemap.xml; then
             echo 'Atlas must remain outside the public sitemap during alpha.' >&2
             exit 1
@@ -106,6 +114,14 @@ jobs:
           set -euo pipefail
           mkdir -p artifacts
           node .github/scripts/verify-atlas-v081.mjs 2>&1 | tee artifacts/public-handoff-browser.log
+
+      - name: Verify centered Atlas viewport
+        shell: bash
+        env:
+          ATLAS_VIEWPORT_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/index.html' || 'https://reasonengine.de/app/index.html' }}
+        run: |
+          set -euo pipefail
+          node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-browser.log
 
       - name: Publish handoff evidence
         if: always()

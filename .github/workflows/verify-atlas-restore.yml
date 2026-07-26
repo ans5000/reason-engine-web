@@ -33,11 +33,14 @@ jobs:
         run: |
           set -euo pipefail
           node --check app/truth-gate-v0.8.1.js
+          node --check app/viewport-center-v0.8.1.js
           node --check app/backup-v0.3.js
           node --check .github/scripts/verify-atlas-restore-v081.mjs
           grep -Fq 'atlas-app-v0.8.1-2026-07-26' app/index.html
+          grep -Fq 'atlas-viewport-hotfix-2026-07-26' app/index.html
           grep -Fq 'truth-gate-v0.8.1.js' app/index.html
-          grep -Fq 'reason-engine-atlas-v081-truth-gate' app/sw.js
+          grep -Fq 'viewport-center-v0.8.1.js' app/index.html
+          grep -Fq 'reason-engine-atlas-v081-viewport-hotfix' app/sw.js
 
       - name: Start branch preview
         if: github.event_name == 'pull_request'
