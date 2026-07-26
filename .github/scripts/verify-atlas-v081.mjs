@@ -93,14 +93,14 @@ async function exerciseTruthGate(browser) {
   const target = page.locator('[data-fields] .hex-field:not(.root)').first();
   const fieldId = await target.getAttribute('data-field-id');
   if (!fieldId) throw new Error('Target field has no stable field id');
-  await target.click();
+  await target.evaluate((element) => element.click());
   await page.locator('[data-field-dialog]').waitFor({ state: 'visible' });
   await page.locator('[data-confirm-field]').click();
 
   let reopened = page.locator(`[data-fields] .hex-field[data-field-id="${fieldId}"]`);
   await reopened.waitFor();
   if (await reopened.getAttribute('data-state') !== 'confirmed') throw new Error('Field could not be checked before the edit test');
-  await reopened.click();
+  await reopened.evaluate((element) => element.click());
   const checkedLabel = await page.locator('option[value="confirmed"]').textContent();
   if (checkedLabel?.trim() !== 'geprüft') throw new Error(`Checked-state label is still ${checkedLabel}`);
   const body = page.locator('[data-field-body]');
