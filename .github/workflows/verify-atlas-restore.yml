@@ -2,11 +2,9 @@ name: Verify Atlas backup restore
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
     paths:
       - ".github/workflows/verify-atlas-restore.yml"
       - "app/**"
@@ -20,12 +18,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  verify-production-restore:
-    name: Export and restore production Atlas
+  verify-restore:
+    name: Export and restore Atlas v0.4.1
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 16
 
     steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Start branch preview
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          nohup python3 -m http.server 4174 > /tmp/atlas-v041-restore.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            curl --fail --silent http://127.0.0.1:4174/app/ > /dev/null && exit 0
+            sleep 1
+          done
+          cat /tmp/atlas-v041-restore.log
+          exit 1
+
       - name: Install browser
         shell: bash
         run: |
@@ -34,6 +47,8 @@ jobs:
 
       - name: Exercise complete backup cycle
         shell: bash
+        env:
+          ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4174/app/' || 'https://reasonengine.de/app/' }}
         run: |
           set -euo pipefail
           mkdir -p artifacts
@@ -41,97 +56,84 @@ jobs:
           const fs = require('fs');
           const { chromium } = require('playwright');
 
-          const base = 'https://reasonengine.de/app/';
-          const backupPath = `${process.cwd()}/artifacts/atlas-production-backup.json`;
+          const base = process.env.ATLAS_BASE;
+          const expectedMarker = 'atlas-app-v0.4.1-2026-07-26';
+          const backupPath = `${process.cwd()}/artifacts/atlas-v041-backup.json`;
 
           (async () => {
             const browser = await chromium.launch({ headless: true });
-            const context = await browser.newContext({
-              viewport: { width: 1280, height: 900 },
-              acceptDownloads: true,
-              serviceWorkers: 'block',
-            });
+            const context = await browser.newContext({ viewport: { width: 900, height: 900 }, acceptDownloads: true, serviceWorkers: 'block' });
             const page = await context.newPage();
-
             try {
-              await page.goto(`${base}?restore=${process.env.GITHUB_SHA}`, {
-                waitUntil: 'networkidle',
-                timeout: 60000,
-              });
-
+              await page.goto(`${base}?restore=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
               const marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
-              if (marker !== 'atlas-app-v0.3-2026-07-26') {
-                throw new Error(`Unexpected production build: ${marker}`);
-              }
+              if (marker !== expectedMarker) throw new Error(`Unexpected build ${marker}`);
 
               await page.locator('[data-enter]').click();
               await page.locator('[data-screen="library"]:not([hidden]) [data-new-atlas]').first().click();
               await page.locator('[data-example]').click();
-              await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
+              await page.locator('[data-problem-form]').evaluate(form => form.requestSubmit());
               await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
 
-              const originalNodes = await page.locator('[data-nodes] .node').count();
-              if (originalNodes < 5) throw new Error(`Original Atlas has only ${originalNodes} nodes`);
+              await page.locator('[data-tab="chat"]').click();
+              await page.locator('#chat-input').fill('Die Haustechnik ist verantwortlich.');
+              await page.locator('[data-chat-form]').evaluate(form => form.requestSubmit());
+              await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
+              let checkedNode = page.locator('button.node').filter({ hasText: 'Beteiligte' }).first();
+              await checkedNode.click();
+              await page.locator('[data-confirm-node]').click();
+              checkedNode = page.locator('button.node').filter({ hasText: 'Beteiligte' }).first();
+              if (await checkedNode.getAttribute('data-confirmed') !== 'true') throw new Error('Source checked state missing');
+
+              const originalState = await page.evaluate(() => JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02')));
+              const originalAtlas = originalState.atlases.find(atlas => atlas.id === originalState.currentId);
+              const originalCount = originalAtlas.nodes.length;
+              const sourceTopic = originalAtlas.nodes.find(node => node.title === 'Beteiligte')?.topic;
+              if (sourceTopic !== 'stakeholders') throw new Error('Source topic mapping missing');
 
               await page.locator('[data-screen="workspace"] [data-back-library]').click();
-              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
-
               const [download] = await Promise.all([
                 page.waitForEvent('download'),
                 page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
               ]);
               await download.saveAs(backupPath);
-
               const backup = JSON.parse(fs.readFileSync(backupPath, 'utf8'));
-              if (backup.kind !== 'reason-engine-atlas-backup') throw new Error('Backup kind is invalid');
-              if (backup.version !== '0.3') throw new Error(`Backup version is ${backup.version}`);
-              if (!Array.isArray(backup.atlases) || backup.atlases.length !== 1) throw new Error('Backup does not contain exactly one Atlas');
-              if (!Array.isArray(backup.atlases[0].nodes) || backup.atlases[0].nodes.length < 5) throw new Error('Backup lost Atlas nodes');
+              const exportedNode = backup.atlases[0].nodes.find(node => node.title === 'Beteiligte');
+              if (!exportedNode.confirmed || exportedNode.topic !== 'stakeholders') throw new Error('Backup lost source state');
 
               await page.evaluate(() => localStorage.clear());
               await page.reload({ waitUntil: 'networkidle' });
               await page.locator('[data-enter]').click();
-              await page.locator('[data-screen="library"]:not([hidden])').waitFor();
-              if (await page.locator('.atlas-card').count()) throw new Error('Library was not empty after clearing local storage');
-
-              let dialogMessage = '';
-              page.once('dialog', async (dialog) => {
-                dialogMessage = dialog.message();
-                await dialog.accept();
-              });
+              let dialogText = '';
+              page.once('dialog', async dialog => { dialogText = dialog.message(); await dialog.accept(); });
               await page.locator('[data-import-input]').setInputFiles(backupPath);
-              await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor({ timeout: 30000 });
-              if (!dialogMessage.includes('1 Atlas')) throw new Error(`Unexpected import dialog: ${dialogMessage}`);
+              await page.waitForFunction(() => JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02'))?.atlases?.length === 1);
+              if (!dialogText.includes('Prüfstatus')) throw new Error(`Import did not disclose trust reset: ${dialogText}`);
+
+              const restoredState = await page.evaluate(() => JSON.parse(localStorage.getItem('reason-engine-atlas-library-v02')));
+              const restored = restoredState.atlases[0];
+              if (restored.nodes.length !== originalCount) throw new Error('Restore changed node count');
+              const restoredNode = restored.nodes.find(node => node.title === 'Beteiligte');
+              if (restoredNode.confirmed !== false) throw new Error('Restore trusted checked state');
+              if (restoredNode.topic !== 'stakeholders') throw new Error('Restore lost safe topic metadata');
+              if (restoredNode.conflict || restoredNode.conflictWith) throw new Error('Restore trusted contradiction metadata');
+              if (!restored.history.some(event => event.type === 'confirmation_invalidated')) throw new Error('Trust reset missing from history');
 
               await page.locator('[data-screen="library"]:not([hidden]) .atlas-card-open').click();
               await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
-
-              const restoredNodes = await page.locator('[data-nodes] .node').count();
-              if (restoredNodes !== originalNodes) {
-                throw new Error(`Restore changed node count from ${originalNodes} to ${restoredNodes}`);
-              }
-              const importedHistory = await page.locator('[data-history] li').allTextContents();
-              if (!importedHistory.some((entry) => entry.includes('lokalen JSON-Sicherung importiert'))) {
-                throw new Error('Restore event is missing from the history');
-              }
-
-              await page.screenshot({
-                path: 'artifacts/atlas-restored-production.png',
-                fullPage: true,
-                animations: 'disabled',
-              });
+              await page.screenshot({ path: 'artifacts/atlas-v041-restored.png', fullPage: true, animations: 'disabled' });
             } finally {
               await context.close();
               await browser.close();
             }
-          })();
+          })().catch(error => { console.error(error); process.exit(1); });
           NODE
 
       - name: Publish restore evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: atlas-restore-evidence
+          name: atlas-v041-restore-evidence
           path: artifacts/
           if-no-files-found: warn
           retention-days: 14
