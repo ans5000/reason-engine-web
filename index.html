@@ -1,162 +1,24 @@
 <!doctype html>
 <html lang="de">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Reason Engine macht komplexe Entscheidungen nachvollziehbar: Evidenz, Annahmen, Unsicherheit, Verantwortung und nächste Schritte bleiben sichtbar.">
-  <meta name="robots" content="noindex,nofollow">
-  <meta name="theme-color" content="#17140f">
-  <title>Reason Engine · Besser denken. Sichtbar entscheiden.</title>
-  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="stylesheet" href="homepage-v0.5.css">
-  <script src="homepage-v0.5.js" defer></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Reason Engine macht Evidenz, Annahmen, Unsicherheit und Verantwortung in komplexen Entscheidungen sichtbar.">
+<meta name="theme-color" content="#132018">
+<title>Reason Engine · Nachvollziehbar entscheiden</title>
+<style>
+:root{--bg:#f3efe6;--ink:#1b211c;--muted:#687067;--dark:#132018;--dark2:#1c2b22;--cream:#fffaf0;--sage:#b9ceb9;--sand:#d9bc91;--line:rgba(27,33,28,.15);--shell:min(1180px,calc(100vw - 40px));font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);line-height:1.55}a{color:inherit}header{position:sticky;top:0;z-index:20;background:rgba(243,239,230,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}.nav{width:var(--shell);min-height:70px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:24px}.brand{font-family:Georgia,serif;font-size:1.16rem;font-weight:700;text-decoration:none}.navlinks{display:flex;gap:22px;align-items:center}.navlinks a{text-decoration:none;font-size:.9rem;font-weight:650}.cta{padding:10px 15px;border:1px solid currentColor;border-radius:999px}.hero{background:radial-gradient(circle at 78% 18%,rgba(185,206,185,.22),transparent 28%),linear-gradient(135deg,var(--dark),#0e1511);color:var(--cream)}.hero-inner{width:var(--shell);min-height:72vh;margin:auto;padding:90px 0 72px;display:grid;grid-template-columns:1.2fr .8fr;gap:70px;align-items:center}.kicker{font-size:.73rem;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--sage)}h1,h2,h3{font-family:Georgia,"Times New Roman",serif;font-weight:400;letter-spacing:-.03em}h1{font-size:clamp(3.6rem,8vw,7.8rem);line-height:.91;margin:18px 0 28px}h2{font-size:clamp(2.3rem,5vw,4.6rem);line-height:1.02;margin:10px 0 22px}.lead{font-size:clamp(1.05rem,1.7vw,1.3rem);max-width:700px;color:rgba(255,250,240,.82)}.buttons{display:flex;flex-wrap:wrap;gap:12px;margin-top:30px}.button{display:inline-flex;padding:13px 18px;border-radius:10px;text-decoration:none;font-weight:750;border:1px solid rgba(255,255,255,.35)}.button.primary{background:var(--cream);color:var(--dark)}.signal{border:1px solid rgba(255,255,255,.15);border-radius:22px;padding:26px;background:rgba(255,255,255,.045)}.signal-row{display:grid;grid-template-columns:120px 1fr;gap:16px;padding:15px 0;border-bottom:1px solid rgba(255,255,255,.11)}.signal-row:last-child{border:0}.signal-row span{font-size:.72rem;letter-spacing:.1em;font-weight:800}.signal-row p{margin:0;color:rgba(255,250,240,.72)}section{padding:88px 0}.shell{width:var(--shell);margin:auto}.section-head{max-width:850px;margin-bottom:42px}.section-head p{font-size:1.08rem;color:var(--muted)}.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{padding:28px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.48)}.card .num{font-size:.72rem;letter-spacing:.12em;font-weight:800;color:#7b654d}.card h3{font-size:1.9rem;margin:42px 0 12px}.card p{color:var(--muted);margin:0}.dark{background:var(--dark);color:var(--cream)}.dark .section-head p{color:rgba(255,250,240,.68)}.flow{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}.step{padding:22px;border:1px solid rgba(255,255,255,.14);border-radius:16px;background:rgba(255,255,255,.04)}.step span{font-size:.72rem;color:var(--sage);font-weight:800}.step h3{font-family:inherit;font-size:1rem;font-weight:800;letter-spacing:0;margin:35px 0 8px}.step p{font-size:.9rem;color:rgba(255,250,240,.62);margin:0}.projects{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}.project{min-height:260px;padding:30px;border-radius:20px;border:1px solid var(--line);display:flex;flex-direction:column;justify-content:flex-end}.project h3{font-size:2.2rem;margin:0 0 10px}.project p{margin:0;color:var(--muted)}.project:nth-child(2){background:var(--dark2);color:var(--cream)}.project:nth-child(2) p{color:rgba(255,250,240,.65)}.status{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:start}.status-list{margin:0}.status-list div{display:flex;justify-content:space-between;gap:20px;padding:16px 0;border-bottom:1px solid var(--line)}.status-list dt{font-weight:750}.status-list dd{margin:0;color:var(--muted);text-align:right}footer{padding:32px 0;border-top:1px solid var(--line)}.footer{width:var(--shell);margin:auto;display:flex;justify-content:space-between;gap:30px;align-items:center}.footer-links{display:flex;gap:18px}.footer-links a{text-decoration:none;font-size:.9rem}@media(max-width:850px){.navlinks a:not(.cta){display:none}.hero-inner,.status{grid-template-columns:1fr}.hero-inner{padding-top:62px}.signal{margin-top:10px}.grid-3,.flow,.projects{grid-template-columns:1fr}.flow{gap:10px}.card h3{margin-top:18px}.footer{align-items:flex-start;flex-direction:column}}@media(max-width:520px){:root{--shell:min(100% - 28px,1180px)}h1{font-size:3.35rem}.hero-inner{min-height:auto;padding-bottom:56px}.nav{min-height:62px}.cta{padding:8px 11px}.signal-row{grid-template-columns:1fr;gap:4px}section{padding:64px 0}}
+</style>
 </head>
 <body>
-  <a class="skip-link" href="#main">Zum Inhalt springen</a>
-
-  <header class="site-header" data-header>
-    <div class="shell nav-shell">
-      <a class="brand" href="#top" aria-label="Reason Engine Startseite">
-        <img src="assets/mark.svg" width="34" height="34" alt="">
-        <span>Reason Engine</span>
-      </a>
-      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav" data-nav-toggle>
-        <span class="sr-only">Navigation öffnen</span><span></span><span></span>
-      </button>
-      <nav id="site-nav" class="site-nav" aria-label="Hauptnavigation" data-nav>
-        <a href="#warum">Warum</a>
-        <a href="#arbeitsweise">Arbeitsweise</a>
-        <a href="#projekte">Projekte</a>
-        <a href="#status">Status</a>
-        <a class="nav-cta" href="mailto:ohno5001@gmail.com?subject=Gespräch%20über%20Reason%20Engine">Gespräch beginnen</a>
-      </nav>
-    </div>
-  </header>
-
-  <main id="main">
-    <section class="hero" id="top" aria-labelledby="hero-title">
-      <img class="hero-image" src="assets/IMG_0472.jpeg" width="1448" height="1086" alt="Zwei Menschen arbeiten in einer hölzernen Bibliothek gemeinsam an einem großen Modell; daneben steht ein MacBook.">
-      <div class="hero-shade" aria-hidden="true"></div>
-      <div class="shell hero-inner">
-        <div class="hero-copy reveal">
-          <p class="eyebrow light">REASON ENGINE</p>
-          <h1 id="hero-title">Besser denken.<br>Sichtbar entscheiden.</h1>
-          <p class="hero-lead">Reason Engine entwickelt eine nachvollziehbare Arbeitsweise für Menschen und KI, wenn Informationen verteilt, Annahmen unsichtbar und Entscheidungen zu wichtig für eine Black Box sind.</p>
-          <p class="hero-detail">Evidenz, Inferenz, Unsicherheit, Verantwortung und Korrekturen bleiben getrennt, prüfbar und miteinander verbunden.</p>
-          <div class="hero-actions">
-            <a class="button button-light" href="#arbeitsweise">So funktioniert es</a>
-            <a class="button button-ghost" href="#status">Was bereits real ist</a>
-          </div>
-          <p class="hero-truth">Frühe Entwicklungsphase. Keine Wunderbehauptung. Kein fertiges Produktkostüm.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="mechanism-section" id="warum" aria-labelledby="why-title">
-      <div class="shell mechanism-grid">
-        <div class="mechanism-copy reveal">
-          <p class="eyebrow">DAS PROBLEM</p>
-          <h2 id="why-title">Information ist billig. Nachvollziehbares Denken nicht.</h2>
-          <p>Organisationen besitzen Wissen in Gesprächen, Dokumenten, Tabellen, Köpfen und Software. KI kann daraus schnell Antworten erzeugen. Doch oft bleibt unsichtbar, welche Aussage belegt, welche nur abgeleitet und welche noch offen ist.</p>
-          <ol class="method-steps">
-            <li><span>01</span><div><strong>Quellen verschwimmen</strong><p>Beobachtung, Erinnerung und Vermutung landen im selben Absatz.</p></div></li>
-            <li><span>02</span><div><strong>Unsicherheit verschwindet</strong><p>Flüssige Sprache klingt sicherer, als die Evidenz tatsächlich ist.</p></div></li>
-            <li><span>03</span><div><strong>Verantwortung zerfasert</strong><p>Niemand sieht mehr klar, wer prüfen, freigeben oder korrigieren muss.</p></div></li>
-            <li><span>04</span><div><strong>Lernen wird überschrieben</strong><p>Neue Antworten ersetzen alte, statt den Erkenntnisweg sichtbar zu verbessern.</p></div></li>
-          </ol>
-        </div>
-        <article class="reason-artifact reveal" aria-label="Beispiel eines strukturierten Entscheidungsraums">
-          <div class="artifact-head"><span>ENTSCHEIDUNGSRAUM</span><span>PRÜFBARER STAND</span></div>
-          <div class="artifact-row heard"><span class="artifact-label">BEOBACHTET</span><p>Der reale Ablauf wurde in einem Gespräch beschrieben.</p></div>
-          <div class="artifact-row inferred"><span class="artifact-label">ABGELEITET</span><p>Aus mehreren Aussagen ergibt sich eine mögliche Regel.</p></div>
-          <div class="artifact-row open"><span class="artifact-label">OFFEN</span><p>Die Ausnahmefälle und Freigabegrenzen sind noch nicht geklärt.</p></div>
-          <div class="artifact-row confirmed"><span class="artifact-label">BESTÄTIGT</span><p>Die verantwortliche Fachperson hat den begrenzten Geltungsbereich geprüft.</p></div>
-          <p class="artifact-note">Reason Engine macht nicht alles gewiss. Sie verhindert, dass Ungewissheit unsichtbar wird.</p>
-        </article>
-      </div>
-    </section>
-
-    <section class="projects-section" id="arbeitsweise" aria-labelledby="method-title">
-      <div class="shell">
-        <div class="section-head reveal">
-          <p class="eyebrow">DIE ARBEITSWEISE</p>
-          <h2 id="method-title">Aus Gesprächen werden korrigierbare Strukturen.</h2>
-          <p>Reason Engine verbindet Dokumentation, Prüfung und Entscheidung, ohne menschliche Verantwortung an das Modell abzugeben.</p>
-        </div>
-        <div class="project-grid">
-          <article class="project-card project-core reveal"><div class="project-meta"><span>01</span><span>EVIDENZ</span></div><h3>Trennen</h3><p>Direkte Aussagen, Quellen, Ableitungen, Hypothesen und Entscheidungen erhalten unterschiedliche Rollen.</p><span class="status-chip">Evidence before inference</span></article>
-          <article class="project-card project-p2 reveal"><div class="project-meta"><span>02</span><span>PRÜFUNG</span></div><h3>Angreifen</h3><p>Annahmen werden nicht dekoriert, sondern durch Gegenfragen, Grenzen und falsifizierbare Tests belastet.</p><span class="status-chip">Challenge before confidence</span></article>
-          <article class="project-card project-atlas reveal"><div class="project-meta"><span>03</span><span>REIFE</span></div><h3>Einordnen</h3><p>Epistemisch relevante Objekte zeigen, wie belastbar ihr aktueller Stand ist und warum.</p><span class="status-chip">Epistemic Maturity · experimental</span></article>
-          <article class="project-card project-lab reveal"><div class="project-meta"><span>04</span><span>LERNEN</span></div><h3>Erhalten</h3><p>Korrekturen löschen den alten Stand nicht. Die Entwicklung bleibt als überprüfbare Spur erhalten.</p><span class="status-chip">Append-only learning</span></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="manifest-section" aria-labelledby="manifest-title">
-      <div class="shell manifest-grid">
-        <figure class="manifest-image reveal"><img src="assets/IMG_0473.jpeg" width="1122" height="1402" alt="Abstrakte Darstellung einer schwebenden Kugel, geometrischer Beziehungen und einer verborgenen Tiefe unter einer dunklen Oberfläche."></figure>
-        <div class="manifest-copy reveal">
-          <p class="eyebrow light">DER KERN</p>
-          <h2 id="manifest-title">Was sichtbar ist, ist selten das ganze System.</h2>
-          <p>Entscheidungen entstehen aus Beziehungen zwischen Menschen, Regeln, Dokumenten, Werkzeugen, Interessen und Unsicherheiten. Reason Engine versucht, diese Beziehungen sichtbar und veränderbar zu machen.</p>
-          <blockquote>Wahrheit statt Wunschdenken heißt nicht, dass alles sicher sein muss. Es heißt, dass Unsicherheit ihren Namen behält.</blockquote>
-        </div>
-      </div>
-    </section>
-
-    <section class="principles-section" id="projekte" aria-labelledby="projects-title">
-      <div class="shell">
-        <div class="section-head reveal">
-          <p class="eyebrow">WAS GERADE ENTSTEHT</p>
-          <h2 id="projects-title">Ein Kern. Mehrere echte Testfelder.</h2>
-          <p>Keine erfundenen Erfolgsgeschichten. Wir zeigen den gegenwärtigen Entwicklungsstand und die Räume, in denen sich die Idee bewähren muss.</p>
-        </div>
-        <div class="principle-grid">
-          <article class="principle-card reveal"><span>FOUNDATION</span><h3>Reason Engine</h3><p>Der generische Normen-, Evidenz- und Entscheidungskern.</p></article>
-          <article class="principle-card reveal"><span>FIELD LAB</span><h3>P2 Engine</h3><p>Ein eigenständiger Pilotraum für Prozesse im Landmaschinenhandel.</p></article>
-          <article class="principle-card reveal"><span>INTERFACE</span><h3>Atlas</h3><p>Eine räumliche Navigation durch komplexe Systeme, Beziehungen und Artefakte.</p></article>
-          <article class="principle-card reveal"><span>RESEARCH</span><h3>Discovery & Labs</h3><p>Beobachtungen, Hypothesen, Fehler und experimentelle Verfahren.</p></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="pilot-section" aria-labelledby="pilot-title">
-      <div class="shell pilot-card reveal">
-        <div class="pilot-copy">
-          <p class="eyebrow light">KLEINER START</p>
-          <h2 id="pilot-title">Nicht alles bauen. Einen echten Prozess verstehen.</h2>
-          <p>Ein sinnvoller Einstieg beginnt mit einem klar begrenzten Ablauf, wenigen anonymisierten Fällen und einer Frage: Wird die Entscheidung dadurch nachvollziehbarer, korrigierbarer oder verlässlicher?</p>
-          <div class="hero-actions"><a class="button button-light" href="mailto:ohno5001@gmail.com?subject=Pilotgespräch%20Reason%20Engine">Gespräch beginnen</a><a class="button button-ghost" href="https://github.com/ans5000/reason-engine" rel="noopener noreferrer">Repository ansehen</a></div>
-        </div>
-        <div class="pilot-boundary">
-          <div><span>1</span><p><strong>Ein Prozess</strong><br>Kein versteckter Komplettumbau.</p></div>
-          <div><span>2</span><p><strong>Wenige Fälle</strong><br>Anonymisiert oder synthetisch.</p></div>
-          <div><span>3</span><p><strong>Explizite Grenzen</strong><br>Was wissen wir, was nicht?</p></div>
-          <div><span>4</span><p><strong>Klarer Endpunkt</strong><br>Stoppen, weiterforschen oder bauen.</p></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="status-section" id="status" aria-labelledby="status-title">
-      <div class="shell status-layout">
-        <div class="reveal"><p class="eyebrow">AKTUELLER STAND</p><h2 id="status-title">Die Architektur steht nicht still. Sie beginnt, sich durch ihre eigene Prüfung zu verbessern.</h2></div>
-        <dl class="status-list reveal">
-          <div><dt>Reason Engine Kern</dt><dd>konzeptionell etabliert</dd></div>
-          <div><dt>Epistemic Maturity</dt><dd>experimentell implementiert</dd></div>
-          <div><dt>Externe Feldvalidierung</dt><dd>vorbereitet, noch offen</dd></div>
-          <div><dt>Produktionsreife</dt><dd>nicht behauptet</dd></div>
-        </dl>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="shell footer-grid">
-      <div><a class="brand footer-brand" href="#top"><img src="assets/mark.svg" width="32" height="32" alt=""><span>Reason Engine</span></a><p>Nachvollziehbare Systeme für Entscheidungen, bei denen menschliche Verantwortung nicht verschwinden darf.</p></div>
-      <div class="footer-links"><a href="https://github.com/ans5000/reason-engine" rel="noopener noreferrer">GitHub</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div>
-      <p class="footer-status">Öffentliche Entwicklungsseite · Frühe Phase · Keine behaupteten Kundenergebnisse</p>
-    </div>
-  </footer>
+<header><nav class="nav"><a class="brand" href="#top">Reason Engine</a><div class="navlinks"><a href="#warum">Warum</a><a href="#prozess">Prozess</a><a href="#projekte">Projekte</a><a href="#status">Status</a><a class="cta" href="mailto:ohno5001@gmail.com?subject=Reason%20Engine">Kontakt</a></div></nav></header>
+<main>
+<section class="hero" id="top"><div class="hero-inner"><div><div class="kicker">Offene Architektur für Mensch und KI</div><h1>Denken wird sichtbar.</h1><p class="lead">Reason Engine macht Quellen, Annahmen, Unsicherheit, Verantwortung und Korrekturen in komplexen Entscheidungen nachvollziehbar.</p><div class="buttons"><a class="button primary" href="#prozess">So funktioniert es</a><a class="button" href="#status">Was bereits real ist</a></div></div><aside class="signal"><div class="signal-row"><span>BEOBACHTET</span><p>Was wurde tatsächlich gesagt, gemessen oder dokumentiert?</p></div><div class="signal-row"><span>ABGELEITET</span><p>Welche Schlussfolgerung entsteht daraus?</p></div><div class="signal-row"><span>OFFEN</span><p>Was ist noch unsicher, widersprüchlich oder ungeprüft?</p></div><div class="signal-row"><span>BESTÄTIGT</span><p>Was gilt, für wen und innerhalb welcher Grenzen?</p></div></aside></div></section>
+<section id="warum"><div class="shell"><div class="section-head"><div class="kicker" style="color:#6c735f">Das Problem</div><h2>Antworten sind schnell. Begründungen verschwinden.</h2><p>Wissen liegt in Gesprächen, Dokumenten, Tabellen, Köpfen und Software. KI erzeugt daraus flüssige Antworten. Doch oft bleibt unsichtbar, welche Aussage belegt, welche nur abgeleitet und welche noch offen ist.</p></div><div class="grid-3"><article class="card"><div class="num">01 · EVIDENZ</div><h3>Quellen trennen</h3><p>Beobachtung, Erinnerung, Vermutung und Entscheidung erhalten unterschiedliche Rollen.</p></article><article class="card"><div class="num">02 · UNSICHERHEIT</div><h3>Grenzen zeigen</h3><p>Das System simuliert keine Gewissheit, wo die Evidenz noch Lücken hat.</p></article><article class="card"><div class="num">03 · VERANTWORTUNG</div><h3>Menschen im System halten</h3><p>Prüfung, Freigabe und Korrektur bleiben sichtbar einer verantwortlichen Rolle zugeordnet.</p></article></div></div></section>
+<section class="dark" id="prozess"><div class="shell"><div class="section-head"><div class="kicker">Der Mechanismus</div><h2>Ein korrigierbarer Entscheidungsraum.</h2><p>Reason Engine ersetzt keine Verantwortung. Sie organisiert den Weg von der Aussage zur Entscheidung so, dass spätere Korrekturen möglich bleiben.</p></div><div class="flow"><article class="step"><span>01</span><h3>Erfassen</h3><p>Quellen, Aussagen und Kontext aufnehmen.</p></article><article class="step"><span>02</span><h3>Trennen</h3><p>Evidenz, Inferenz und Hypothese unterscheiden.</p></article><article class="step"><span>03</span><h3>Prüfen</h3><p>Konflikte, Grenzen und Gegenbeispiele suchen.</p></article><article class="step"><span>04</span><h3>Entscheiden</h3><p>Verantwortung und Geltungsbereich festlegen.</p></article><article class="step"><span>05</span><h3>Lernen</h3><p>Korrekturen als nachvollziehbare Spur erhalten.</p></article></div></div></section>
+<section id="projekte"><div class="shell"><div class="section-head"><div class="kicker" style="color:#6c735f">Was gerade entsteht</div><h2>Ein Kern. Mehrere echte Testfelder.</h2><p>Keine erfundenen Erfolgsgeschichten. Die Projekte zeigen, wo sich die Architektur praktisch bewähren muss.</p></div><div class="projects"><article class="project"><h3>Reason Engine</h3><p>Der generische Normen-, Evidenz- und Entscheidungskern.</p></article><article class="project"><h3>P2 Engine</h3><p>Ein eigenständiger Discovery- und Pilotraum für Prozesse im Landmaschinenhandel.</p></article><article class="project"><h3>Atlas</h3><p>Eine räumliche Navigation durch Beziehungen, Systeme und Wissensobjekte.</p></article><article class="project"><h3>Discovery & Labs</h3><p>Beobachtungen, Hypothesen, Fehler und experimentelle Verfahren.</p></article></div></div></section>
+<section id="status"><div class="shell status"><div><div class="kicker" style="color:#6c735f">Aktueller Stand</div><h2>Frühe Phase. Klare Evidenzgrenzen.</h2><p>Die Architektur ist konzeptionell weit entwickelt. Runtime, Feldvalidierung und Produktreife werden nicht behauptet, solange belastbare Nachweise fehlen.</p></div><dl class="status-list"><div><dt>Reason Engine Kern</dt><dd>konzeptionell etabliert</dd></div><div><dt>Epistemic Maturity</dt><dd>experimentell implementiert</dd></div><div><dt>Externe Feldvalidierung</dt><dd>vorbereitet, noch offen</dd></div><div><dt>Produktionsreife</dt><dd>nicht behauptet</dd></div></dl></div></section>
+</main>
+<footer><div class="footer"><div><strong>Reason Engine</strong><br><small>Nachvollziehbare Entscheidungen für Mensch und KI.</small></div><div class="footer-links"><a href="https://github.com/ans5000/reason-engine">GitHub</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a></div></div></footer>
 </body>
 </html>
