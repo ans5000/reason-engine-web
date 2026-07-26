@@ -20,10 +20,27 @@ jobs:
   verify-public-domain:
     name: Verify reasonengine.de
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 18
 
     steps:
-      - name: Verify live files and truth markers
+      - name: Check out proposed source
+        uses: actions/checkout@v4
+
+      - name: Verify source truth and JavaScript syntax
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app/app.js
+          node --check app/backup-v0.3.js
+          grep -Fq 'public-entrance-v0.7-2026-07-26' index.html
+          grep -Fq 'href="app/"' index.html
+          grep -Fq 'Öffentliche Alpha · lokal' index.html
+          grep -Fq 'atlas-app-v0.3-2026-07-26' app/index.html
+          grep -Fq 'noindex,nofollow' app/index.html
+          grep -Fq 'Sicherung importieren' app/index.html
+          grep -Fq 'reason-engine-atlas-v03' app/sw.js
+
+      - name: Verify live public files and truth markers
         shell: bash
         run: |
           set -euo pipefail
@@ -56,7 +73,6 @@ jobs:
           fetch "https://reasonengine.de/robots.txt" artifacts/robots.txt
           fetch "https://reasonengine.de/sitemap.xml" artifacts/sitemap.xml
 
-          grep -Fq 'public-entrance-v0.6-2026-07-26' artifacts/home.html
           grep -Fq 'Entscheidungen mit KI, die später noch erklärbar sind.' artifacts/home.html
           grep -Fq 'Reason Engine Study' artifacts/home.html
           grep -Fq 'Weihnachtsbaumlogistik' artifacts/home.html
@@ -72,86 +88,110 @@ jobs:
           grep -Fq 'https://reasonengine.de/' artifacts/sitemap.xml
           grep -Fq 'https://reasonengine.de/study.html' artifacts/sitemap.xml
 
-      - name: Install browser for pixel handoff
+          if [[ "${GITHUB_EVENT_NAME}" != "pull_request" ]]; then
+            fetch "https://reasonengine.de/app/" artifacts/atlas.html
+            grep -Fq 'public-entrance-v0.7-2026-07-26' artifacts/home.html
+            grep -Fq 'href="app/"' artifacts/home.html
+            grep -Fq 'atlas-app-v0.3-2026-07-26' artifacts/atlas.html
+            grep -Fq 'ÖFFENTLICHE ALPHA v0.3' artifacts/atlas.html
+            grep -Fq 'Sicherung importieren' artifacts/atlas.html
+          fi
+
+      - name: Start branch preview for Atlas
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          nohup python3 -m http.server 4173 > /tmp/reason-engine-preview.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:4173/app/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/reason-engine-preview.log
+          exit 1
+
+      - name: Install browser for handoff and interaction tests
         shell: bash
         run: |
           npm install --no-save --no-package-lock playwright@1.54.1
           npx playwright install --with-deps chromium
 
-      - name: Capture revealed desktop and mobile pages
+      - name: Capture pages and exercise Atlas
         shell: bash
+        env:
+          ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
         run: |
           set -euo pipefail
           node <<'NODE'
           const { chromium } = require('playwright');
 
           const captures = [
-            { url: 'https://reasonengine.de/', path: 'artifacts/home-desktop.png', width: 1440, height: 1000 },
-            { url: 'https://reasonengine.de/', path: 'artifacts/home-mobile.png', width: 390, height: 844 },
-            { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-desktop.png', width: 1440, height: 1000 },
-            { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-mobile.png', width: 390, height: 844 },
+            { url: 'https://reasonengine.de/', path: 'artifacts/home-desktop.png', width: 1440, height: 1000, reveal: true },
+            { url: 'https://reasonengine.de/', path: 'artifacts/home-mobile.png', width: 390, height: 844, reveal: true },
+            { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-desktop.png', width: 1440, height: 1000, reveal: true },
+            { url: 'https://reasonengine.de/study.html', path: 'artifacts/study-mobile.png', width: 390, height: 844, reveal: true },
+            { url: process.env.ATLAS_BASE, path: 'artifacts/atlas-desktop.png', width: 1440, height: 1000, reveal: false },
+            { url: process.env.ATLAS_BASE, path: 'artifacts/atlas-mobile.png', width: 390, height: 844, reveal: false },
           ];
 
-          async function exerciseRevealElements(page) {
-            await page.addStyleTag({
-              content: 'html, body { scroll-behavior: auto !important; }',
-            });
-
-            const revealItems = await page.locator('.reveal').all();
-
-            for (const item of revealItems) {
-              await item.scrollIntoViewIfNeeded();
-              await page.waitForTimeout(140);
+          async function prepareLongCapture(page, reveal) {
+            await page.addStyleTag({ content: 'html, body { scroll-behavior: auto !important; }' });
+            if (reveal) {
+              const revealItems = await page.locator('.reveal').all();
+              for (const item of revealItems) {
+                await item.scrollIntoViewIfNeeded();
+                await page.waitForTimeout(120);
+              }
             }
-
             await page.evaluate(() => {
               document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
               document.body.style.setProperty('scroll-behavior', 'auto', 'important');
               window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-              if (document.activeElement instanceof HTMLElement) {
-                document.activeElement.blur();
-              }
+              if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
             });
-
             await page.waitForFunction(() => window.scrollY === 0);
-            await page.waitForTimeout(200);
+          }
+
+          async function exerciseAtlas(browser) {
+            const context = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true });
+            const page = await context.newPage();
+            await page.goto(`${process.env.ATLAS_BASE}?verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
+            await page.locator('[data-enter]').click();
+            await page.locator('[data-new-atlas]').first().click();
+            await page.locator('[data-example]').click();
+            await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
+            await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
+            const nodeCount = await page.locator('[data-nodes] .node').count();
+            if (nodeCount < 5) throw new Error(`Atlas created only ${nodeCount} nodes`);
+            const historyCount = await page.locator('[data-history] li').count();
+            if (historyCount < 1) throw new Error('Atlas history is empty after creation');
+            await page.locator('[data-screen="workspace"] [data-back-library]').click();
+            await page.locator('[data-screen="library"]:not([hidden]) .atlas-card').waitFor();
+            const [download] = await Promise.all([
+              page.waitForEvent('download'),
+              page.locator('[data-screen="library"]:not([hidden]) [data-export-library]').click(),
+            ]);
+            if (!download.suggestedFilename().endsWith('.json')) throw new Error('Library backup is not JSON');
+            await context.close();
           }
 
           (async () => {
             const browser = await chromium.launch({ headless: true });
-
             try {
               for (const capture of captures) {
-                const page = await browser.newPage({
-                  viewport: { width: capture.width, height: capture.height },
-                  deviceScaleFactor: 1,
-                });
-
+                const page = await browser.newPage({ viewport: { width: capture.width, height: capture.height }, deviceScaleFactor: 1 });
                 const separator = capture.url.includes('?') ? '&' : '?';
-                await page.goto(`${capture.url}${separator}verify=${process.env.GITHUB_SHA}`, {
-                  waitUntil: 'networkidle',
-                  timeout: 60000,
-                });
-
-                await exerciseRevealElements(page);
-
-                const hiddenRevealItems = await page.locator('.reveal:not(.is-visible)').count();
-                if (hiddenRevealItems !== 0) {
-                  throw new Error(`${capture.url} still has ${hiddenRevealItems} hidden reveal elements`);
+                await page.goto(`${capture.url}${separator}verify=${process.env.GITHUB_SHA}`, { waitUntil: 'networkidle', timeout: 60000 });
+                await prepareLongCapture(page, capture.reveal);
+                if (capture.reveal) {
+                  const hidden = await page.locator('.reveal:not(.is-visible)').count();
+                  if (hidden !== 0) throw new Error(`${capture.url} still has ${hidden} hidden reveal elements`);
                 }
-
-                const scrollPosition = await page.evaluate(() => window.scrollY);
-                if (scrollPosition !== 0) {
-                  throw new Error(`${capture.url} screenshot started at scrollY=${scrollPosition}`);
-                }
-
-                await page.screenshot({
-                  path: capture.path,
-                  fullPage: true,
-                  animations: 'disabled',
-                });
+                await page.screenshot({ path: capture.path, fullPage: true, animations: 'disabled' });
                 await page.close();
               }
+              await exerciseAtlas(browser);
             } finally {
               await browser.close();
             }
