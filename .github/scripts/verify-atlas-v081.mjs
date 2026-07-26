@@ -107,11 +107,22 @@ async function exerciseTruthGate(browser) {
   await body.fill(`${await body.inputValue()}\n\nDiese Ergänzung verändert die inhaltliche Grundlage.`);
   await page.locator('[data-field-form] button[value="save"]').click();
 
-  await page.waitForLoadState('domcontentloaded');
+  await page.waitForFunction((id) => {
+    const library = JSON.parse(localStorage.getItem('reason-engine-atlas-library-v03'));
+    const atlas = library?.atlases?.find((item) => item.id === library.currentId);
+    const field = atlas?.fields?.find((item) => item.id === id);
+    return Boolean(
+      field &&
+      field.state === 'provisional' &&
+      field.confirmed === false &&
+      atlas.history?.some((event) => event.type === 'field_truth_reset')
+    );
+  }, fieldId, { timeout: 30000 });
+  await page.waitForTimeout(350);
   await page.locator('[data-screen="workspace"]:not([hidden])').waitFor({ timeout: 30000 });
   await page.waitForFunction(() => document.querySelectorAll('[data-fields] .hex-field[data-field-id]').length >= 7);
   reopened = page.locator(`[data-fields] .hex-field[data-field-id="${fieldId}"]`);
-  if (await reopened.getAttribute('data-state') !== 'provisional') throw new Error('Edited checked field did not return to provisional');
+  if (await reopened.getAttribute('data-state') !== 'provisional') throw new Error('Edited checked field did not render as provisional');
 
   const editState = await page.evaluate((id) => {
     const library = JSON.parse(localStorage.getItem('reason-engine-atlas-library-v03'));
