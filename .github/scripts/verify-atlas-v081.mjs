@@ -107,32 +107,24 @@ async function exerciseTruthGate(browser) {
   await body.fill(`${await body.inputValue()}\n\nDiese Ergänzung verändert die inhaltliche Grundlage.`);
   await page.locator('[data-field-form] button[value="save"]').click();
 
-  await page.waitForFunction((id) => {
+  await page.waitForTimeout(1200);
+  const postSave = await page.evaluate((id) => {
     const library = JSON.parse(localStorage.getItem('reason-engine-atlas-library-v03'));
     const atlas = library?.atlases?.find((item) => item.id === library.currentId);
     const field = atlas?.fields?.find((item) => item.id === id);
-    return Boolean(
-      field &&
-      field.state === 'provisional' &&
-      field.confirmed === false &&
-      atlas.history?.some((event) => event.type === 'field_truth_reset')
-    );
-  }, fieldId, { timeout: 30000 });
-  await page.waitForTimeout(350);
+    let diagnostic = null;
+    try { diagnostic = JSON.parse(sessionStorage.getItem('reason-engine-atlas-truth-gate-diagnostic')); } catch {}
+    return { field, history: atlas?.history || [], diagnostic, url: location.href };
+  }, fieldId);
+  if (!postSave.field || postSave.field.state !== 'provisional' || postSave.field.confirmed !== false || !postSave.history.some((event) => event.type === 'field_truth_reset')) {
+    throw new Error(`Truth reset state mismatch: ${JSON.stringify(postSave)}`);
+  }
+
   await page.locator('[data-screen="workspace"]:not([hidden])').waitFor({ timeout: 30000 });
   await page.waitForFunction(() => document.querySelectorAll('[data-fields] .hex-field[data-field-id]').length >= 7);
   reopened = page.locator(`[data-fields] .hex-field[data-field-id="${fieldId}"]`);
   if (await reopened.getAttribute('data-state') !== 'provisional') throw new Error('Edited checked field did not render as provisional');
-
-  const editState = await page.evaluate((id) => {
-    const library = JSON.parse(localStorage.getItem('reason-engine-atlas-library-v03'));
-    const atlas = library.atlases.find((item) => item.id === library.currentId);
-    const field = atlas.fields.find((item) => item.id === id);
-    return { field, history: atlas.history };
-  }, fieldId);
-  if (editState.field.confirmed || editState.field.state !== 'provisional') throw new Error('Stored field authority survived semantic editing');
-  if (/vom Nutzer bestätigt$/.test(editState.field.source || '')) throw new Error('Confirmation provenance survived semantic editing');
-  if (!editState.history.some((event) => event.type === 'field_truth_reset')) throw new Error('Truth reset is missing from history');
+  if (/vom Nutzer bestätigt$/.test(postSave.field.source || '')) throw new Error('Confirmation provenance survived semantic editing');
 
   await page.locator('[data-screen="workspace"] [data-back-library]').click();
   await page.locator('[data-screen="library"]:not([hidden])').waitFor();
