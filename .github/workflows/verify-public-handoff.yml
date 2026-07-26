@@ -93,6 +93,10 @@ jobs:
           ];
 
           async function exerciseRevealElements(page) {
+            await page.addStyleTag({
+              content: 'html, body { scroll-behavior: auto !important; }',
+            });
+
             const revealItems = await page.locator('.reveal').all();
 
             for (const item of revealItems) {
@@ -100,8 +104,17 @@ jobs:
               await page.waitForTimeout(140);
             }
 
-            await page.evaluate(() => window.scrollTo(0, 0));
-            await page.waitForTimeout(400);
+            await page.evaluate(() => {
+              document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
+              document.body.style.setProperty('scroll-behavior', 'auto', 'important');
+              window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+              if (document.activeElement instanceof HTMLElement) {
+                document.activeElement.blur();
+              }
+            });
+
+            await page.waitForFunction(() => window.scrollY === 0);
+            await page.waitForTimeout(200);
           }
 
           (async () => {
@@ -127,7 +140,16 @@ jobs:
                   throw new Error(`${capture.url} still has ${hiddenRevealItems} hidden reveal elements`);
                 }
 
-                await page.screenshot({ path: capture.path, fullPage: true });
+                const scrollPosition = await page.evaluate(() => window.scrollY);
+                if (scrollPosition !== 0) {
+                  throw new Error(`${capture.url} screenshot started at scrollY=${scrollPosition}`);
+                }
+
+                await page.screenshot({
+                  path: capture.path,
+                  fullPage: true,
+                  animations: 'disabled',
+                });
                 await page.close();
               }
             } finally {
