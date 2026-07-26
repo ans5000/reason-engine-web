@@ -45,7 +45,7 @@ jobs:
         run: |
           nohup python3 -m http.server 4173 > /tmp/reason-engine-preview.log 2>&1 &
           for attempt in $(seq 1 20); do
-            if curl --fail --silent http://127.0.0.1:4173/app/ > /dev/null; then exit 0; fi
+            if curl --fail --silent http://127.0.0.1:4173/app/index.html > /dev/null; then exit 0; fi
             sleep 1
           done
           cat /tmp/reason-engine-preview.log
@@ -60,7 +60,7 @@ jobs:
       - name: Exercise complete backup cycle
         shell: bash
         env:
-          ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/' || 'https://reasonengine.de/app/' }}
+          ATLAS_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/index.html' || 'https://reasonengine.de/app/index.html' }}
         run: |
           set -euo pipefail
           mkdir -p artifacts
