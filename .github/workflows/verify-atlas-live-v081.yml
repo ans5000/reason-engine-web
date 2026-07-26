@@ -1,0 +1,131 @@
+name: Verify Atlas v0.8.1 live
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/verify-atlas-live-v081.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas-v081-live-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-live-atlas:
+    name: Exercise live Atlas v0.8.1
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+
+    steps:
+      - name: Check out probe source
+        uses: actions/checkout@v4
+
+      - name: Install browser
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock playwright@1.54.1
+          npx playwright install --with-deps chromium
+
+      - name: Verify deployed build and truth reset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node <<'NODE' 2>&1 | tee artifacts/live-v081.log
+          const path = require('path');
+          const { chromium } = require('playwright');
+
+          const base = 'https://reasonengine.de/app/index.html';
+          const expected = 'atlas-app-v0.8.1-2026-07-26';
+
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const context = await browser.newContext({
+              viewport: { width: 1180, height: 900 },
+              serviceWorkers: 'block',
+            });
+            const page = await context.newPage();
+            const externalRequests = [];
+            const writeRequests = [];
+            page.on('request', (request) => {
+              const url = new URL(request.url());
+              if (url.origin !== 'https://reasonengine.de') externalRequests.push(request.url());
+              if (!['GET', 'HEAD'].includes(request.method())) writeRequests.push(`${request.method()} ${request.url()}`);
+            });
+
+            try {
+              let marker = null;
+              for (let attempt = 1; attempt <= 24; attempt += 1) {
+                await page.goto(`${base}?live=${process.env.GITHUB_SHA}&attempt=${attempt}`, {
+                  waitUntil: 'networkidle',
+                  timeout: 60000,
+                });
+                marker = await page.locator('meta[name="reason-engine-build"]').getAttribute('content');
+                if (marker === expected) break;
+                await page.waitForTimeout(10000);
+              }
+              if (marker !== expected) throw new Error(`Live deployment returned ${marker}, expected ${expected}`);
+              if (await page.locator('meta[name="reason-engine-data-schema"]').getAttribute('content') !== '0.3') throw new Error('Live data schema is not v0.3');
+              if (await page.locator('meta[name="robots"]').getAttribute('content') !== 'noindex,nofollow') throw new Error('Live Atlas lost noindex,nofollow');
+              if (await page.locator('script[src="truth-gate-v0.8.1.js"]').count() !== 1) throw new Error('Live Truth Gate script is missing');
+
+              await page.locator('[data-enter]').click();
+              await page.locator('[data-screen="library"]:not([hidden])').waitFor();
+              await page.locator('[data-screen="library"]:not([hidden]) [data-new-atlas]').first().click();
+              await page.locator('[data-example]').click();
+              await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
+              await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
+              await page.waitForFunction(() => document.querySelectorAll('[data-fields] .hex-field[data-field-id]').length >= 7);
+              if (await page.locator('[data-city-guide]').count() < 1) throw new Error('Live city guide is missing');
+              if (await page.locator('.hex-tool').count() < 1) throw new Error('Live Reason tools are missing');
+
+              const target = page.locator('[data-fields] .hex-field:not(.root)').first();
+              const fieldId = await target.getAttribute('data-field-id');
+              if (!fieldId) throw new Error('Live field lacks a stable id');
+              await target.evaluate((element) => element.click());
+              await page.locator('[data-field-dialog]').waitFor({ state: 'visible' });
+              await page.locator('[data-confirm-field]').click();
+
+              let reopened = page.locator(`[data-fields] .hex-field[data-field-id="${fieldId}"]`);
+              await reopened.waitFor();
+              if (await reopened.getAttribute('data-state') !== 'confirmed') throw new Error('Live field could not be checked');
+              await reopened.evaluate((element) => element.click());
+              const body = page.locator('[data-field-body]');
+              await body.fill(`${await body.inputValue()}\n\nLive-Abnahme verändert die inhaltliche Grundlage.`);
+              await page.locator('[data-field-form] button[value="save"]').click();
+              await page.waitForTimeout(1400);
+
+              const stored = await page.evaluate((id) => {
+                const library = JSON.parse(localStorage.getItem('reason-engine-atlas-library-v03'));
+                const atlas = library.atlases.find((item) => item.id === library.currentId);
+                return {
+                  field: atlas.fields.find((item) => item.id === id),
+                  history: atlas.history,
+                };
+              }, fieldId);
+              if (stored.field.state !== 'provisional' || stored.field.confirmed !== false) throw new Error(`Live edit retained authority: ${JSON.stringify(stored.field)}`);
+              if (!stored.history.some((event) => event.type === 'field_truth_reset')) throw new Error('Live truth reset is missing from history');
+              if (/vom Nutzer bestätigt$/.test(stored.field.source || '')) throw new Error('Live confirmation provenance survived editing');
+
+              if (externalRequests.length) throw new Error(`Live Atlas made external requests: ${externalRequests.join(', ')}`);
+              if (writeRequests.length) throw new Error(`Live Atlas made network writes: ${writeRequests.join(', ')}`);
+              await page.screenshot({ path: path.join('artifacts', 'atlas-v081-live.png'), fullPage: true, animations: 'disabled' });
+            } finally {
+              await context.close();
+              await browser.close();
+            }
+          })();
+          NODE
+
+      - name: Publish live evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-v081-live-evidence
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
