@@ -1,0 +1,89 @@
+name: Verify Atlas Regulatory Evaluator
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/regulatory-evaluator-v0.9.1.js"
+      - "app/regulatory-runtime-v0.9.1.js"
+      - "app/regulatory-v0.9.1.css"
+      - "app/index.html"
+      - "app/sw.js"
+      - ".github/scripts/verify-atlas-regulatory-evaluator-v091.mjs"
+      - ".github/workflows/verify-atlas-regulatory-evaluator.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "app/regulatory-evaluator-v0.9.1.js"
+      - "app/regulatory-runtime-v0.9.1.js"
+      - "app/regulatory-v0.9.1.css"
+      - "app/index.html"
+      - "app/sw.js"
+      - ".github/scripts/verify-atlas-regulatory-evaluator-v091.mjs"
+      - ".github/workflows/verify-atlas-regulatory-evaluator.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas-regulatory-evaluator-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-regulatory-evaluator:
+    name: Reference Resolver and Evaluator
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out proposed source
+        uses: actions/checkout@v4
+
+      - name: Verify source and markers
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app/regulatory-evaluator-v0.9.1.js
+          node --check app/regulatory-runtime-v0.9.1.js
+          node --check .github/scripts/verify-atlas-regulatory-evaluator-v091.mjs
+          grep -Fq 'atlas-regulatory-layer-v0.9.1-2026-07-27' app/index.html
+          grep -Fq 'regulatory-evaluator-v0.9.1.js' app/index.html
+          grep -Fq 'regulatory-runtime-v0.9.1.js' app/index.html
+          grep -Fq 'regulatory-v0.9.1.css' app/index.html
+          grep -Fq 'regulatory-evaluator-v0.9.1.js' app/sw.js
+          grep -Fq 'outcomeAloneMayTrigger: false' app/regulatory-evaluator-v0.9.1.js
+          if grep -Fq 'confidence:' app/regulatory-evaluator-v0.9.1.js; then
+            echo 'Stored confidence fields are forbidden.' >&2
+            exit 1
+          fi
+
+      - name: Run regulatory test matrix
+        shell: bash
+        run: node .github/scripts/verify-atlas-regulatory-evaluator-v091.mjs
+
+      - name: Verify deployed regulatory assets
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          fetch() {
+            local url="$1"
+            local output="$2"
+            local separator="?"
+            if [[ "$url" == *\?* ]]; then separator="&"; fi
+            curl --fail --silent --show-error --location \
+              --retry 18 --retry-all-errors --retry-delay 10 \
+              --connect-timeout 10 --max-time 45 \
+              "${url}${separator}verify=${GITHUB_SHA}" --output "$output"
+          }
+          fetch "https://reasonengine.de/app/index.html" artifacts/atlas.html
+          fetch "https://reasonengine.de/app/regulatory-evaluator-v0.9.1.js" artifacts/evaluator.js
+          fetch "https://reasonengine.de/app/regulatory-runtime-v0.9.1.js" artifacts/runtime.js
+          fetch "https://reasonengine.de/app/regulatory-v0.9.1.css" artifacts/regulation.css
+          grep -Fq 'atlas-regulatory-layer-v0.9.1-2026-07-27' artifacts/atlas.html
+          grep -Fq 'resolveRouteReferences' artifacts/evaluator.js
+          grep -Fq 'evaluateCenterCandidate' artifacts/evaluator.js
+          grep -Fq 'activation_only' artifacts/runtime.js
+          grep -Fq 'data-regulation-state' artifacts/regulation.css
