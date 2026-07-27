@@ -1,3 +1,8 @@
+const qualityPass = document.createElement('link');
+qualityPass.rel = 'stylesheet';
+qualityPass.href = 'image-quality-pass-v0.1.css';
+document.head.appendChild(qualityPass);
+
 const header = document.querySelector('[data-header]');
 const navToggle = document.querySelector('[data-nav-toggle]');
 const nav = document.querySelector('[data-nav]');
