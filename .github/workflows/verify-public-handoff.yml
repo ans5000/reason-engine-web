@@ -56,6 +56,7 @@ jobs:
           grep -Fq '.hex-shell:hover .hex-tool,.hex-shell:focus-within .hex-tool{pointer-events:auto}' app/reason-tools-v0.8.css
           grep -Fq 'display: flex' app/atlas-toolbar-hotfix-v0.9.1.css
           grep -Fq 'white-space: nowrap' app/atlas-toolbar-hotfix-v0.9.1.css
+          grep -Fq '.map-tools .network-toggle.active' app/atlas-toolbar-hotfix-v0.9.1.css
 
       - name: Verify live public files and boundaries
         shell: bash
@@ -75,6 +76,7 @@ jobs:
           fetch "https://reasonengine.de/" artifacts/home.html
           fetch "https://reasonengine.de/study.html" artifacts/study.html
           fetch "https://reasonengine.de/app/" artifacts/atlas-live.html
+          fetch "https://reasonengine.de/app/atlas-toolbar-hotfix-v0.9.1.css" artifacts/atlas-toolbar-live.css
           fetch "https://reasonengine.de/robots.txt" artifacts/robots.txt
           fetch "https://reasonengine.de/sitemap.xml" artifacts/sitemap.xml
           grep -Fq 'public-entrance-v0.7-2026-07-26' artifacts/home.html
@@ -83,6 +85,9 @@ jobs:
           grep -Fq 'noindex,nofollow' artifacts/atlas-live.html
           grep -Fq 'Sicherung importieren' artifacts/atlas-live.html
           grep -Fq 'atlas-viewport-hotfix-2026-07-26' artifacts/atlas-live.html
+          grep -Fq 'atlas-toolbar-hotfix-v0.9.1-2026-07-27' artifacts/atlas-live.html
+          grep -Fq 'atlas-toolbar-hotfix-v0.9.1.css' artifacts/atlas-live.html
+          grep -Fq '.map-tools .network-toggle.active' artifacts/atlas-toolbar-live.css
           grep -Fq 'viewport-center-v0.8.1.js' artifacts/atlas-live.html
           grep -Fq 'Allow: /' artifacts/robots.txt
           grep -Fq 'Sitemap: https://reasonengine.de/sitemap.xml' artifacts/robots.txt
@@ -145,7 +150,7 @@ jobs:
         shell: bash
         env:
           ATLAS_VIEWPORT_BASE: https://reasonengine.de/app/index.html
-          ATLAS_VIEWPORT_MODE: baseline
+          ATLAS_VIEWPORT_MODE: toolbar
         run: |
           set -euo pipefail
           node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-live.log
