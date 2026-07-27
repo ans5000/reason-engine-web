@@ -219,6 +219,6 @@
 
   document.addEventListener('click',(event)=>{const field=event.target instanceof Element&&event.target.closest('.hex-field[data-field-id]');if(field)activeFieldId=field.dataset.fieldId;if(event.target instanceof Element&&event.target.closest('[data-add-field]')){const atlas=current(read());createBefore=new Set((atlas?.fields||[]).map((item)=>item.id));activeFieldId=null;}if(event.target instanceof Element&&event.target.closest('[data-confirm-field]')&&activeFieldId){const value=activeFieldId;setTimeout(()=>changed(value,'confirmed'),0);}});
   document.addEventListener('submit',(event)=>{if(!(event.target instanceof Element)||!event.target.matches('[data-field-form]'))return;const value=activeFieldId,before=createBefore;setTimeout(()=>{if(value)changed(value);else if(before){const atlas=current(read()),created=atlas?.fields.find((item)=>!before.has(item.id));if(created)changed(created.id,'created');}createBefore=null;},0);});
-  const fields=document.querySelector('[data-fields]');if(fields)new MutationObserver(()=>requestAnimationFrame(render)).observe(fields,{childList:true,subtree:true});
+  const fields=document.querySelector('[data-fields]');if(fields)new MutationObserver(()=>requestAnimationFrame(render)).observe(fields,{childList:true});
   setTimeout(render,120); window.addEventListener('pageshow',()=>setTimeout(render,80));
 })();
