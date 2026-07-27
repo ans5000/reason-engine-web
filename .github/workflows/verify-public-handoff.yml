@@ -135,6 +135,7 @@ jobs:
         shell: bash
         env:
           ATLAS_VIEWPORT_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/index.html' || 'https://reasonengine.de/app/index.html' }}
+          ATLAS_VIEWPORT_MODE: toolbar
         run: |
           set -euo pipefail
           node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-branch.log
@@ -144,6 +145,7 @@ jobs:
         shell: bash
         env:
           ATLAS_VIEWPORT_BASE: https://reasonengine.de/app/index.html
+          ATLAS_VIEWPORT_MODE: baseline
         run: |
           set -euo pipefail
           node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-live.log
