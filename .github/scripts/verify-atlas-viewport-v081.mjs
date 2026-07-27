@@ -100,7 +100,12 @@ try {
     const toolbarStyle = getComputedStyle(toolbar);
     const toolbarFits = toolbar.scrollWidth <= toolbar.clientWidth + 1;
     const toolbarVisible = toolbarRect.width > 0 && toolbarRect.height > 0;
-    if (toolbarStyle.display !== 'flex' || !toolbarFits || !toolbarVisible || overlappingPairs.length || wrappedButtons.length) return false;
+    const activeNetwork = toolbar.querySelector('.network-toggle.active');
+    const activeNetworkStyle = activeNetwork ? getComputedStyle(activeNetwork) : null;
+    const activeNetworkReadable = activeNetworkStyle?.color === 'rgb(31, 81, 48)'
+      && activeNetworkStyle?.backgroundColor === 'rgba(78, 219, 114, 0.16)';
+
+    if (toolbarStyle.display !== 'flex' || !toolbarFits || !toolbarVisible || overlappingPairs.length || wrappedButtons.length || !activeNetworkReadable) return false;
 
     result.toolbar = {
       display: toolbarStyle.display,
@@ -109,6 +114,11 @@ try {
       scrollWidth: toolbar.scrollWidth,
       overlappingPairs,
       wrappedButtons,
+      activeNetwork: {
+        readable: activeNetworkReadable,
+        color: activeNetworkStyle.color,
+        backgroundColor: activeNetworkStyle.backgroundColor,
+      },
       buttons: buttons.map((button, index) => ({
         index,
         text: button.textContent.trim(),
