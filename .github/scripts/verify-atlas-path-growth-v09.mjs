@@ -20,6 +20,7 @@ async function createAtlas(page) {
   await page.locator('[data-problem-form]').evaluate((form) => form.requestSubmit());
   await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
   await page.waitForFunction(() => document.documentElement.dataset.atlasPathGrowth === 'loaded');
+  await page.waitForFunction(() => document.documentElement.dataset.atlasRegulatoryEvaluator === 'loaded');
 }
 
 async function acceptFrom(page, sourceId) {
@@ -37,6 +38,7 @@ async function acceptFrom(page, sourceId) {
   ]);
   await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
   await page.waitForFunction(() => document.documentElement.dataset.atlasPathGrowth === 'loaded');
+  await page.waitForFunction(() => document.documentElement.dataset.atlasRegulatoryEvaluator === 'loaded');
   const current = await atlas(page);
   const route = current.routes.filter((item) => item.from === sourceId && item.pathOrigin === 'desired_path').at(-1);
   if (!route) throw new Error(`Desired Path was not created from ${sourceId}`);
@@ -81,6 +83,43 @@ try {
 
   const second = await acceptFrom(page, first);
   const third = await acceptFrom(page, second);
+
+  await page.waitForTimeout(250);
+  current = await atlas(page);
+  if (current.pathGrowth.centerCandidates.includes(third)) throw new Error('Depth-only center candidate survived regulation.');
+  if (await page.locator(`[data-center-emergence="${third}"]`).count()) throw new Error('Depth alone exposed a center action.');
+
+  await page.evaluate(({ thirdId, secondId }) => {
+    const KEY = 'reason-engine-atlas-library-v03';
+    const library = JSON.parse(localStorage.getItem(KEY));
+    const current = library.atlases.find((item) => item.id === library.currentId);
+    const old = '2026-07-23T12:00:00.000Z';
+    const recent = '2026-07-27T12:00:00.000Z';
+    const activation = { useCount: 3, sessionIds: ['s1', 's2', 's3'], firstUsedAt: old, lastUsedAt: recent };
+    const emptyRefs = { supportingEvidence: [], contradictingEvidence: [], positiveOutcomes: [], negativeOutcomes: [], conflicts: [] };
+
+    current.fields.push(
+      { id: 'reg-actor', title: 'Unabhängiger Zufluss A', body: 'Eigenständiger Beteiligtenzufluss.', fieldType: 'actor', state: 'provisional', confirmed: false, source: 'Regulatory integration fixture', q: 4, r: -2 },
+      { id: 'reg-risk', title: 'Unabhängiger Zufluss B', body: 'Eigenständiger Risikozufluss.', fieldType: 'risk', state: 'provisional', confirmed: false, source: 'Regulatory integration fixture', q: 4, r: -3 },
+      { id: 'reg-evidence-a', title: 'Evidenz A', body: 'Explizites Evidenzsignal A.', fieldType: 'resource', state: 'confirmed', confirmed: true, source: 'Regulatory integration fixture', q: -4, r: 2, regulatorySignal: { kind: 'evidence', direction: 'supporting', weight: 1, sourceId: 'source-a' } },
+      { id: 'reg-evidence-b', title: 'Evidenz B', body: 'Explizites Evidenzsignal B.', fieldType: 'resource', state: 'confirmed', confirmed: true, source: 'Regulatory integration fixture', q: -4, r: 3, regulatorySignal: { kind: 'evidence', direction: 'supporting', weight: 1, sourceId: 'source-b' } }
+    );
+
+    const existing = current.routes.find((route) => route.from === secondId && route.to === thirdId && route.pathOrigin === 'desired_path');
+    Object.assign(existing, { createdAt: old, lastUsedAt: recent, activation: { ...activation }, regulatoryRefs: { ...emptyRefs, supportingEvidence: ['reg-evidence-a'] } });
+
+    current.routes.push(
+      { id: 'reg-route-a', from: 'reg-actor', to: thirdId, type: 'leads', pathOrigin: 'desired_path', pathState: 'path', pathUses: 3, createdAt: old, lastUsedAt: recent, activation: { ...activation }, regulatoryRefs: { ...emptyRefs, supportingEvidence: ['reg-evidence-a'] } },
+      { id: 'reg-route-b', from: 'reg-risk', to: thirdId, type: 'leads', pathOrigin: 'desired_path', pathState: 'path', pathUses: 3, createdAt: old, lastUsedAt: recent, activation: { ...activation }, regulatoryRefs: { ...emptyRefs, supportingEvidence: ['reg-evidence-b'] } }
+    );
+    current.pathGrowth.centerCandidates = [...new Set([...(current.pathGrowth.centerCandidates || []), thirdId])];
+    localStorage.setItem(KEY, JSON.stringify(library));
+    sessionStorage.setItem('reason-engine-atlas-reopen-v07', 'true');
+  }, { thirdId: third, secondId: second });
+
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.locator('[data-screen="workspace"]:not([hidden])').waitFor();
+  await page.waitForFunction(() => document.documentElement.dataset.atlasRegulatoryEvaluator === 'loaded');
   await page.waitForFunction((id) => document.querySelector(`[data-center-emergence="${CSS.escape(id)}"]`), third);
   await page.locator(`[data-center-emergence="${third}"]`).click();
   await page.waitForLoadState('domcontentloaded');
@@ -97,6 +136,7 @@ try {
     suggestions: suggested,
     desiredRoutes: current.routes.filter((route) => route.pathOrigin === 'desired_path').length,
     reinforcedState: current.routes.find((route) => route.to === first)?.pathState,
+    depthOnlyCenterBlocked: true,
     emergentCenter: current.fields.find((field) => field.id === third)?.title,
   };
   await page.screenshot({ path: path.join(artifacts, 'atlas-path-growth-v09.png'), fullPage: true, animations: 'disabled' });
