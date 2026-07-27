@@ -38,9 +38,11 @@ jobs:
           node --check .github/scripts/verify-atlas-restore-v081.mjs
           grep -Fq 'atlas-app-v0.8.1-2026-07-26' app/index.html
           grep -Fq 'atlas-viewport-hotfix-2026-07-26' app/index.html
+          grep -Fq 'atlas-toolbar-hotfix-v0.9.1-2026-07-27' app/index.html
           grep -Fq 'truth-gate-v0.8.1.js' app/index.html
           grep -Fq 'viewport-center-v0.8.1.js' app/index.html
-          grep -Fq 'reason-engine-atlas-v081-touch-edit-hotfix' app/sw.js
+          grep -Fq 'reason-engine-atlas-v091-toolbar-hotfix' app/sw.js
+          grep -Fq 'atlas-toolbar-hotfix-v0.9.1.css' app/sw.js
 
       - name: Start branch preview
         if: github.event_name == 'pull_request'
