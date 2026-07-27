@@ -1,0 +1,29 @@
+.map-meta {
+  min-width: 0;
+}
+
+.map-tools {
+  display: flex;
+  min-width: 0;
+  max-width: min(100%, 430px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  grid-template-columns: none;
+  scrollbar-width: thin;
+}
+
+.map-tools button {
+  flex: 0 0 auto;
+  min-width: 38px;
+  white-space: nowrap;
+}
+
+@media (max-width: 800px) {
+  .map-tools {
+    display: flex !important;
+    grid-template-columns: none !important;
+    grid-auto-flow: initial !important;
+    grid-auto-columns: initial !important;
+    overflow-x: auto !important;
+  }
+}
