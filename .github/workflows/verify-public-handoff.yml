@@ -41,16 +41,21 @@ jobs:
           grep -Fq 'href="app/"' index.html
           grep -Fq 'atlas-app-v0.8.1-2026-07-26' app/index.html
           grep -Fq 'atlas-viewport-hotfix-2026-07-26' app/index.html
+          grep -Fq 'atlas-toolbar-hotfix-v0.9.1-2026-07-27' app/index.html
+          grep -Fq 'atlas-toolbar-hotfix-v0.9.1.css' app/index.html
           grep -Fq 'ÖFFENTLICHE ALPHA v0.8.1' app/index.html
           grep -Fq 'truth-gate-v0.8.1.js' app/index.html
           grep -Fq 'viewport-center-v0.8.1.js' app/index.html
-          grep -Fq 'reason-engine-atlas-v081-touch-edit-hotfix' app/sw.js
+          grep -Fq 'reason-engine-atlas-v091-toolbar-hotfix' app/sw.js
+          grep -Fq 'atlas-toolbar-hotfix-v0.9.1.css' app/sw.js
           grep -Fq 'noindex,nofollow' app/index.html
           grep -Fq 'import_trust_reset' app/truth-gate-v0.8.1.js
           grep -Fq 'field_truth_reset' app/truth-gate-v0.8.1.js
           grep -Fq '.hex-toolbox{position:absolute' app/reason-tools-v0.8.css
           grep -Fq 'pointer-events:none' app/reason-tools-v0.8.css
           grep -Fq '.hex-shell:hover .hex-tool,.hex-shell:focus-within .hex-tool{pointer-events:auto}' app/reason-tools-v0.8.css
+          grep -Fq 'display: flex' app/atlas-toolbar-hotfix-v0.9.1.css
+          grep -Fq 'white-space: nowrap' app/atlas-toolbar-hotfix-v0.9.1.css
 
       - name: Verify live public files and boundaries
         shell: bash
@@ -130,6 +135,7 @@ jobs:
         shell: bash
         env:
           ATLAS_VIEWPORT_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/index.html' || 'https://reasonengine.de/app/index.html' }}
+          ATLAS_VIEWPORT_MODE: toolbar
         run: |
           set -euo pipefail
           node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-branch.log
@@ -139,6 +145,7 @@ jobs:
         shell: bash
         env:
           ATLAS_VIEWPORT_BASE: https://reasonengine.de/app/index.html
+          ATLAS_VIEWPORT_MODE: baseline
         run: |
           set -euo pipefail
           node .github/scripts/verify-atlas-viewport-v081.mjs 2>&1 | tee artifacts/atlas-viewport-live.log
