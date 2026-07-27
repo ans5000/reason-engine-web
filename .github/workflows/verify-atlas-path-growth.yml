@@ -1,0 +1,81 @@
+name: Verify Atlas Desired Paths
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/scripts/verify-atlas-path-growth-v09.mjs"
+      - ".github/workflows/verify-atlas-path-growth.yml"
+      - "app/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: atlas-path-growth-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-atlas-path-growth:
+    name: Next Hex and Desired Paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+
+    steps:
+      - name: Check out proposed source
+        uses: actions/checkout@v4
+
+      - name: Verify Desired Paths source
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --check app/path-growth-v0.9.js
+          node --check app/backup-v0.3.js
+          node --check .github/scripts/verify-atlas-path-growth-v09.mjs
+          grep -Fq 'atlas-desired-paths-v0.9-2026-07-27' app/index.html
+          grep -Fq 'path-growth-v0.9.css' app/index.html
+          grep -Fq 'path-growth-v0.9.js' app/index.html
+          grep -Fq "pathOrigin:'desired_path'" app/path-growth-v0.9.js
+          grep -Fq "pathState:'trace'" app/path-growth-v0.9.js
+          grep -Fq 'center_emerged' app/path-growth-v0.9.js
+          grep -Fq 'path-growth-v0.9.js' app/sw.js
+          grep -Fq 'path-growth-v0.9.css' app/sw.js
+
+      - name: Start branch preview
+        if: github.event_name == 'pull_request'
+        shell: bash
+        run: |
+          nohup python3 -m http.server 4173 > /tmp/reason-engine-preview.log 2>&1 &
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent http://127.0.0.1:4173/app/index.html > /dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/reason-engine-preview.log
+          exit 1
+
+      - name: Install browser
+        shell: bash
+        run: |
+          npm install --no-save --no-package-lock playwright@1.54.1
+          npx playwright install --with-deps chromium
+
+      - name: Exercise Next Hex, path reinforcement and center emergence
+        shell: bash
+        env:
+          ATLAS_PATH_BASE: ${{ github.event_name == 'pull_request' && 'http://127.0.0.1:4173/app/index.html' || 'https://reasonengine.de/app/index.html' }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          node .github/scripts/verify-atlas-path-growth-v09.mjs 2>&1 | tee artifacts/atlas-path-growth-browser.log
+
+      - name: Publish Desired Paths evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: atlas-path-growth-evidence
+          path: artifacts/
+          if-no-files-found: warn
+          retention-days: 14
