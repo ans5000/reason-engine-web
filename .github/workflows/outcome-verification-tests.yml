@@ -1,0 +1,25 @@
+name: Outcome Verification v0.1
+
+on:
+  pull_request:
+    paths:
+      - "outcome_verification/**"
+      - "tests/test_website_deployment.py"
+      - ".github/workflows/outcome-verification-tests.yml"
+  push:
+    branches:
+      - outcome-verification-v0.1
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run reference-path tests
+        run: python -m unittest tests/test_website_deployment.py -v
