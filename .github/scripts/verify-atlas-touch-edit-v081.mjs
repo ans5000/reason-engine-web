@@ -35,7 +35,27 @@ try {
   const target = page.locator('[data-fields] .hex-field[data-type="decision"]').first();
   await target.scrollIntoViewIfNeeded();
   await target.focus();
-  await page.waitForTimeout(200);
+
+  await target.evaluate((element) => new Promise((resolve, reject) => {
+    const startedAt = performance.now();
+    const inspect = () => {
+      const toolbox = element.parentElement?.querySelector('.hex-toolbox');
+      const tool = toolbox?.querySelector('.hex-tool');
+      const opacity = toolbox ? Number.parseFloat(getComputedStyle(toolbox).opacity) : 0;
+      const toolboxPointerEvents = toolbox ? getComputedStyle(toolbox).pointerEvents : null;
+      const toolPointerEvents = tool ? getComputedStyle(tool).pointerEvents : null;
+      if (opacity >= 0.99 && toolboxPointerEvents === 'none' && toolPointerEvents === 'auto') {
+        resolve();
+        return;
+      }
+      if (performance.now() - startedAt > 2000) {
+        reject(new Error(`Touch toolbox transition did not settle: ${JSON.stringify({ opacity, toolboxPointerEvents, toolPointerEvents })}`));
+        return;
+      }
+      requestAnimationFrame(inspect);
+    };
+    inspect();
+  }));
 
   const hit = await target.evaluate((element) => {
     const rect = element.getBoundingClientRect();
@@ -50,13 +70,13 @@ try {
       topTag: top?.tagName || null,
       topClass: top?.className || null,
       targetHit: top === element || element.contains(top),
-      toolboxOpacity: toolbox ? getComputedStyle(toolbox).opacity : null,
+      toolboxOpacity: toolbox ? Number.parseFloat(getComputedStyle(toolbox).opacity) : null,
       toolboxPointerEvents: toolbox ? getComputedStyle(toolbox).pointerEvents : null,
       toolPointerEvents: tool ? getComputedStyle(tool).pointerEvents : null,
     };
   });
 
-  if (hit.toolboxOpacity !== '1') throw new Error(`Touch toolbox did not become visible: ${JSON.stringify(hit)}`);
+  if (hit.toolboxOpacity === null || hit.toolboxOpacity < 0.99) throw new Error(`Touch toolbox did not become visible: ${JSON.stringify(hit)}`);
   if (hit.toolboxPointerEvents !== 'none') throw new Error(`Toolbox still captures the whole hex: ${JSON.stringify(hit)}`);
   if (hit.toolPointerEvents !== 'auto') throw new Error(`Visible tool buttons are not interactive: ${JSON.stringify(hit)}`);
   if (!hit.targetHit) throw new Error(`Focused hex center is intercepted: ${JSON.stringify(hit)}`);
