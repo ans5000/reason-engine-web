@@ -11,6 +11,7 @@
   <meta name="reason-engine-data-schema" content="0.3">
   <meta name="reason-engine-build" content="atlas-app-v0.8.1-2026-07-26">
   <meta name="reason-engine-viewport" content="atlas-viewport-hotfix-2026-07-26">
+  <meta name="reason-engine-path-growth" content="atlas-desired-paths-v0.9-2026-07-27">
   <title>Atlas · Reason Engine</title>
   <link rel="icon" href="../assets/mark.svg" type="image/svg+xml">
   <link rel="manifest" href="manifest.webmanifest">
@@ -18,29 +19,31 @@
   <link rel="stylesheet" href="alpha-v0.3.css">
   <link rel="stylesheet" href="city-guide-v0.7.css">
   <link rel="stylesheet" href="reason-tools-v0.8.css">
+  <link rel="stylesheet" href="path-growth-v0.9.css">
   <script src="reason-v0.7.js" defer></script>
   <script src="app.js" defer></script>
   <script src="reason-tools-v0.8.js" defer></script>
   <script src="truth-gate-v0.8.1.js" defer></script>
   <script src="backup-v0.3.js" defer></script>
   <script src="viewport-center-v0.8.1.js" defer></script>
+  <script src="path-growth-v0.9.js" defer></script>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="../"><img src="../assets/mark.svg" alt="" width="32" height="32"><span>Reason Engine</span></a>
-    <span class="local">Öffentliche Alpha v0.8.1 · lokal · Reason-Netz</span>
+    <span class="local">Öffentliche Alpha v0.8.1 · Desired Paths Preview</span>
   </header>
   <main>
     <section class="screen intro" data-screen="intro">
       <div class="intro-copy">
         <p class="eyebrow">ATLAS · ÖFFENTLICHE ALPHA v0.8.1</p>
-        <h1>Die Karte bekommt Werkzeuge und ein Flugnetz.</h1>
-        <p class="lead">Jedes Hex ist ein Arbeitsobjekt. Beim Berühren erscheint sein Werkzeugkasten. Deep Dive, Ka-Tet, Audit, Pilot und Quellen erzeugen neue Folgefelder; Relation verbindet auch weit entfernte Orte über ein sichtbares Reason-Netz.</p>
+        <h1>Erst gehen. Dann Wege bauen.</h1>
+        <p class="lead">Wenn du ein Hex veränderst, legt Atlas bis zu drei nächste Schritte als durchscheinende Next Hexes aus. Du entscheidest, welche Spur du wirklich gehst. Wieder genutzte Spuren werden zu Pfaden und Straßen; aus längeren Wegen können neue Zentren entstehen.</p>
         <div class="rules">
-          <p><b>01 · Objektzentriert.</b> Werkzeuge werden direkt auf ein Feld angewendet.</p>
-          <p><b>02 · Wachsend.</b> Analysen und Experimente erzeugen eigene benachbarte Hexes.</p>
-          <p><b>03 · Verbunden.</b> Nicht benachbarte Felder lassen sich semantisch verknüpfen.</p>
-          <p><b>04 · Zweite Ebene.</b> Flugrouten und Knoten zeigen Zusammenhänge über der Karte.</p>
+          <p><b>01 · Next Hex.</b> Vorschläge lassen sich übernehmen, bearbeiten, parken oder verwerfen.</p>
+          <p><b>02 · Desired Paths.</b> Atlas gibt keine Straßen vor. Erst deine tatsächliche Nutzung verfestigt einen Weg.</p>
+          <p><b>03 · Path Growth.</b> Übernommene Hexe wachsen räumlich in der eingeschlagenen Richtung weiter.</p>
+          <p><b>04 · Center Emergence.</b> Ein gewachsener Denkweg kann auf deinen Befehl zum neuen Zentrum werden.</p>
         </div>
         <button class="primary" data-enter>Atlas öffnen</button>
         <small>Öffentlich zugängliche, aber nicht über Suchmaschinen beworbene Alpha. Noch keine echte KI, keine Cloud, keine Konten. Bitte keine persönlichen, medizinischen oder anderen sensiblen Daten eingeben.</small>

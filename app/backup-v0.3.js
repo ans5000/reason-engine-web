@@ -6,6 +6,8 @@
   const FIELD_TYPES = new Set(['problem', 'statement', 'assumption', 'question', 'decision', 'resource', 'risk', 'process', 'actor', 'rule']);
   const FIELD_STATES = new Set(['empty', 'provisional', 'confirmed', 'critical', 'decided']);
   const ROUTE_TYPES = new Set(['supports', 'depends', 'leads', 'blocks', 'decides', 'confirms']);
+  const PATH_STATES = new Set(['trace', 'path', 'road']);
+  const SUGGESTION_STATES = new Set(['active', 'deferred']);
   const LEGACY_TYPES = { root: 'problem', known: 'statement', open: 'question' };
   const importInput = document.querySelector('[data-import-input]');
 
@@ -128,7 +130,7 @@
       const body = asText(raw?.body, isRoot ? asText(rawAtlas?.problem, 'Importierter Ausgangspunkt') : 'Ohne Inhalt').slice(0, 1600);
       const type = normalizeType(raw, isRoot);
       const state = normalizeState(raw, isRoot, type, body);
-      return {
+      const field = {
         id,
         key: asText(raw?.key, '') || null,
         title: asText(raw?.title, isRoot ? 'Importierter Ausgangspunkt' : 'Importiertes Feld').slice(0, 90),
@@ -140,6 +142,14 @@
         q: point.q,
         r: point.r
       };
+      if (raw?.pathOrigin === 'desired_path') field.pathOrigin = 'desired_path';
+      if (Number.isInteger(raw?.pathDepth) && raw.pathDepth >= 0 && raw.pathDepth <= 100) field.pathDepth = raw.pathDepth;
+      if (raw?.isCenter === true && !isRoot) field.isCenter = true;
+      const parent = asText(raw?.parentFieldId);
+      const center = asText(raw?.centerId);
+      if (parent) field._legacyParentFieldId = parent;
+      if (center) field._legacyCenterId = center;
+      return field;
     });
 
     if (!fields.some((field) => field.id === 'root')) {
@@ -149,7 +159,19 @@
         fieldType: 'problem', state: 'confirmed', confirmed: true,
         source: 'Aus JSON-Sicherung importiert', q: 0, r: 0
       });
+      idMap.set('root', 'root');
     }
+
+    fields.forEach((field) => {
+      if (field._legacyParentFieldId) {
+        field.parentFieldId = idMap.get(field._legacyParentFieldId) || null;
+        delete field._legacyParentFieldId;
+      }
+      if (field._legacyCenterId) {
+        field.centerId = idMap.get(field._legacyCenterId) || 'root';
+        delete field._legacyCenterId;
+      }
+    });
     return { fields, idMap };
   }
 
@@ -162,16 +184,77 @@
         const from = idMap.get(asText(raw?.from)) || asText(raw?.from);
         const to = idMap.get(asText(raw?.to)) || asText(raw?.to);
         if (!fieldIds.has(from) || !fieldIds.has(to) || from === to) return;
-        const key = [from, to].sort().join('|');
-        if (seen.has(key)) return;
-        seen.add(key);
-        routes.push({ id: makeId('route'), from, to, type: ROUTE_TYPES.has(raw?.type) ? raw.type : 'supports' });
+        const routeKey = [from, to].sort().join('|');
+        if (seen.has(routeKey)) return;
+        seen.add(routeKey);
+        const route = { id: makeId('route'), from, to, type: ROUTE_TYPES.has(raw?.type) ? raw.type : 'supports' };
+        if (raw?.pathOrigin === 'desired_path') {
+          route.pathOrigin = 'desired_path';
+          route.pathState = PATH_STATES.has(raw?.pathState) ? raw.pathState : 'trace';
+          route.pathUses = Math.min(999, Math.max(1, Number(raw?.pathUses) || 1));
+          route.createdAt = asDate(raw?.createdAt);
+          route.lastUsedAt = asDate(raw?.lastUsedAt, route.createdAt);
+        }
+        routes.push(route);
       });
     }
     if (!routes.length) {
       fields.filter((field) => field.id !== 'root').forEach((field) => routes.push({ id: makeId('route'), from: 'root', to: field.id, type: 'supports' }));
     }
     return routes;
+  }
+
+  function normalizePathGrowth(rawAtlas, fields, idMap) {
+    const raw = rawAtlas?.pathGrowth;
+    if (!raw || typeof raw !== 'object') return undefined;
+    const ids = new Set(fields.map((field) => field.id));
+    const remap = (fieldId) => idMap.get(asText(fieldId)) || asText(fieldId);
+    const centers = ['root'];
+    (Array.isArray(raw.centers) ? raw.centers : []).forEach((fieldId) => {
+      const mapped = remap(fieldId);
+      if (ids.has(mapped) && !centers.includes(mapped)) centers.push(mapped);
+    });
+    const centerCandidates = [];
+    (Array.isArray(raw.centerCandidates) ? raw.centerCandidates : []).forEach((fieldId) => {
+      const mapped = remap(fieldId);
+      if (ids.has(mapped) && mapped !== 'root' && !centers.includes(mapped) && !centerCandidates.includes(mapped)) centerCandidates.push(mapped);
+    });
+    const suggestions = [];
+    (Array.isArray(raw.suggestions) ? raw.suggestions : []).slice(0, 250).forEach((item) => {
+      const sourceFieldId = remap(item?.sourceFieldId);
+      const q = Number(item?.q);
+      const r = Number(item?.r);
+      if (!ids.has(sourceFieldId) || !Number.isInteger(q) || !Number.isInteger(r) || Math.abs(q) > 10 || Math.abs(r) > 10) return;
+      const fieldType = FIELD_TYPES.has(item?.fieldType) && item.fieldType !== 'problem' ? item.fieldType : 'statement';
+      suggestions.push({
+        id: makeId('next'),
+        sourceFieldId,
+        title: asText(item?.title, 'Nächstes Hex').slice(0, 90),
+        body: asText(item?.body, 'Noch nicht geklärt.').slice(0, 1600),
+        fieldType,
+        routeType: ROUTE_TYPES.has(item?.routeType) ? item.routeType : 'leads',
+        status: SUGGESTION_STATES.has(item?.status) ? item.status : 'active',
+        q,
+        r,
+        createdAt: asDate(item?.createdAt),
+        generatedFromSignature: asText(item?.generatedFromSignature).slice(0, 3600)
+      });
+    });
+    const lastSignatures = {};
+    if (raw.lastSignatures && typeof raw.lastSignatures === 'object') {
+      Object.entries(raw.lastSignatures).forEach(([oldId, value]) => {
+        const mapped = remap(oldId);
+        if (ids.has(mapped) && typeof value === 'string') lastSignatures[mapped] = value.slice(0, 3600);
+      });
+    }
+    return {
+      version: '0.1',
+      suggestions,
+      centers,
+      centerCandidates,
+      lastSignatures,
+      showDeferred: Boolean(raw.showDeferred)
+    };
   }
 
   function normalizeAtlas(raw) {
@@ -199,7 +282,7 @@
     })) : [];
     history.push({ id: makeId('event'), at: now(), type: 'imported', text: 'Atlas aus einer lokalen JSON-Sicherung importiert.' });
 
-    return {
+    const atlas = {
       id: makeId('atlas'),
       version: '0.3',
       createdAt: asDate(raw.createdAt),
@@ -212,6 +295,9 @@
       routes: normalizeRoutes(raw, fields, idMap),
       history
     };
+    const pathGrowth = normalizePathGrowth(raw, fields, idMap);
+    if (pathGrowth) atlas.pathGrowth = pathGrowth;
+    return atlas;
   }
 
   async function importFile(file) {
@@ -221,7 +307,7 @@
     const source = parsed?.kind === BACKUP_KIND && Array.isArray(parsed.atlases)
       ? parsed.atlases
       : Array.isArray(parsed?.atlases) ? parsed.atlases : [parsed];
-    if (!source.length || source.length > 100) throw new Error('Die Sicherung enthält keine gültige oder zu viele Atlanten.');
+    if (!source.length || source.length > 100) throw new Error('Die Sicherung enthält keine gültigen oder zu viele Atlanten.');
 
     const imported = source.map(normalizeAtlas);
     const library = loadLibrary();
